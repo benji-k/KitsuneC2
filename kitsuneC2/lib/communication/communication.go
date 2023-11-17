@@ -10,12 +10,31 @@ import (
 	"encoding/json"
 	"errors"
 	"net"
+	"reflect"
 )
 
-// Sends an "envelope" (see /lib/communication) to the server. This function encryptes the envelope with AES using the session key.
+// All communication between the client and servers get wrapped in an envelope. This envelope contains the type of the message being sent, and
+// the message data itself. The Data variable can be further deserialized into specific message types.
+type Envelope struct {
+	MessageType int
+	Data        []byte
+}
+
+// Given the type of message and contents, this function encapsulates the message in an envelope and encrypts it with AES using the session key.
 // Before sending the data, the function prepends it with the length of the data, so the server knows how much data to receive.
-func SendEnvelope(connection net.Conn, envelope Envelope, aesKey []byte) error {
-	rawJson, _ := json.Marshal(envelope)
+func SendEnvelope(connection net.Conn, messageType int, data interface{}, aesKey []byte) error {
+	//First we check if the data variable corresponds to the correct messageType using reflection.
+	expectedType := reflect.TypeOf(MessageTypeToStruct[messageType]())
+	dataType := reflect.TypeOf(data)
+	if !dataType.AssignableTo(expectedType) && !reflect.PointerTo(dataType).AssignableTo(expectedType) {
+		return errors.New("data does not correspond to messageType")
+	}
+
+	//After we know all types are correct, marshal the passed data and put it in an envelope. Afterwards marshal the whole envelope so that
+	//it can be encrypted.
+	envelopeData, _ := json.Marshal(data)
+	rawJson, _ := json.Marshal(Envelope{MessageType: messageType, Data: envelopeData})
+
 	encryptedJson, err := cryptography.EncryptAes(rawJson, []byte(aesKey))
 	if err != nil {
 		return err
@@ -36,29 +55,29 @@ func SendEnvelope(connection net.Conn, envelope Envelope, aesKey []byte) error {
 
 // Reads the first 4 bytes (uint32) from socket (message length). The reads the entire encrypted message. Afterwards, the function decrypts the message
 // and attempts to unmarshal the resulting JSON into a Envelope object.
-func ReceiveEnvelope(connection net.Conn, aesKey []byte) (*Envelope, error) {
+func ReceiveEnvelope(connection net.Conn, aesKey []byte) (int, []byte, error) {
 	messageLengthAsBytes, err := ReadFromSocket(connection, 4)
 	if err != nil {
-		return nil, err
+		return -1, nil, err
 	}
 	messageLength := binary.LittleEndian.Uint32(messageLengthAsBytes)
 
 	cipherText, err := ReadFromSocket(connection, int(messageLength))
 	if err != nil {
-		return nil, err
+		return -1, nil, err
 	}
 	rawJsonAsBytes, err := cryptography.DecryptAes(cipherText, []byte(aesKey))
 	if err != nil {
-		return nil, err
+		return -1, nil, err
 	}
 
 	var messageEnvelope *Envelope = new(Envelope)
 	json.Unmarshal(rawJsonAsBytes, messageEnvelope)
 
-	return messageEnvelope, nil
+	return messageEnvelope.MessageType, messageEnvelope.Data, nil
 }
 
-// writes data to a socket. The function checks if the number of bytes actually written to the socket == len(data).
+// Writes data to a socket. The function checks if the number of bytes actually written to the socket == len(data).
 func WriteToSocket(connection net.Conn, data []byte) error {
 	bytesWritten, err := connection.Write(data)
 	if err != nil {
@@ -70,7 +89,7 @@ func WriteToSocket(connection net.Conn, data []byte) error {
 	return nil
 }
 
-// reads n bytes from a socket.
+// Reads n bytes from a socket.
 func ReadFromSocket(connection net.Conn, n int) ([]byte, error) {
 	var buffer []byte = make([]byte, n)
 	bytesRead, err := connection.Read(buffer) //connection.Read reads a maximum of len(buffer)

