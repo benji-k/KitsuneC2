@@ -1,0 +1,18 @@
+/* This table tracks all active implants.*/
+CREATE TABLE IF NOT EXISTS implant_info(
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    public_ip TEXT,
+    session_key TEXT NOT NULL,
+    os TEXT,
+    arch TEXT,
+    last_checkin INTEGER 
+);
+
+/*This table tracks all pending tasks for a specific implant.*/
+CREATE TABLE IF NOT EXISTS implant_tasks(
+    task_id TEXT PRIMARY KEY,
+    implant_id TEXT NOT NULL,
+    task_type INT NOT NULL, /*see communication/serializable.go for all message types*/
+    task_data TEXT          /*Contains JSON serialized structs. see communication/serializable.go for info*/
+)

