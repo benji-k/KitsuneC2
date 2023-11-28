@@ -8,6 +8,10 @@ type Implant_info struct {
 	Os           string
 	Arch         string
 	Last_checkin int
+	Username     string
+	Uid          string
+	Gid          string
+	Hostname     string
 }
 
 type Implant_task struct {

