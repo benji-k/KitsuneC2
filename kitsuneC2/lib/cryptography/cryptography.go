@@ -139,12 +139,12 @@ func DecryptAes(ciphertext []byte, key []byte) ([]byte, error) {
 		return nil, err
 	}
 	if len(ciphertext) < aes.BlockSize {
-		panic("ciphertext too short")
+		return nil, errors.New("ciphertext too short")
 	}
 	iv := ciphertext[:aes.BlockSize]
 	ciphertext = ciphertext[aes.BlockSize:]
 	if len(ciphertext)%aes.BlockSize != 0 {
-		panic("ciphertext is not a multiple of the block size")
+		return nil, errors.New("ciphertext is not a multiple of the block size")
 	}
 	mode := cipher.NewCBCDecrypter(block, iv)
 	mode.CryptBlocks(ciphertext, ciphertext)
