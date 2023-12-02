@@ -10,7 +10,7 @@ import (
 
 func RequestFileInfo(conn net.Conn, pathToFile string) error {
 	req := communication.FileInfoReq{PathToFile: pathToFile}
-	err := communication.SendEnvelopeToImplant(conn, 11, req, []byte("thisis32bitlongpassphraseimusing"))
+	err := SendEnvelopeToImplant(conn, 11, req, []byte("thisis32bitlongpassphraseimusing"))
 	if err != nil {
 		return err
 	} else {

