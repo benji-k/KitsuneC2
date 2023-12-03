@@ -1,9 +1,9 @@
 package main
 
 import (
+	"KitsuneC2/implant/modules"
 	"KitsuneC2/lib/communication"
 	"net"
-	"os"
 )
 
 var MessageTypeToFunc = map[int]func(net.Conn, interface{}){
@@ -16,7 +16,7 @@ func handleFileInfoReq(conn net.Conn, arguments interface{}) {
 	if !ok {
 		return
 	}
-	results, _ := os.Stat(fileInfoReq.PathToFile)
+	results, _ := modules.FileInfo(fileInfoReq.PathToFile)
 
 	resp := communication.FileInfoResp{Name: results.Name(), Size: results.Size(), Mode: results.Mode().String(), ModTime: int(results.ModTime().Unix()), IsDir: results.IsDir()}
 	SendEnvelopeToServer(conn, 12, resp)

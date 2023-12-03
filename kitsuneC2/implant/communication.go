@@ -23,7 +23,7 @@ var (
 // using an RSA public key. The encryptes AES-key + encrypted envelope get sent over the wire as follows:
 // Message = uint32(message length) - uint32(encryptedAESkey length) - encryptesAESkey - encryptedEnvelope
 func SendEnvelopeToServer(connection net.Conn, messageType int, data interface{}) error {
-	newSessionKey := communication.GenerateRandomBytes(32)
+	newSessionKey := cryptography.GenerateRandomBytes(32) //generate new sessionKey
 	encryptedJson, err := communication.PackAndEncryptEnvelope(messageType, data, newSessionKey)
 	if err != nil {
 		return err
@@ -50,7 +50,8 @@ func SendEnvelopeToServer(connection net.Conn, messageType int, data interface{}
 	if err != nil {
 		return err
 	}
-	sessionKey = newSessionKey
+
+	sessionKey = newSessionKey //only if everything went ok, dump our current sessionKey and set it to the new one.
 
 	return nil
 }
@@ -74,7 +75,10 @@ func ReceiveEnvelopeFromServer(connection net.Conn) (int, interface{}, error) {
 	}
 
 	var messageEnvelope *communication.Envelope = new(communication.Envelope)
-	json.Unmarshal(rawJsonAsBytes, messageEnvelope)
+	err = json.Unmarshal(rawJsonAsBytes, messageEnvelope)
+	if err != nil {
+		return -1, nil, err
+	}
 
 	dataAsStruct := communication.MessageTypeToStruct[messageEnvelope.MessageType]()
 	err = json.Unmarshal(messageEnvelope.Data, dataAsStruct)

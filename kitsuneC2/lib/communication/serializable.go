@@ -7,7 +7,8 @@ package communication
 // statements have to be created
 var MessageTypeToStruct = map[int]func() interface{}{
 	0: func() interface{} { return &ImplantRegister{} },
-	1: func() interface{} { return &ImplantCheckin{} },
+	1: func() interface{} { return &ImplantCheckinReq{} },
+	2: func() interface{} { return &ImplantCheckinResp{} },
 	//reserved for implant functionality
 	11: func() interface{} { return &FileInfoReq{} },
 	12: func() interface{} { return &FileInfoResp{} },
@@ -22,8 +23,13 @@ type ImplantRegister struct {
 	GID         string
 }
 
-type ImplantCheckin struct {
+type ImplantCheckinReq struct {
 	ImplantId string
+}
+
+type ImplantCheckinResp struct {
+	TaskIds       []int
+	TaskArguments [][]byte
 }
 
 type FileInfoReq struct {

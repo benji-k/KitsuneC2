@@ -4,7 +4,6 @@ type Implant_info struct {
 	Id           string
 	Name         string
 	Public_ip    string
-	Session_key  string
 	Os           string
 	Arch         string
 	Last_checkin int

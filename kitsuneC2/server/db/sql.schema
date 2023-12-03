@@ -3,7 +3,6 @@ CREATE TABLE IF NOT EXISTS implant_info(
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
     public_ip TEXT,
-    session_key TEXT NOT NULL,
     os TEXT,
     arch TEXT,
     last_checkin INTEGER 

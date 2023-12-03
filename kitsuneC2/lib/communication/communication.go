@@ -5,7 +5,6 @@ package communication
 
 import (
 	"KitsuneC2/lib/cryptography"
-	"crypto/rand"
 	"encoding/json"
 	"errors"
 	"net"
@@ -17,12 +16,6 @@ import (
 type Envelope struct {
 	MessageType int
 	Data        []byte
-}
-
-func GenerateRandomBytes(length int) []byte {
-	buff := make([]byte, length)
-	rand.Read(buff)
-	return buff
 }
 
 // Given the type of message and it's arguments, wraps the data in an envelope datastructure and encrypts the whole datastructure. The function

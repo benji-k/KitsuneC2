@@ -25,7 +25,7 @@ func GetImplantInfo(implantId string) (*Implant_info, error) {
 		return nil, errors.New("No results for implant with id: " + implantId)
 	}
 
-	err = rows.Scan(&info.Id, &info.Name, &info.Public_ip, &info.Session_key, &info.Os, &info.Arch, &info.Last_checkin)
+	err = rows.Scan(&info.Id, &info.Name, &info.Public_ip, &info.Os, &info.Arch, &info.Last_checkin)
 	if err != nil {
 		return nil, err
 	}
@@ -35,12 +35,12 @@ func GetImplantInfo(implantId string) (*Implant_info, error) {
 
 // Given info about an implant, registers an entry in the implant_info table.
 func AddImplant(info *Implant_info) error {
-	stmt, err := dbConn.Prepare("INSERT INTO implant_info VALUES (?,?,?,?,?,?,?)")
+	stmt, err := dbConn.Prepare("INSERT INTO implant_info VALUES (?,?,?,?,?,?)")
 	if err != nil {
-		return nil
+		return err
 	}
 	defer stmt.Close()
-	_, err = stmt.Exec(info.Id, info.Name, info.Public_ip, info.Session_key, info.Os, info.Arch, info.Last_checkin)
+	_, err = stmt.Exec(info.Id, info.Name, info.Public_ip, info.Os, info.Arch, info.Last_checkin)
 	if err != nil {
 		return err
 	}
