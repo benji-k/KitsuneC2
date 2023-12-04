@@ -105,7 +105,7 @@ func checkIn(conn net.Conn) (*[]int, *[]interface{}, error) {
 	//the arguments belonging to each task. We need to unmarshal the 2nd array to the corresponding taskArgument structs.
 	var argumentsAsStructs []interface{} = make([]interface{}, len(checkInResp.TaskArguments)) //Create a struct array with the length of the amount of arguments we received
 	for i := range argumentsAsStructs {
-		dataAsStruct := communication.MessageTypeToStruct[checkInResp.TaskIds[i]]() //Determine struct that we should unmarshal to based on TaskType
+		dataAsStruct := communication.MessageTypeToStruct[checkInResp.TaskTypes[i]]() //Determine struct that we should unmarshal to based on TaskType
 		err = json.Unmarshal(checkInResp.TaskArguments[i], dataAsStruct)
 		if err != nil {
 			continue
@@ -113,7 +113,7 @@ func checkIn(conn net.Conn) (*[]int, *[]interface{}, error) {
 		argumentsAsStructs[i] = dataAsStruct //Assign unmarshalled struct to array
 	}
 
-	return &checkInResp.TaskIds, &argumentsAsStructs, nil
+	return &checkInResp.TaskTypes, &argumentsAsStructs, nil
 }
 
 func executeTask(taskType int, arguments interface{}) {

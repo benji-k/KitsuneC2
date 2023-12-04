@@ -14,6 +14,12 @@ var MessageTypeToStruct = map[int]func() interface{}{
 	12: func() interface{} { return &FileInfoResp{} },
 }
 
+// A task is a type of message that gets sent after checkin. Every task needs to have an ID so that we know to what task certain
+// output belongs.
+type Task interface {
+	SetTaskId(id string) //This function is only used in the API. It's the API responsibility to generate tasks.
+}
+
 type ImplantRegister struct {
 	ImplantId   string
 	ImplantName string
@@ -28,18 +34,28 @@ type ImplantCheckinReq struct {
 }
 
 type ImplantCheckinResp struct {
-	TaskIds       []int
+	TaskTypes     []int
 	TaskArguments [][]byte
 }
 
 type FileInfoReq struct {
+	TaskId     string
 	PathToFile string
 }
 
+func (t *FileInfoReq) SetTaskId(id string) {
+	t.TaskId = id
+}
+
 type FileInfoResp struct {
+	TaskId  string
 	Name    string
 	Size    int64
 	Mode    string
 	ModTime int
 	IsDir   bool
+}
+
+func (t *FileInfoResp) SetTaskId(id string) {
+	t.TaskId = id
 }

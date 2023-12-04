@@ -1,10 +1,17 @@
 package db
 
 import (
+	"database/sql"
 	"errors"
 )
 
-const MAX_PENDING_TASKS int = 100
+const (
+	MAX_PENDING_TASKS int = 100
+)
+
+var (
+	ErrNoResults error = errors.New("no results for query") //Used in all Get* functions
+)
 
 // Given an implant ID, returns all data from the implant_info table.
 func GetImplantInfo(implantId string) (*Implant_info, error) {
@@ -22,7 +29,7 @@ func GetImplantInfo(implantId string) (*Implant_info, error) {
 	var info *Implant_info = new(Implant_info)
 	hasResult := rows.Next()
 	if !hasResult {
-		return nil, errors.New("No results for implant with id: " + implantId)
+		return nil, ErrNoResults
 	}
 
 	err = rows.Scan(&info.Id, &info.Name, &info.Public_ip, &info.Os, &info.Arch, &info.Last_checkin)
@@ -70,9 +77,16 @@ func RemoveImplant(implantId string) error {
 	return nil
 }
 
-// Given an implant ID, returns a list of pending tasks from the implant_tasks table.
-func GetTasks(implantId string) ([]*Implant_task, error) {
-	stmt, err := dbConn.Prepare("SELECT * FROM implant_tasks WHERE implant_id=?")
+// Given an implant ID, returns tasks belonging to that implant. The completed paramter dictates whether the tasks returned are
+// completed or pending
+func GetTasks(implantId string, completed bool) ([]*Implant_task, error) {
+	var stmt *sql.Stmt
+	var err error
+	if completed {
+		stmt, err = dbConn.Prepare("SELECT * FROM implant_tasks WHERE implant_id=? AND completed=TRUE")
+	} else {
+		stmt, err = dbConn.Prepare("SELECT * FROM implant_tasks WHERE implant_id=? AND completed=FALSE")
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -87,8 +101,11 @@ func GetTasks(implantId string) ([]*Implant_task, error) {
 	var i int = 0
 	for rows.Next() {
 		tasks[i] = new(Implant_task)
-		rows.Scan(&tasks[i].Task_id, &tasks[i].Implant_id, &tasks[i].Task_type, &tasks[i].Task_data)
+		rows.Scan(&tasks[i].Task_id, &tasks[i].Implant_id, &tasks[i].Task_type, &tasks[i].Task_data, &tasks[i].Completed, &tasks[i].Task_result)
 		i++
+	}
+	if i == 0 {
+		return nil, ErrNoResults
 	}
 
 	tasks = tasks[:i]
@@ -98,16 +115,39 @@ func GetTasks(implantId string) ([]*Implant_task, error) {
 
 // Given a task, adds it to the implant_tasks table
 func AddTask(task *Implant_task) error {
-	stmt, err := dbConn.Prepare("INSERT INTO implant_tasks VALUES (?,?,?,?)")
+	stmt, err := dbConn.Prepare("INSERT INTO implant_tasks VALUES (?,?,?,?,?,?)")
 	if err != nil {
 		return err
 	}
 	defer stmt.Close()
-	_, err = stmt.Exec(task.Task_id, task.Implant_id, task.Task_type, task.Task_data)
+	_, err = stmt.Exec(task.Task_id, task.Implant_id, task.Task_type, task.Task_data, task.Completed, task.Task_result)
 	if err != nil {
 		return err
 	}
 	return nil
+}
+
+// Given a taskId, returns all information related to said task
+func GetTask(taskId string) (*Implant_task, error) {
+	stmt, err := dbConn.Prepare("SELECT * FROM implant_tasks WHERE task_id=?")
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+	rows, err := stmt.Query(taskId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	task := new(Implant_task)
+	hasResult := rows.Next()
+	if !hasResult {
+		return nil, ErrNoResults
+	}
+	rows.Scan(&task.Task_id, &task.Implant_id, &task.Task_type, &task.Task_data, &task.Completed, &task.Task_result)
+
+	return task, nil
 }
 
 // Given a task ID, removes it from the implant_tasks table
@@ -126,18 +166,37 @@ func RemoveTask(taskId string) error {
 	return nil
 }
 
-func AddListener() {
+// Changes status of a task from pending to complete. The taskResult parameter is optional.
+func CompleteTask(taskId string, taskResult []byte) error {
+	stmt, err := dbConn.Prepare("UPDATE implant_tasks SET completed=true, task_result=? WHERE task_id=?")
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+	res, err := stmt.Exec(taskResult, taskId)
+	if err != nil {
+		return err
+	}
+	if n, _ := res.RowsAffected(); n == 0 {
+		return errors.New("No task with id: " + taskId)
+	}
 
+	return nil
 }
 
-func RemoveListener() {
-
-}
-
-func AddPayload() {
-
-}
-
-func RemovePayload() {
-
+// Given an implant ID and time of last checkin in Unix time format, updates the database entry.
+func UpdateLastCheckin(implantId string, time int) error {
+	stmt, err := dbConn.Prepare("UPDATE implant_info SET last_checkin=? WHERE id=?")
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+	res, err := stmt.Exec(time, implantId)
+	if err != nil {
+		return err
+	}
+	if n, _ := res.RowsAffected(); n == 0 {
+		return errors.New("No implant with id: " + implantId)
+	}
+	return nil
 }

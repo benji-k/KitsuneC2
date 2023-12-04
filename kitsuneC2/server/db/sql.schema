@@ -13,5 +13,7 @@ CREATE TABLE IF NOT EXISTS implant_tasks(
     task_id TEXT PRIMARY KEY,
     implant_id TEXT NOT NULL,
     task_type INT NOT NULL, /*see communication/serializable.go for all message types*/
-    task_data TEXT          /*Contains JSON serialized structs. see communication/serializable.go for info*/
+    task_data BLOB,         /*Contains JSON serialized structs. see communication/serializable.go for info*/
+    completed BOOL,
+    task_result BLOB
 )

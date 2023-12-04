@@ -45,6 +45,7 @@ func Init() {
 }
 
 func Shutdown() {
+	log.Println("[INFO] Shutting down DB...")
 	dbConn.Close()
 }
 

