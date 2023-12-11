@@ -13,7 +13,34 @@ var (
 	ErrNoResults error = errors.New("no results for query") //Used in all Get* functions
 )
 
-// Given an implant ID, returns all data from the implant_info table.
+// Returns information about all active implants
+func GetAllImplants() ([]*Implant_info, error) {
+	stmt, err := dbConn.Prepare("SELECT * FROM implant_info")
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+	rows, err := stmt.Query()
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var output []*Implant_info
+	for rows.Next() {
+		info := new(Implant_info)
+		rows.Scan(&info.Id, &info.Name, &info.Public_ip, &info.Os, &info.Arch, &info.Last_checkin, &info.Username, &info.Uid, &info.Gid, &info.Hostname)
+		output = append(output, info)
+	}
+	if len(output) == 0 {
+		return nil, ErrNoResults
+	}
+
+	return output, nil
+}
+
+// Given an implant ID, returns all data from the implant_info table. Returns a db.ErrNoResults error if there were no results
+// for the specified ID
 func GetImplantInfo(implantId string) (*Implant_info, error) {
 	stmt, err := dbConn.Prepare("SELECT * FROM implant_info WHERE id=?")
 	if err != nil {
@@ -32,7 +59,7 @@ func GetImplantInfo(implantId string) (*Implant_info, error) {
 		return nil, ErrNoResults
 	}
 
-	err = rows.Scan(&info.Id, &info.Name, &info.Public_ip, &info.Os, &info.Arch, &info.Last_checkin)
+	err = rows.Scan(&info.Id, &info.Name, &info.Public_ip, &info.Os, &info.Arch, &info.Last_checkin, &info.Username, &info.Uid, &info.Gid, &info.Hostname)
 	if err != nil {
 		return nil, err
 	}
@@ -42,12 +69,12 @@ func GetImplantInfo(implantId string) (*Implant_info, error) {
 
 // Given info about an implant, registers an entry in the implant_info table.
 func AddImplant(info *Implant_info) error {
-	stmt, err := dbConn.Prepare("INSERT INTO implant_info VALUES (?,?,?,?,?,?)")
+	stmt, err := dbConn.Prepare("INSERT INTO implant_info VALUES (?,?,?,?,?,?,?,?,?,?)")
 	if err != nil {
 		return err
 	}
 	defer stmt.Close()
-	_, err = stmt.Exec(info.Id, info.Name, info.Public_ip, info.Os, info.Arch, info.Last_checkin)
+	_, err = stmt.Exec(info.Id, info.Name, info.Public_ip, info.Os, info.Arch, info.Last_checkin, info.Username, info.Uid, info.Gid, info.Hostname)
 	if err != nil {
 		return err
 	}

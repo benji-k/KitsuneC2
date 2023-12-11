@@ -5,7 +5,11 @@ CREATE TABLE IF NOT EXISTS implant_info(
     public_ip TEXT,
     os TEXT,
     arch TEXT,
-    last_checkin INTEGER 
+    last_checkin INTEGER,
+    username TEXT,
+    uid TEXT,
+    gid TEXT,
+    hostname TEXT
 );
 
 /*This table tracks all pending tasks for a specific implant.*/
