@@ -154,6 +154,23 @@ func AddTask(task *Implant_task) error {
 	return nil
 }
 
+// removes a non-completed task for a specific implant
+func RemovePendingTaskForImplant(implantId string, taskId string) error {
+	stmt, err := dbConn.Prepare("DELETE FROM implant_tasks WHERE implant_id=? AND task_id=? AND completed=false")
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+	res, err := stmt.Exec(implantId, taskId)
+	if err != nil {
+		return err
+	}
+	if n, _ := res.RowsAffected(); n == 0 {
+		return errors.New("No task with ID: " + taskId + " for implant with ID: " + implantId)
+	}
+	return nil
+}
+
 // Given a taskId, returns all information related to said task
 func GetTask(taskId string) (*Implant_task, error) {
 	stmt, err := dbConn.Prepare("SELECT * FROM implant_tasks WHERE task_id=?")

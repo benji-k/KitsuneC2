@@ -4,8 +4,11 @@
 package cli
 
 import (
+	"KitsuneC2/lib/communication"
 	"KitsuneC2/server/api"
 	"bufio"
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -52,6 +55,7 @@ func stringPrompt(label string, c color.Color) []string {
 	var userInput string
 	r := bufio.NewReader(os.Stdin)
 	for {
+		fmt.Println()
 		c.Fprint(os.Stderr, label)
 		userInput, _ = r.ReadString('\n')
 		if userInput != "\n" { //The "\n" character is still in the buffer. This is basically the same as checking if the user provided input.
@@ -196,28 +200,77 @@ func homeQuit(cCtx *cli.Context) error {
 }
 
 // ------------------interactCliApp functions-------------------
-func interactModules(cCtx *cli.Context) error {
-
-	return nil
-}
 
 func interactPendingTasks(cCtx *cli.Context) error {
+	tasks, err := api.GetTasksForImplant(cliCtx.implantId, false)
+	if err != nil {
+		NotifyUser(err.Error(), "FAIL")
+		return nil
+	}
+	headerFmt := color.New(color.FgGreen, color.Underline).SprintfFunc()
+	columnFmt := color.New(color.FgYellow).SprintfFunc()
+	tbl := table.New("ID", "Module", "Arguments")
+	tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
 
+	for _, task := range tasks {
+		tbl.AddRow(task.Task_id, "TODO", string(task.Task_data))
+	}
+	tbl.Print()
 	return nil
 }
 
 func interactCompletedTasks(cCtx *cli.Context) error {
+	tasks, err := api.GetTasksForImplant(cliCtx.implantId, true)
+	if err != nil {
+		NotifyUser(err.Error(), "FAIL")
+		return nil
+	}
+	headerFmt := color.New(color.FgGreen, color.Underline).SprintfFunc()
+	columnFmt := color.New(color.FgYellow).SprintfFunc()
+	tbl := table.New("ID", "Module", "Arguments")
+	tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
 
+	for _, task := range tasks {
+		tbl.AddRow(task.Task_id, "TODO", string(task.Task_data))
+	}
+	tbl.Print()
 	return nil
 }
 
-func interactAdd(cCtx *cli.Context) error {
+func interactResult(cCtx *cli.Context) error {
+	if cCtx.Args().Len() != 1 {
+		NotifyUser("remove: expected 1 argument", "FAIL")
+		return nil
+	}
+	taskId := cCtx.Args().First()
 
+	task, err := api.GetTask(taskId)
+	if err != nil {
+		NotifyUser(err.Error(), "FAIL")
+		return nil
+	}
+	if !task.Completed {
+		NotifyUser("Task has no result because it hasn't been executed yet.", "FAIL")
+		return nil
+	}
+	buff := bytes.NewBuffer([]byte{})
+	json.Indent(buff, task.Task_result, "", "    ")
+	fmt.Println(buff.String())
 	return nil
 }
 
 func interactRemove(cCtx *cli.Context) error {
-
+	if cCtx.Args().Len() != 1 {
+		NotifyUser("remove: expected 1 argument", "FAIL")
+		return nil
+	}
+	taskId := cCtx.Args().First()
+	err := api.RemovePendingTaskForImplant(cliCtx.implantId, taskId)
+	if err != nil {
+		NotifyUser(err.Error(), "FAIL")
+		return nil
+	}
+	NotifyUser("Successfully removed task with ID: "+taskId, "SUCCESS")
 	return nil
 }
 
@@ -230,5 +283,21 @@ func interactExit(cCtx *cli.Context) error {
 	cliCtx.context = "home"
 	cliCtx.implantId = ""
 
+	return nil
+}
+
+func interactFileInfo(cCtx *cli.Context) error {
+	if cCtx.Args().Len() != 1 {
+		NotifyUser("remove: expected 1 argument", "FAIL")
+		return nil
+	}
+	path := cCtx.Args().First()
+
+	var task communication.Task = &communication.FileInfoReq{PathToFile: path}
+	taskId, err := api.AddTaskForImplant(cliCtx.implantId, 11, &task)
+	if err != nil {
+		NotifyUser(err.Error(), "FAIL")
+	}
+	NotifyUser("created task with ID: "+taskId, "SUCCESS")
 	return nil
 }

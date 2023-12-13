@@ -93,13 +93,6 @@ var interactCliApp cli.App = cli.App{
 	ExitErrHandler: onCliError,
 	Commands: []*cli.Command{
 		{
-			Name:        "modules",
-			Usage:       "List available modules for this implant",
-			UsageText:   "modules",
-			Description: "Lists all available modules for this implant.",
-			Action:      interactModules,
-		},
-		{
 			Name:        "pending-tasks",
 			Usage:       "List all pending tasks for this implant",
 			UsageText:   "pending-tasks",
@@ -114,11 +107,11 @@ var interactCliApp cli.App = cli.App{
 			Action:      interactCompletedTasks,
 		},
 		{
-			Name:        "add",
-			Usage:       "Add task to the list of pending tasks",
-			UsageText:   "add [module ID] [args]",
-			Description: "Adds a task that the implant will execute on the next check-in. Once the implant has executed the task, the task will be marked as complete.",
-			Action:      interactAdd,
+			Name:        "result",
+			Usage:       "Check the output of an executed task",
+			UsageText:   "result [task ID]",
+			Description: "Returns the result for an executed task.",
+			Action:      interactResult,
 		},
 		{
 			Name:        "remove",
@@ -140,6 +133,14 @@ var interactCliApp cli.App = cli.App{
 			UsageText:   "exit",
 			Description: "Stops interaction with this implant and returns to home screen.",
 			Action:      interactExit,
+		},
+		{
+			Name:        "file-info",
+			Usage:       "get information about a file",
+			UsageText:   "file-info [path]",
+			Description: "Running this command will fetch information about a file on the remote host.",
+			Category:    "Modules",
+			Action:      interactFileInfo,
 		},
 	},
 }

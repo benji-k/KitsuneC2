@@ -4,11 +4,12 @@
 package communication
 
 // This map correlates all MessageType's to a specific data stucture for a message. This can be used for reflection so that no big switch
-// statements have to be created
+// statements have to be created. Note that MessageTypes and TaskTypes are the same.
 var MessageTypeToStruct = map[int]func() interface{}{
 	0: func() interface{} { return &ImplantRegister{} },
 	1: func() interface{} { return &ImplantCheckinReq{} },
 	2: func() interface{} { return &ImplantCheckinResp{} },
+	4: func() interface{} { return &ImplantErrorResp{} },
 	//reserved for implant functionality
 	11: func() interface{} { return &FileInfoReq{} },
 	12: func() interface{} { return &FileInfoResp{} },
@@ -36,6 +37,11 @@ type ImplantCheckinReq struct {
 type ImplantCheckinResp struct {
 	TaskTypes     []int
 	TaskArguments [][]byte
+}
+
+type ImplantErrorResp struct {
+	TaskId string
+	Error  string
 }
 
 type FileInfoReq struct {

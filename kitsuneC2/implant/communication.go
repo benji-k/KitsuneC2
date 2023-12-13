@@ -95,3 +95,10 @@ func ReceiveEnvelopeFromServer(connection net.Conn) (int, interface{}, error) {
 
 	return messageEnvelope.MessageType, dataAsStruct, nil
 }
+
+// A handler can call this function if a module fails. Calling this module completes the task on the server side, but it will
+// be made clear an error was encountered.
+func SendErrorToServer(connection net.Conn, taskId string, err error) error {
+	resp := communication.ImplantErrorResp{TaskId: taskId, Error: err.Error()}
+	return SendEnvelopeToServer(connection, 4, resp)
+}
