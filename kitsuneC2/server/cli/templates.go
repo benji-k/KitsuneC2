@@ -142,5 +142,83 @@ var interactCliApp cli.App = cli.App{
 			Category:    "Modules",
 			Action:      interactFileInfo,
 		},
+		{
+			Name:        "upload",
+			Usage:       "upload a file to the remote implant",
+			UsageText:   "upload [--origin] [--destination]",
+			Description: "Running this command will read the file specified in [--origin] from the server and upload it to the [--destination] location on the remote implant.",
+			Category:    "Modules",
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:  "origin",
+					Usage: "path to file on local server that should be uploaded",
+				},
+				&cli.StringFlag{
+					Name:  "destination",
+					Usage: "path on remote implant where file should be uploaded",
+				},
+			},
+			Action: interactUpload,
+		},
+		{
+			Name:        "download",
+			Usage:       "download a file from the remote implant",
+			UsageText:   "download [--origin] [--destination]",
+			Description: "Running this command downloads a file from path [--origin] to the destination specified in [--destination].",
+			Category:    "Modules",
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:  "origin",
+					Usage: "path to file on remote implant that should be downloaded",
+				},
+				&cli.StringFlag{
+					Name:  "destination",
+					Usage: "path on local server where file should be downloaded to",
+				},
+			},
+			Action: interactDownload,
+		},
+		{
+			Name:        "ls",
+			Usage:       "list directory",
+			UsageText:   "ls [path]",
+			Description: "list the current working directory. If [path] is specified, lists the directory of [path].",
+			Category:    "Modules",
+			Action:      interactLs,
+		},
+		{
+			Name:        "cd",
+			Usage:       "change working directory",
+			UsageText:   "cd [path]",
+			Description: "changes the current working directory to [path].",
+			Category:    "Modules",
+			Action:      interactCd,
+		},
+		{
+			Name:        "exec",
+			Usage:       "execute a command",
+			UsageText:   "exec [--cmd] [--args]",
+			Description: "executes a command on the remote implant. This command is implemented using the \"os/exec\" package, see the docs for more information about the required parameters.",
+			Category:    "Modules",
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:  "cmd",
+					Usage: "command to be executed",
+				},
+				&cli.StringFlag{
+					Name:  "args",
+					Usage: "arguments to program",
+				},
+			},
+			Action: interactExec,
+		},
+		{
+			Name:        "shellcode-exec",
+			Usage:       "execute shellcode on remote implant",
+			UsageText:   "shellcode-exec [shellcode]",
+			Description: "executes shellcode on the remote implant. the shellcode should be in base64 format.",
+			Category:    "Modules",
+			Action:      interactShellcodeExec,
+		},
 	},
 }

