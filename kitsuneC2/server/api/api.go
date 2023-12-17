@@ -1,3 +1,5 @@
+//This package is used by the CLI and web-api to make changes to application state.
+
 package api
 
 import (
@@ -76,7 +78,7 @@ func GetTask(taskId string) (*db.Implant_task, error) {
 	return task, nil
 }
 
-// checks if implant with implantId exists in our database
+// Checks if implant with implantId exists in our database
 func ImplantExists(implantId string) bool {
 	_, err := db.GetImplantInfo(implantId)
 	if err != nil {
@@ -89,9 +91,14 @@ func ImplantExists(implantId string) bool {
 	return true
 }
 
-// returns information about all implants registered in the DB.
+// Returns information about all implants registered in the DB.
 func GetAllImplants() ([]*db.Implant_info, error) {
 	return db.GetAllImplants()
+}
+
+// Gets the "active" status from an implant
+func GetImplantStatus(implantId string) (bool, error) {
+	return db.GetImplantStatus(implantId)
 }
 
 // Starts a TCP listener on the specified port and network. E.g. network="127.0.0.1" port=4444. Leave network empty to listen

@@ -6,11 +6,12 @@ type Implant_info struct {
 	Public_ip    string
 	Os           string
 	Arch         string
-	Last_checkin int
+	Last_checkin int64
 	Username     string
 	Uid          string
 	Gid          string
 	Hostname     string
+	Active       bool
 }
 
 type Implant_task struct {

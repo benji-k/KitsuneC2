@@ -29,7 +29,7 @@ func GetAllImplants() ([]*Implant_info, error) {
 	var output []*Implant_info
 	for rows.Next() {
 		info := new(Implant_info)
-		rows.Scan(&info.Id, &info.Name, &info.Public_ip, &info.Os, &info.Arch, &info.Last_checkin, &info.Username, &info.Uid, &info.Gid, &info.Hostname)
+		rows.Scan(&info.Id, &info.Name, &info.Public_ip, &info.Os, &info.Arch, &info.Last_checkin, &info.Username, &info.Uid, &info.Gid, &info.Hostname, &info.Active)
 		output = append(output, info)
 	}
 	if len(output) == 0 {
@@ -59,7 +59,7 @@ func GetImplantInfo(implantId string) (*Implant_info, error) {
 		return nil, ErrNoResults
 	}
 
-	err = rows.Scan(&info.Id, &info.Name, &info.Public_ip, &info.Os, &info.Arch, &info.Last_checkin, &info.Username, &info.Uid, &info.Gid, &info.Hostname)
+	err = rows.Scan(&info.Id, &info.Name, &info.Public_ip, &info.Os, &info.Arch, &info.Last_checkin, &info.Username, &info.Uid, &info.Gid, &info.Hostname, &info.Active)
 	if err != nil {
 		return nil, err
 	}
@@ -69,12 +69,12 @@ func GetImplantInfo(implantId string) (*Implant_info, error) {
 
 // Given info about an implant, registers an entry in the implant_info table.
 func AddImplant(info *Implant_info) error {
-	stmt, err := dbConn.Prepare("INSERT INTO implant_info VALUES (?,?,?,?,?,?,?,?,?,?)")
+	stmt, err := dbConn.Prepare("INSERT INTO implant_info VALUES (?,?,?,?,?,?,?,?,?,?,?)")
 	if err != nil {
 		return err
 	}
 	defer stmt.Close()
-	_, err = stmt.Exec(info.Id, info.Name, info.Public_ip, info.Os, info.Arch, info.Last_checkin, info.Username, info.Uid, info.Gid, info.Hostname)
+	_, err = stmt.Exec(info.Id, info.Name, info.Public_ip, info.Os, info.Arch, info.Last_checkin, info.Username, info.Uid, info.Gid, info.Hostname, info.Active)
 	if err != nil {
 		return err
 	}
@@ -102,6 +102,47 @@ func RemoveImplant(implantId string) error {
 	}
 
 	return nil
+}
+
+// Changes the "active" status of an implant to "status"
+func SetImplantStatus(implantId string, status bool) error {
+	stmt, err := dbConn.Prepare("UPDATE implant_info SET active=? WHERE id=?")
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+	res, err := stmt.Exec(status, implantId)
+	if err != nil {
+		return err
+	}
+	if n, _ := res.RowsAffected(); n == 0 {
+		return errors.New("No implant with id: " + implantId)
+	}
+
+	return nil
+}
+
+// Gets the "active" status of an implant
+func GetImplantStatus(implantId string) (bool, error) {
+	stmt, err := dbConn.Prepare("SELECT active FROM implant_info WHERE id=?")
+	if err != nil {
+		return false, err
+	}
+	defer stmt.Close()
+	rows, err := stmt.Query(implantId)
+	if err != nil {
+		return false, err
+	}
+	defer rows.Close()
+
+	hasResult := rows.Next()
+	if !hasResult {
+		return false, ErrNoResults
+	}
+	var output bool
+	rows.Scan(&output)
+
+	return output, nil
 }
 
 // Given an implant ID, returns tasks belonging to that implant. The completed paramter dictates whether the tasks returned are

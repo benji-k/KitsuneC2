@@ -9,6 +9,7 @@ import (
 func main() {
 	//printBanner()
 	db.Init()
+	cli.InitCli()
 	cli.CliLoop()
 	db.Shutdown()
 }

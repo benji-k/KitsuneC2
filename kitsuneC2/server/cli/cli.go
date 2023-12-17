@@ -7,8 +7,8 @@ import (
 	"KitsuneC2/lib/communication"
 	"KitsuneC2/lib/utils"
 	"KitsuneC2/server/api"
-	"bufio"
 	"bytes"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -18,6 +18,7 @@ import (
 	"time"
 
 	"github.com/fatih/color"
+	"github.com/peterh/liner"
 	"github.com/rodaine/table"
 	cli "github.com/urfave/cli/v2"
 )
@@ -30,17 +31,23 @@ type cliContext struct {
 }
 
 var cliCtx cliContext = cliContext{context: "home", implantId: "", quit: false}
+var rl *liner.State
+
+func InitCli() {
+	fmt.Println("Type 'help' for a list of available commands.")
+	fmt.Println()
+	rl = liner.NewLiner()
+}
 
 func CliLoop() {
 	for {
 		if cliCtx.quit {
 			return
 		}
-
 		if cliCtx.context == "home" {
-			homeCliApp.Run(stringPrompt("KitsuneC2 > ", *color.New(color.FgRed)))
+			homeCliApp.Run(stringPrompt("[KitsuneC2]", *color.New(color.FgRed)))
 		} else if cliCtx.context == "interacting" {
-			interactCliApp.Run(stringPrompt(cliCtx.implantId+" > ", *color.New(color.FgHiCyan)))
+			interactCliApp.Run(stringPrompt("["+cliCtx.implantId+"]", *color.New(color.FgHiCyan)))
 		} else {
 			log.Println("[ERROR] CLI is in unkown state, quitting!")
 			return
@@ -54,15 +61,15 @@ func CliLoop() {
 func stringPrompt(label string, c color.Color) []string {
 	var result string = "server "
 	var userInput string
-	r := bufio.NewReader(os.Stdin)
 	for {
 		fmt.Println()
-		c.Fprint(os.Stderr, label)
-		userInput, _ = r.ReadString('\n')
-		if userInput != "\n" { //The "\n" character is still in the buffer. This is basically the same as checking if the user provided input.
+		c.Println(label)
+		userInput, _ = rl.Prompt("> ")
+		if userInput != "" {
 			break
 		}
 	}
+	rl.AppendHistory(userInput)
 	result += userInput
 	return strings.Split(strings.TrimSpace(result), " ")
 }
@@ -96,7 +103,7 @@ func NotifyUser(msg string, msgType string) {
 	}
 }
 
-//Template specific functions
+//Template specific functions. These functions get called from templates.go
 //------------------homeCliApp functions-----------------------
 
 func homeImplants(cCtx *cli.Context) error {
@@ -107,12 +114,12 @@ func homeImplants(cCtx *cli.Context) error {
 	}
 	headerFmt := color.New(color.FgGreen, color.Underline).SprintfFunc()
 	columnFmt := color.New(color.FgYellow).SprintfFunc()
-	tbl := table.New("Implant ID", "IP", "Name", "Hostname", "User", "UID", "GID", "OS", "Arch", "Last Checkin")
+	tbl := table.New("Implant ID", "IP", "Name", "Hostname", "User", "UID", "GID", "OS", "Arch", "Last Checkin (s)", "Active")
 	tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
 
 	for i := range implants {
-		standardTimeFormat := time.Unix(int64(implants[i].Last_checkin), 0)
-		tbl.AddRow(implants[i].Id, implants[i].Public_ip, implants[i].Name, implants[i].Hostname, implants[i].Username, implants[i].Uid, implants[i].Gid, implants[i].Os, implants[i].Arch, standardTimeFormat)
+		secondsSinceLastCheckin := time.Now().Unix() - implants[i].Last_checkin
+		tbl.AddRow(implants[i].Id, implants[i].Public_ip, implants[i].Name, implants[i].Hostname, implants[i].Username, implants[i].Uid, implants[i].Gid, implants[i].Os, implants[i].Arch, secondsSinceLastCheckin, implants[i].Active)
 	}
 	tbl.Print()
 
@@ -277,6 +284,52 @@ func interactRemove(cCtx *cli.Context) error {
 }
 
 func interactKill(cCtx *cli.Context) error {
+	var task communication.Task = &communication.ImplantKillReq{}
+	taskId, err := api.AddTaskForImplant(cliCtx.implantId, 5, &task)
+	if err != nil {
+		NotifyUser(err.Error(), "FAIL")
+		return nil
+	}
+	NotifyUser("created task with ID: "+taskId, "SUCCESS")
+	return nil
+}
+
+func interactConfig(cCtx *cli.Context) error {
+	serverIp := cCtx.String("server-ip")
+	serverPort := cCtx.String("server-port")
+	callbackInt := cCtx.String("callback-interval")
+	callbackJit := cCtx.String("callback-jitter")
+
+	var config = &communication.ImplantConfigReq{}
+	if serverIp != "" {
+		config.ServerIp = serverIp
+	}
+	serverPortI, err := strconv.Atoi(serverPort)
+	if err != nil {
+		config.ServerPort = -1
+	} else {
+		config.ServerPort = serverPortI
+	}
+	callbackIntI, err := strconv.Atoi(callbackInt)
+	if err != nil {
+		config.CallbackInterval = -1
+	} else {
+		config.CallbackInterval = callbackIntI
+	}
+	callbackJitI, err := strconv.Atoi(callbackJit)
+	if err != nil {
+		config.CallbackJitter = -1
+	} else {
+		config.CallbackJitter = callbackJitI
+	}
+
+	var task communication.Task = config
+	taskId, err := api.AddTaskForImplant(cliCtx.implantId, 7, &task)
+	if err != nil {
+		NotifyUser(err.Error(), "FAIL")
+		return nil
+	}
+	NotifyUser("created task with ID: "+taskId, "SUCCESS")
 
 	return nil
 }
@@ -402,6 +455,24 @@ func interactExec(cCtx *cli.Context) error {
 }
 
 func interactShellcodeExec(cCtx *cli.Context) error {
-	NotifyUser("Command not yet implemented", "FAIL")
+	if cCtx.Args().Len() != 1 {
+		NotifyUser("cd: expected 1 argument", "FAIL")
+		return nil
+	}
+	scHex := cCtx.Args().First()
+	sc, err := hex.DecodeString(scHex)
+	if err != nil {
+		NotifyUser(err.Error(), "FAIL")
+		return nil
+	}
+
+	var task communication.Task = &communication.ShellcodeExecReq{Shellcode: sc}
+	taskId, err := api.AddTaskForImplant(cliCtx.implantId, 23, &task)
+	if err != nil {
+		NotifyUser(err.Error(), "FAIL")
+		return nil
+	}
+	NotifyUser("created task with ID: "+taskId, "SUCCESS")
+
 	return nil
 }
