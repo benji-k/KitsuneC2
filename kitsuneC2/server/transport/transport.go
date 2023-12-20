@@ -26,15 +26,16 @@ var privKey string
 func Initialize() {
 	priv, err := db.GetPrivateKey()
 	if err == db.ErrNoResults { //we don't have a keypair, try to create one.
+		log.Printf("[INFO] transport: no existing keypair in DB, attempting to create...")
 		priv, pub, err := cryptography.GenerateRSAKeyPair(2048)
 		if err != nil {
-			log.Fatal("Could not generate keypair. Reason: ", err.Error())
+			log.Fatal("[FATAL] transport: Could not generate keypair. Reason: ", err.Error())
 		}
 		privStr := cryptography.RsaPrivateKeyToString(priv)
 		pubStr := cryptography.RSAPublicKeyToString(pub)
 		db.InitKeypair(privStr, pubStr)
 	} else if err != nil { //something went wrong during fetching of keypair
-		log.Fatal("Could not fetch private key from db. Reason: " + err.Error())
+		log.Fatal("[FATAL] transport: Could not fetch private key from db. Reason: " + err.Error())
 	}
 	//we managed to fetch private key, or create a keypair
 
@@ -43,8 +44,10 @@ func Initialize() {
 
 // Given a session, messageType and corresponding data, this function will encrypt the message and send it over an existing connection.
 func SendEnvelopeToImplant(sess *Session, messageType int, data interface{}) error {
+	log.Printf("[INFO] transport: Sending message to implant with messageType: %d", messageType)
 	encryptedJson, err := communication.PackAndEncryptEnvelope(messageType, data, sess.AesKey)
 	if err != nil {
+		log.Printf("[ERROR] transport: Not able to encrypt envelope")
 		return err
 	}
 	//create a buffer and write the len(encryptedData) + encryptedData into it
@@ -69,7 +72,7 @@ func ReceiveEnvelopeFromImplant(connection net.Conn) (int, interface{}, *Session
 	// We read the first 4 bytes of the message to determine the length of the encrypted aesKey. Knowing this information, we can
 	// split the message in an encrypted AES key and the encrypted envelope. Using our private key we can decrypt the aes key, and with
 	// that key we can decrypt the message.
-
+	log.Printf("[INFO] transport: attempting to read incoming message from implant...")
 	messageLengthAsBytes, err := communication.ReadFromSocket(connection, 4) //read 4 bytes from connection to determine messageLen
 	if err != nil {
 		return -1, nil, nil, err

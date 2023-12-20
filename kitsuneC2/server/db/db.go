@@ -26,26 +26,26 @@ var (
 func Initialize() {
 	//Check if db already exists. If not, create it.
 	if _, err := os.Stat("./db/kitsune.sqlite"); err != nil {
-		log.Println("[INFO] /db/kitsune.sqlite was not found, attempting to create...")
+		log.Println("[INFO] db: /db/kitsune.sqlite was not found, attempting to create...")
 		err := createDb()
 		if err != nil {
-			log.Fatal("[FATAL] could not create database file! Reason: " + err.Error())
+			log.Fatal("[FATAL] db: could not create database file! Reason: " + err.Error())
 		}
-		log.Println("[INFO] succesfully created /db/kitsune.sqlite")
+		log.Println("[INFO] db: succesfully created /db/kitsune.sqlite")
 	}
 
-	log.Println("[INFO] /db/kitsune.sqlite found, opening connection...")
+	log.Println("[INFO] db: /db/kitsune.sqlite found, opening connection...")
 
 	var err error
 	dbConn, err = sql.Open("sqlite3", "./db/kitsune.sqlite")
 	if err != nil {
-		log.Fatal("[FATAL] could not connect to db! Reason: " + err.Error())
+		log.Fatal("[FATAL] db: could not connect to db! Reason: " + err.Error())
 	}
-	log.Println("[INFO] Database initialized and ready to serve...")
+	log.Println("[INFO] db: Database initialized and ready to serve...")
 }
 
 func Shutdown() {
-	log.Println("[INFO] Shutting down DB...")
+	log.Println("[INFO] db: Shutting down DB...")
 	dbConn.Close()
 }
 

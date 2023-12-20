@@ -20,25 +20,25 @@ type Listener struct {
 // Start is a non-blocking function. Calling Start will make the listener start listening for connections is a seperate thread.
 // Please note that all net.Conn objects that are passed to Handler are expected to be closed by the handler.
 func (l *Listener) Start() error {
-	log.Printf("[INFO] Attempting to start listener on: %s:%d\n", l.Network, l.Port)
+	log.Printf("[INFO] listener: Attempting to start listener on: %s:%d\n", l.Network, l.Port)
 	var err error
 	l.ls, err = net.Listen("tcp", l.Network+":"+strconv.Itoa(l.Port))
 	if err != nil {
-		log.Printf("[ERROR] Failed opening listener on: %s:%d\n		Reason: %s", l.Network, l.Port, err.Error())
+		log.Printf("[ERROR] listener: Failed opening listener on: %s:%d\n Reason: %s", l.Network, l.Port, err.Error())
 		return err
 	}
 	l.terminate = false
 
 	//Because we want Start() to be non-blocking, we run this in a seperate thread.
 	go func() {
-		log.Printf("[INFO] Successfully started listener on: %s:%d\n", l.Network, l.Port)
+		log.Printf("[INFO] listener: Successfully started listener on: %s:%d\n", l.Network, l.Port)
 		for !l.terminate {
 			conn, err := l.ls.Accept()
 			if err == nil {
 				go l.Handler(conn)
 			}
 		}
-		log.Printf("[INFO] Successfully stopped listener on: %s:%d\n", l.Network, l.Port)
+		log.Printf("[INFO] listener: Successfully stopped listener on: %s:%d\n", l.Network, l.Port)
 	}()
 
 	return nil
@@ -46,7 +46,7 @@ func (l *Listener) Start() error {
 
 // Stops the listening thread by calling Close() to the listener and making sure the loop in Start() exits.
 func (l *Listener) Stop() {
-	log.Printf("[INFO] Attempting to stop listener on: %s:%d\n", l.Network, l.Port)
+	log.Printf("[INFO] listener: Attempting to stop listener on: %s:%d\n", l.Network, l.Port)
 	l.ls.Close()
 	l.terminate = true
 }

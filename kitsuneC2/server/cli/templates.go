@@ -23,9 +23,9 @@ var homeCliApp cli.App = cli.App{
 			Action:      homeImplants,
 		},
 		{
-			Name:        "generate",
+			Name:        "gen-implant",
 			Usage:       "Generate a new KistuneC2 implant binary",
-			UsageText:   "generate [--rhost][--rport][--output][?--os][?--arch][?--name][?--callback-interval][?--callback-jitter][?--retry-count]",
+			UsageText:   "gen-implant [--rhost][--rport][--output][?--os][?--arch][?--name][?--callback-interval][?--callback-jitter][?--retry-count]",
 			Description: "Generates a new KitsuneC2 implant binary.",
 			Flags: []cli.Flag{
 				&cli.StringFlag{

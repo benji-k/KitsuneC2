@@ -3,6 +3,7 @@ package db
 import (
 	"database/sql"
 	"errors"
+	"log"
 )
 
 const (
@@ -15,6 +16,7 @@ var (
 
 // Returns information about all active implants
 func GetAllImplants() ([]*Implant_info, error) {
+	log.Printf("[INFO] db: executing statement: SELECT * FROM implant_info")
 	stmt, err := dbConn.Prepare("SELECT * FROM implant_info")
 	if err != nil {
 		return nil, err
@@ -42,6 +44,7 @@ func GetAllImplants() ([]*Implant_info, error) {
 // Given an implant ID, returns all data from the implant_info table. Returns a db.ErrNoResults error if there were no results
 // for the specified ID
 func GetImplantInfo(implantId string) (*Implant_info, error) {
+	log.Printf("[INFO] db: executing statement: SELECT * FROM implant_info WHERE id=%s", implantId)
 	stmt, err := dbConn.Prepare("SELECT * FROM implant_info WHERE id=?")
 	if err != nil {
 		return nil, err
@@ -69,6 +72,7 @@ func GetImplantInfo(implantId string) (*Implant_info, error) {
 
 // Given info about an implant, registers an entry in the implant_info table.
 func AddImplant(info *Implant_info) error {
+	log.Printf("[INFO] db: executing statement: INSERT INTO implant_info VALUES (?,?,?,?,?,?,?,?,?,?,?)")
 	stmt, err := dbConn.Prepare("INSERT INTO implant_info VALUES (?,?,?,?,?,?,?,?,?,?,?)")
 	if err != nil {
 		return err
@@ -83,6 +87,8 @@ func AddImplant(info *Implant_info) error {
 
 // Given an implant ID, removes all information related to said implant from ALL tables.
 func RemoveImplant(implantId string) error {
+	log.Printf("[INFO] db: executing statement: DELETE FROM implant_info WHERE id=%s", implantId)
+	log.Printf("[INFO] db: executing statement: DELETE FROM implant_info WHERE id=%s", implantId)
 	stmt1, _ := dbConn.Prepare("DELETE FROM implant_info WHERE id=?")
 	stmt2, _ := dbConn.Prepare("DELETE FROM implant_tasks WHERE implant_id=?")
 	defer stmt1.Close()
@@ -106,6 +112,7 @@ func RemoveImplant(implantId string) error {
 
 // Changes the "active" status of an implant to "status"
 func SetImplantStatus(implantId string, status bool) error {
+	log.Printf("[INFO] db: executing statement: UPDATE implant_info SET active=%t WHERE id=%s", status, implantId)
 	stmt, err := dbConn.Prepare("UPDATE implant_info SET active=? WHERE id=?")
 	if err != nil {
 		return err
@@ -124,6 +131,7 @@ func SetImplantStatus(implantId string, status bool) error {
 
 // Gets the "active" status of an implant
 func GetImplantStatus(implantId string) (bool, error) {
+	log.Printf("[INFO] db: executing statement: SELECT active FROM implant_info WHERE id=%s", implantId)
 	stmt, err := dbConn.Prepare("SELECT active FROM implant_info WHERE id=?")
 	if err != nil {
 		return false, err
@@ -148,6 +156,7 @@ func GetImplantStatus(implantId string) (bool, error) {
 // Given an implant ID, returns tasks belonging to that implant. The completed paramter dictates whether the tasks returned are
 // completed or pending
 func GetTasks(implantId string, completed bool) ([]*Implant_task, error) {
+	log.Printf("[INFO] db: executing statement: SELECT * FROM implant_tasks WHERE implant_id=%s AND completed=%t", implantId, completed)
 	var stmt *sql.Stmt
 	var err error
 	if completed {
@@ -183,6 +192,7 @@ func GetTasks(implantId string, completed bool) ([]*Implant_task, error) {
 
 // Given a task, adds it to the implant_tasks table
 func AddTask(task *Implant_task) error {
+	log.Printf("[INFO] db: executing statement: INSERT INTO implant_tasks VALUES (?,?,?,?,?,?)")
 	stmt, err := dbConn.Prepare("INSERT INTO implant_tasks VALUES (?,?,?,?,?,?)")
 	if err != nil {
 		return err
@@ -197,6 +207,8 @@ func AddTask(task *Implant_task) error {
 
 // removes a non-completed task for a specific implant
 func RemovePendingTaskForImplant(implantId string, taskId string) error {
+	log.Printf("[INFO] db: executing statement: DELETE FROM implant_tasks WHERE implant_id=%s AND task_id=%s AND completed=false", implantId, taskId)
+
 	stmt, err := dbConn.Prepare("DELETE FROM implant_tasks WHERE implant_id=? AND task_id=? AND completed=false")
 	if err != nil {
 		return err
@@ -214,6 +226,7 @@ func RemovePendingTaskForImplant(implantId string, taskId string) error {
 
 // Given a taskId, returns all information related to said task
 func GetTask(taskId string) (*Implant_task, error) {
+	log.Printf("[INFO] db: executing statement: SELECT * FROM implant_tasks WHERE task_id=%s", taskId)
 	stmt, err := dbConn.Prepare("SELECT * FROM implant_tasks WHERE task_id=?")
 	if err != nil {
 		return nil, err
@@ -237,6 +250,7 @@ func GetTask(taskId string) (*Implant_task, error) {
 
 // Given a task ID, removes it from the implant_tasks table
 func RemoveTask(taskId string) error {
+	log.Printf("[INFO] db: executing statement: DELETE FROM implant_tasks WHERE task_id=%s", taskId)
 	stmt, _ := dbConn.Prepare("DELETE FROM implant_tasks WHERE task_id=?")
 	defer stmt.Close()
 
@@ -253,6 +267,7 @@ func RemoveTask(taskId string) error {
 
 // Changes status of a task from pending to complete. The taskResult parameter is optional.
 func CompleteTask(taskId string, taskResult []byte) error {
+	log.Printf("[INFO] db: executing statement: UPDATE implant_tasks SET completed=true, task_result=? WHERE task_id=%s", taskId)
 	stmt, err := dbConn.Prepare("UPDATE implant_tasks SET completed=true, task_result=? WHERE task_id=?")
 	if err != nil {
 		return err
@@ -271,6 +286,7 @@ func CompleteTask(taskId string, taskResult []byte) error {
 
 // Given an implant ID and time of last checkin in Unix time format, updates the database entry.
 func UpdateLastCheckin(implantId string, time int) error {
+	log.Printf("[INFO] db: executing statement: UPDATE implant_info SET last_checkin=%d WHERE id=%s", time, implantId)
 	stmt, err := dbConn.Prepare("UPDATE implant_info SET last_checkin=? WHERE id=?")
 	if err != nil {
 		return err
@@ -288,6 +304,7 @@ func UpdateLastCheckin(implantId string, time int) error {
 
 // Should only be called once. If there isn't an existing keypair, this function can be used to add a keypair to the db.
 func InitKeypair(private string, public string) error {
+	log.Printf("[INFO] db: executing statement: INSERT INTO secrets VALUES (?,?)")
 	stmt1, err := dbConn.Prepare("INSERT INTO secrets VALUES (?,?)")
 	if err != nil {
 		return err
@@ -314,6 +331,7 @@ func InitKeypair(private string, public string) error {
 
 // Fetches the private key used for encryption/decryption of implant comms.
 func GetPrivateKey() (string, error) {
+	log.Printf("[INFO] db: executing statement: SELECT value FROM secrets WHERE key=private_key")
 	stmt, err := dbConn.Prepare("SELECT value FROM secrets WHERE key=?")
 	if err != nil {
 		return "", err
@@ -342,6 +360,7 @@ func GetPrivateKey() (string, error) {
 
 // Fetches the public key that is used by implants to encrypt session keys.
 func GetPublicKey() (string, error) {
+	log.Printf("[INFO] db: executing statement: SELECT value FROM secrets WHERE key=public_key")
 	stmt, err := dbConn.Prepare("SELECT value FROM secrets WHERE key=?")
 	if err != nil {
 		return "", err

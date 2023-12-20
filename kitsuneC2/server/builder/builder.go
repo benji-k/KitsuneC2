@@ -26,32 +26,34 @@ var implantSource string = "../implant"
 var libSource string = "../lib"
 var goMod string = "../go.mod"
 
-func BuildImplant(config *BuilderConfig) error {
+// Given a build config, compiles an implant binary and returns the output path.
+func BuildImplant(config *BuilderConfig) (string, error) {
 	err := initBuilder()
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	tmpImplantSrc, err := copyImplantSrcToTmpFolder()
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer os.RemoveAll(tmpImplantSrc)
 
 	err = fillImplantConfig(config, filepath.Join(tmpImplantSrc, "implant", "config", "config_template.config"))
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	err = invokeGoBuild(config, filepath.Join(tmpImplantSrc, "implant"))
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	return nil
+	return config.OutputFile, nil
 }
 
 func initBuilder() error {
+	log.Printf("[INFO] builder: Initializing builder")
 	var err error
 	goMod, _ = filepath.Abs(goMod)
 	libSource, _ = filepath.Abs(libSource)
@@ -81,7 +83,7 @@ func initBuilder() error {
 
 // Fills in template values in implant/config/config_template.config, deletes original config.go and replaces it with filled in template
 func fillImplantConfig(config *BuilderConfig, configTemplatePath string) error {
-	log.Printf("[INFO] Attempting to fill template in file %s.", configTemplatePath)
+	log.Printf("[INFO] builder: Attempting to fill template in file %s.", configTemplatePath)
 	tmpl, err := template.New("config_template.config").ParseFiles(configTemplatePath)
 	if err != nil {
 		return err
@@ -110,7 +112,7 @@ func fillImplantConfig(config *BuilderConfig, configTemplatePath string) error {
 
 // Given a directory with valid Go source code (including go.mod), attempts to build the code.
 func invokeGoBuild(config *BuilderConfig, SourceDir string) error {
-	log.Printf("[INFO] Attemping to build source code at %s.", SourceDir)
+	log.Printf("[INFO] builder: Attemping to build source code at %s.", SourceDir)
 	cwd, _ := os.Getwd()
 	err := os.Chdir(SourceDir)
 	if err != nil {
@@ -124,12 +126,13 @@ func invokeGoBuild(config *BuilderConfig, SourceDir string) error {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
-	log.Printf("[INFO] Executing command: %s %s", cmd.Path, cmd.Args)
+	log.Printf("[INFO] builder: Executing command: %s %s", cmd.Path, cmd.Args)
 	return cmd.Run()
 }
 
 // Copies all the files from this repository needed for compilation of the implant into a temporary folder
 func copyImplantSrcToTmpFolder() (string, error) {
+	log.Printf("[INFO] builder: Attemping to copy implant source code to temporary folder")
 	tmpFolder, err := os.MkdirTemp("", "")
 	if err != nil {
 		return "", err
@@ -141,14 +144,17 @@ func copyImplantSrcToTmpFolder() (string, error) {
 	}
 	err = utils.CopyFolder(implantSource, filepath.Join(tmpFolder, "implant"))
 	if err != nil {
+		log.Printf("[ERROR] builder: Could not copy %s to %s", implantSource, filepath.Join(tmpFolder, "implant"))
 		return "", err
 	}
 	err = utils.CopyFolder(libSource, filepath.Join(tmpFolder, "lib"))
 	if err != nil {
+		log.Printf("[ERROR] builder: Could not copy %s to %s", libSource, filepath.Join(tmpFolder, "lib"))
 		return "", err
 	}
 	err = os.Link(goMod, filepath.Join(tmpFolder, "go.mod"))
 	if err != nil {
+		log.Printf("[ERROR] builder: Could to copy %s to %s", goMod, filepath.Join(tmpFolder, "go.mod"))
 		return "", err
 	}
 	return tmpFolder, nil

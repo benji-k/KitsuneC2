@@ -164,11 +164,12 @@ func homeGenerate(cCtx *cli.Context) error {
 		return nil
 	}
 
-	err = api.BuildImplant(&builder.BuilderConfig{ImplantOs: os, ImplantArch: arch, OutputFile: output, ServerIp: rhost, ServerPort: rport, ImplantName: name, CallbackInterval: cbInterval, CallbackJitter: cbJitter, MaxRegisterRetryCount: rCount})
+	outFile, err := api.BuildImplant(&builder.BuilderConfig{ImplantOs: os, ImplantArch: arch, OutputFile: output, ServerIp: rhost, ServerPort: rport, ImplantName: name, CallbackInterval: cbInterval, CallbackJitter: cbJitter, MaxRegisterRetryCount: rCount})
 	if err != nil {
 		NotifyUser(err.Error(), "FAIL")
 		return nil
 	}
+	NotifyUser("Wrote binary to: "+outFile, "SUCCESS")
 
 	return nil
 }
