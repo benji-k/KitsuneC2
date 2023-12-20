@@ -25,9 +25,59 @@ var homeCliApp cli.App = cli.App{
 		{
 			Name:        "generate",
 			Usage:       "Generate a new KistuneC2 implant binary",
-			UsageText:   "generate [arguments]",
+			UsageText:   "generate [--rhost][--rport][--output][?--os][?--arch][?--name][?--callback-interval][?--callback-jitter][?--retry-count]",
 			Description: "Generates a new KitsuneC2 implant binary.",
-			Action:      homeGenerate,
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:  "os",
+					Value: "linux",
+					Usage: "target operating system for implant. See GOOS documentation.",
+				},
+				&cli.StringFlag{
+					Name:  "arch",
+					Value: "amd64",
+					Usage: "target architecture for implant. See GOARCH documentation.",
+				},
+				&cli.StringFlag{
+					Name:    "output",
+					Aliases: []string{"o"},
+					Usage:   "location where binary will be written to.",
+				},
+				&cli.StringFlag{
+					Name:    "rhost",
+					Aliases: []string{"rh"},
+					Usage:   "C2 server IP address.",
+				},
+				&cli.StringFlag{
+					Name:    "rport",
+					Aliases: []string{"rp"},
+					Usage:   "C2 server port.",
+				},
+				&cli.StringFlag{
+					Name:    "name",
+					Aliases: []string{"n"},
+					Usage:   "name for the implant. Randomly generated if left empty.",
+				},
+				&cli.StringFlag{
+					Name:    "callback-interval",
+					Value:   "10",
+					Aliases: []string{"ci"},
+					Usage:   "interval in seconds between implant checkins.",
+				},
+				&cli.StringFlag{
+					Name:    "callback-jitter",
+					Value:   "3",
+					Aliases: []string{"cj"},
+					Usage:   "variation in seconds between implant checkins.",
+				},
+				&cli.StringFlag{
+					Name:    "retry-count",
+					Value:   "40",
+					Aliases: []string{"rc"},
+					Usage:   "number of times an implant will try to reconnect if it can't contact the C2 server.",
+				},
+			},
+			Action: homeGenerate,
 		},
 		{
 			Name:        "listeners",

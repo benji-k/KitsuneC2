@@ -285,3 +285,84 @@ func UpdateLastCheckin(implantId string, time int) error {
 	}
 	return nil
 }
+
+// Should only be called once. If there isn't an existing keypair, this function can be used to add a keypair to the db.
+func InitKeypair(private string, public string) error {
+	stmt1, err := dbConn.Prepare("INSERT INTO secrets VALUES (?,?)")
+	if err != nil {
+		return err
+	}
+	stmt2, err := dbConn.Prepare("INSERT INTO secrets VALUES (?,?)")
+	if err != nil {
+		return err
+	}
+	defer stmt1.Close()
+	defer stmt2.Close()
+
+	_, err = stmt1.Exec("private_key", private)
+	if err != nil {
+		return err
+	}
+
+	_, err = stmt2.Exec("public_key", public)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// Fetches the private key used for encryption/decryption of implant comms.
+func GetPrivateKey() (string, error) {
+	stmt, err := dbConn.Prepare("SELECT value FROM secrets WHERE key=?")
+	if err != nil {
+		return "", err
+	}
+	defer stmt.Close()
+	rows, err := stmt.Query("private_key")
+	if err != nil {
+		return "", err
+	}
+	defer rows.Close()
+
+	hasResult := rows.Next()
+	if !hasResult {
+		return "", ErrNoResults
+	}
+
+	var privkey string
+
+	err = rows.Scan(&privkey)
+	if err != nil {
+		return "", err
+	}
+
+	return privkey, nil
+}
+
+// Fetches the public key that is used by implants to encrypt session keys.
+func GetPublicKey() (string, error) {
+	stmt, err := dbConn.Prepare("SELECT value FROM secrets WHERE key=?")
+	if err != nil {
+		return "", err
+	}
+	defer stmt.Close()
+	rows, err := stmt.Query("public_key")
+	if err != nil {
+		return "", err
+	}
+	defer rows.Close()
+
+	hasResult := rows.Next()
+	if !hasResult {
+		return "", ErrNoResults
+	}
+	var publicKey string
+
+	err = rows.Scan(&publicKey)
+	if err != nil {
+		return "", err
+	}
+
+	return publicKey, nil
+}

@@ -7,12 +7,14 @@ import (
 	"KitsuneC2/lib/communication"
 	"KitsuneC2/lib/utils"
 	"KitsuneC2/server/api"
+	"KitsuneC2/server/builder"
 	"bytes"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -127,6 +129,46 @@ func homeImplants(cCtx *cli.Context) error {
 }
 
 func homeGenerate(cCtx *cli.Context) error {
+	os := cCtx.String("os")
+	arch := cCtx.String("arch")
+	output, err := filepath.Abs(cCtx.String("output"))
+	if err != nil {
+		NotifyUser("output is not a valid path", "FAIL")
+		return nil
+	}
+	rhost := cCtx.String("rhost")
+	rport, err := strconv.Atoi(cCtx.String("rport"))
+	if err != nil {
+		NotifyUser("rport is required and not a valid integer", "FAIL")
+		return nil
+	}
+	name := cCtx.String("name")
+	cbInterval, err := strconv.Atoi(cCtx.String("callback-interval"))
+	if err != nil {
+		NotifyUser("callback-interval is not a valid integer", "FAIL")
+		return nil
+	}
+	cbJitter, err := strconv.Atoi(cCtx.String("callback-jitter"))
+	if err != nil {
+		NotifyUser("callback-jitter is not a valid integer", "FAIL")
+		return nil
+	}
+	rCount, err := strconv.Atoi(cCtx.String("retry-count"))
+	if err != nil {
+		NotifyUser("retry-count is not a valid integer", "FAIL")
+		return nil
+	}
+
+	if output == "" || rhost == "" || rport < 1 || rport > 65535 {
+		NotifyUser("output, rhost and rport are required. rport must be between 1-65535", "FAIL")
+		return nil
+	}
+
+	err = api.BuildImplant(&builder.BuilderConfig{ImplantOs: os, ImplantArch: arch, OutputFile: output, ServerIp: rhost, ServerPort: rport, ImplantName: name, CallbackInterval: cbInterval, CallbackJitter: cbJitter, MaxRegisterRetryCount: rCount})
+	if err != nil {
+		NotifyUser(err.Error(), "FAIL")
+		return nil
+	}
 
 	return nil
 }

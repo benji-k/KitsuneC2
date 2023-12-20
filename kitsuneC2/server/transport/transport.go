@@ -3,10 +3,12 @@ package transport
 import (
 	"KitsuneC2/lib/communication"
 	"KitsuneC2/lib/cryptography"
+	"KitsuneC2/server/db"
 	"bytes"
 	"encoding/binary"
 	"encoding/json"
 	"errors"
+	"log"
 	"net"
 	"reflect"
 )
@@ -18,7 +20,26 @@ type Session struct {
 	AesKey     []byte
 }
 
-var privKey string = "MIIEpAIBAAKCAQEApBu0qZ45NuQ5WQ1TAtnKR45Joj3JvaT+umIOysCiUXB+IOs7cUjY1Pqmnt61x78+gBV+jBI5eQIPO9ZaAtxLlBjFAZza8YvMgUr4csqMC1yn/hBi7O80qhROE+7XCwCsn8snfCvjX72wQ7YbcEuPs4vLU+loVPyjyTBvnvgpveciozDK0xpVLt9fdMgmJn5VgvIG+5VleVve2PSrZinOGng8FvjsGV0gvQ6NbUyylyF4Ncov/nNYr9d39UJpSK6pTIA/GysE4V8IMO2tlccbo7ovNqulPCr2BYFxktaUolkw1wZ5TeNvxZ/NodHIxzTArVEt8cJqR98XjwdAYuYYpwIDAQABAoIBAQCZ4lkAjJu9+zhDZxkmHS9u9d/aQPJB4Mvz3itcuFH85+191NbCnbqly/weEVyH1681z/IASr6V1/aM960j7Yr5blid8IXl5l94BeL/USsNJG9q79azsoLB0ZR9YINJj/JPTOLTrxvhFTCJ7ePA4zn29OlO4BmzR8wVxlOEz9Pke63hf8EHFsdKis3hEg1xtCFWlPXXhDRpe133BZVA72sL4oTU4Kqa3YkmCVnXqpz8st4nfpjx3YdrcOAZ1P5Vkg9m3QNqE2izNtA9BkSUUSfTbEnMN0l1zBGLfSXa3IiyayKlFdkHFQFy74igogcWFCwD9BHrrFrPE6sily3iIVhxAoGBAMRwxZfi5XwQm9w1zAxaNS4QA7CS+wzKqhVkldmTrlvOPx2L637c0u4v49+reYxbuTR2uFXLKRPCzcSOBCEydblE9VRfqV0FYDaiJsnTAwN40HRzVC4u420wQDGMDrJ8zK9sW+GuYY8IDxvw+HVRsWLXIXSQ/47Uj/z0O2ju6aKrAoGBANXdYZ2aJt/thkEJYW8SPP6Dfh6i0IBEL7PEJ3KgBBLhd0b0AXCe+aOAolf48ZTTjno1GztRZd/PxLGEdySXsPbsji6DMNzPtWM5pwxw1fTXBffQTybQzbLGevkXtWoYVf0QBLAdFkANZrjfL4YycJqQYIFVXvYYws9cxpdBAEH1AoGAV5Dlo+Uy4vEMaUdZ5A+6MQRWgLmkS3l0BAFIgyq/yJDRtbwPiAerxx11+NiZYCXrEyXw2d2sO/DUhM/Bq4Kw05uXuLrD5oFk+DWkEMeNSljqo15dohCotJ2ToAKM8qeLHo+xDZMMThQLmCr8tl9qMWMwuKOCKAs8/EdqzEXjw+0CgYB7lHdJyL/Z+bjwb+k7c4CHWZhRP6fX1o7yA9D/rXNtLZftCiai21pJnpUw3ItMgor8Fx/rQPfrQnXYVkE6heUeakcmnWxozCV2duQOjk00M+Qg9OAn/9Q9D/ATbB3KdtGJb+4ljklDLftDrMQbeZ4T0oXRdnFvJ5O6m1OuJ0Ns2QKBgQCdpW8Ua3yaUGrex3XFmSnn2V+gNfScVpQN0OBWpNx3nj5sGE8mzS8tpFhMrOaDARwSTN1AfRNJUr5BucpWsVS4H4KdW7AsxVAhHgfKE4tYQDCUKr3ndijFqyOrT/t58XxKsd8RA0oekoVjvRT0ESqZWNZ5RKkudUG2YWiA3haXnA=="
+var privKey string
+
+// Fetches (if exists) keypair from database for implant communication. If no keypair exists, attempts to create one.
+func Initialize() {
+	priv, err := db.GetPrivateKey()
+	if err == db.ErrNoResults { //we don't have a keypair, try to create one.
+		priv, pub, err := cryptography.GenerateRSAKeyPair(2048)
+		if err != nil {
+			log.Fatal("Could not generate keypair. Reason: ", err.Error())
+		}
+		privStr := cryptography.RsaPrivateKeyToString(priv)
+		pubStr := cryptography.RSAPublicKeyToString(pub)
+		db.InitKeypair(privStr, pubStr)
+	} else if err != nil { //something went wrong during fetching of keypair
+		log.Fatal("Could not fetch private key from db. Reason: " + err.Error())
+	}
+	//we managed to fetch private key, or create a keypair
+
+	privKey = priv
+}
 
 // Given a session, messageType and corresponding data, this function will encrypt the message and send it over an existing connection.
 func SendEnvelopeToImplant(sess *Session, messageType int, data interface{}) error {

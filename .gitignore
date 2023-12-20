@@ -1,2 +1,2 @@
 .vscode
-./kitsuneC2/server/db/kitsune.sqlite
+kitsuneC2/server/db/kitsune.sqlite

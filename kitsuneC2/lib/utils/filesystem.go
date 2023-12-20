@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"log"
 	"os"
 	"path/filepath"
 )
@@ -35,4 +36,39 @@ func ReadFile(path string) ([]byte, error) {
 		return nil, err
 	}
 	return content, nil
+}
+
+// Recursively copies contents of "source folder" into "destination"
+func CopyFolder(source string, destination string) error {
+	log.Printf("[INFO] Attempting to copy folder %s into %s...", source, destination)
+	dirEntries, err := os.ReadDir(source)
+	if err != nil {
+		return err
+	}
+	for _, entry := range dirEntries {
+		if entry.IsDir() {
+			src := filepath.Join(source, entry.Name())
+			dst := filepath.Join(destination, entry.Name())
+			entryInfo, _ := entry.Info()
+			err = os.Mkdir(dst, entryInfo.Mode())
+			if err != nil {
+				log.Printf("[ERROR] Could not copy implant source files to temp folder. Reason %s", err)
+				return err
+			}
+			err = CopyFolder(src, dst)
+			if err != nil {
+				log.Printf("[ERROR] Could not copy implant source files to temp folder. Reason %s", err)
+				return err
+			}
+		} else {
+			src := filepath.Join(source, entry.Name())
+			dst := filepath.Join(destination, entry.Name())
+			err := os.Link(src, dst)
+			if err != nil {
+				log.Printf("[ERROR ]Could not copy implant source files to temp folder. Reason %s", err)
+				return err
+			}
+		}
+	}
+	return nil
 }

@@ -23,7 +23,7 @@ var (
 
 // Initializes the database by looking for a kitsune.sqlite file in the /db/ folder. If it finds it, it opens a connection to it.
 // If it doesn't, it attempts to create a database file. This function must succeed for the program to function properly.
-func Init() {
+func Initialize() {
 	//Check if db already exists. If not, create it.
 	if _, err := os.Stat("./db/kitsune.sqlite"); err != nil {
 		log.Println("[INFO] /db/kitsune.sqlite was not found, attempting to create...")

@@ -21,4 +21,10 @@ CREATE TABLE IF NOT EXISTS implant_tasks(
     task_data BLOB,         /*Contains JSON serialized structs. see communication/serializable.go for info*/
     completed BOOL,
     task_result BLOB
-)
+);
+
+/*Contains application secrets such as the private/public keypair */
+CREATE TABLE IF NOT EXISTS secrets(
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL
+);

@@ -5,6 +5,8 @@ package api
 import (
 	"KitsuneC2/lib/communication"
 	"KitsuneC2/lib/cryptography"
+	"KitsuneC2/lib/utils"
+	"KitsuneC2/server/builder"
 	"KitsuneC2/server/db"
 	"KitsuneC2/server/handlers"
 	"KitsuneC2/server/listener"
@@ -130,4 +132,22 @@ func KillListener(listenerId int) error {
 	runningsListeners[listenerId].Stop()
 	runningsListeners = append(runningsListeners[:listenerId], runningsListeners[listenerId+1:]...) //removes element from list and shifts other elements
 	return nil
+}
+
+func BuildImplant(config *builder.BuilderConfig) error {
+	if config.ImplantName == "" {
+		config.ImplantName = utils.GenerateRandomName()
+	}
+	if config.ServerPort < 0 || config.ServerPort > 65535 {
+		return errors.New("not a valid port number")
+	}
+
+	pub, err := db.GetPublicKey()
+	if err != nil {
+		log.Printf("Could not fetch public key from database while trying to build implant. Reason: %s", err.Error())
+		return err
+	}
+	config.PublicKey = pub
+
+	return builder.BuildImplant(config)
 }
