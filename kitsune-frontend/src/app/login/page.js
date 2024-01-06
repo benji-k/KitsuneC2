@@ -1,16 +1,28 @@
 import Image from 'next/image'
+import { FaUser } from 'react-icons/fa'
+import { FaLock } from 'react-icons/fa'
 
 export default function Login() {
 
     return (
-        <div className="w-screen h-screen bg-gradient-to-br from-wine-purple from-10% to-zinc-600">
-            <div className="flex flex-col items-center justify-start gap-3 mx-auto w-[700px]">
-                <Image src="/fox.png" width={141} height={141} alt='Kitsune logo' className='mt-[224px] mb-[136px]'></Image>
-                <input type="text" placeholder="Username" className="text-white text-opacity-70 w-[507px] ml-[95px] text-xl font-normal font-['Inter'] bg-transparent outline-none self-start"></input>
-                <div className="w-[507px] h-[0px] mb-[20px] border border-white border-opacity-40"></div>
-                <input type="password" placeholder="Password" className="text-white text-opacity-70 w-[507px] text-xl ml-[95px] font-normal font-['Inter'] bg-transparent outline-none self-start"></input>
-                <div className="w-[507px] h-[0px] border border-white border-opacity-40"></div>
-                <button className="w-[543px] h-[67px] mt-[30px] bg-white bg-opacity-90 rounded-[15px] text-neutral-800 text-[32px] font-normal font-['Inter']">Login</button>
+        <div className="min-h-screen px-7 bg-gradient-to-br from-kc2-wine-purple from-10% to-zinc-600">
+            <div className="max-w-lg mx-auto py-36 min-h-screen flex flex-col items-center">
+                <Image src="/fox.png" width={120} height={120} alt='Kitsune logo' className='mb-36'></Image>
+                <div className='flex flex-col gap-4 mb-16 lg:mb-40 w-full'>
+                    <div className='flex gap-4 items-center mr-2'>
+                        <FaUser size={17} color='#cad5e199'/>
+                        <input placeholder='Username' type='text' 
+                        className='w-full bg-transparent border-b-[1px] border-slate-300 border-opacity-60
+                        text-slate-300 outline-none p-2'></input>
+                    </div>
+                    <div className='flex gap-4 items-center mr-2'>
+                        <FaLock size={17} color='#cad5e199'/>
+                        <input placeholder='Password' type='password' 
+                        className='w-full bg-transparent border-b-[1px] border-slate-300 border-opacity-60
+                        text-slate-300 outline-none p-2'></input>
+                    </div>
+                    <button className='bg-slate-100 w-full rounded-lg py-2 mt-4'>Login</button>
+                </div>
             </div>
         </div>
     )
