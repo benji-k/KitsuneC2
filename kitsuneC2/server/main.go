@@ -16,8 +16,8 @@ func main() {
 
 func initialize() {
 	utils.PrintBanner()
-	logging.InitLogger()
 	db.Initialize()
 	cli.InitCli()
 	transport.Initialize()
+	logging.InitLogger()
 }
