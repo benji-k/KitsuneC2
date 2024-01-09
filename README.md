@@ -26,9 +26,11 @@ To name a few. Feel free to improve this project by submitting a pull-request.
 Instructions on how to install **KitsuneC2**
 ```bash
 git clone https://github.com/benji-k/KitsuneC2.git
-cd KitsuneC2
-chmod +x install.sh && ./install.sh
+cd KitsuneC2/kitsuneC2
+sudo docker build . -t kitsunec2
 ```
 
 ## Usage
-After installing, ....
+```bash
+sudo docker run -it --network=host kitsunec2
+```

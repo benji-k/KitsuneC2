@@ -1,8 +1,10 @@
+'use client'
+
 import Image from 'next/image'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { FaUser } from 'react-icons/fa'
-import { IoMdArrowDropdown } from "react-icons/io";
-
+import { signOut } from 'next-auth/react'
 import {NavLinks} from '../constants/navbar'
 
 export default function Navbar(){
@@ -21,7 +23,7 @@ export default function Navbar(){
                             <FaUser size={15} color='#ABABAB'/>
                             <p>Welcome, USER</p>
                         </div>
-                        <button>Logout</button>
+                        <button onClick={()=>{signOut({ callbackUrl: '/login' })}}>Logout</button>
                     </div>
                 </div>
             </div>
@@ -29,7 +31,7 @@ export default function Navbar(){
                 <nav className='flex gap-8 justify-center md:justify-end'>
                 {NavLinks.map((link) => (
                     <li key={link.label} className='list-none'>
-                        <Link href={link.href} className='text-white'>{link.label}</Link>
+                        <Link href={link.href} className={usePathname() === link.href ? "text-kc2-soap-pink" : "text-white"}>{link.label}</Link>
                     </li>
                 ))}
                 </nav>

@@ -13,7 +13,7 @@ module.exports = {
         'kc2-dark-gray' : '#222132',
         'kc2-soap-pink' : '#E2AFEA',
         'kc2-dashboard-bg' : '#353446'
-      }
+      },
     },
   },
   plugins: [],

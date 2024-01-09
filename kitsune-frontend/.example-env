@@ -1,0 +1,4 @@
+NEXTAUTH_URL="http://localhost:3000/api/auth"
+NEXTAUTH_SECRET="" //generate with openssl rand -base64 32
+USERNAME="USER" //username to login the web-app
+PASSWORD="PASS" //password to login the web-app
