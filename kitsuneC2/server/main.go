@@ -6,6 +6,7 @@ import (
 	"KitsuneC2/server/db"
 	"KitsuneC2/server/logging"
 	"KitsuneC2/server/transport"
+	"KitsuneC2/server/web"
 )
 
 func main() {
@@ -20,4 +21,5 @@ func initialize() {
 	cli.InitCli()
 	transport.Initialize()
 	logging.InitLogger()
+	web.Init()
 }

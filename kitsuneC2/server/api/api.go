@@ -63,7 +63,17 @@ func RemovePendingTaskForImplant(implantId string, taskId string) error {
 // have already been completed and thus have a result.
 func GetTasksForImplant(implantId string, completed bool) ([]*db.Implant_task, error) {
 	log.Printf("[INFO] API: Attemping to fetch tasks for implant with ID: %s", implantId)
-	tasks, err := db.GetTasks(implantId, completed)
+	tasks, err := db.GetTasksForImplant(implantId, completed)
+	if err != nil {
+		return nil, err
+	}
+	return tasks, nil
+}
+
+// Fetches all tasks for all implants. The completed parameter dictates whether the fetched tasks are completed or not.
+func GetAllTasks(completed bool) ([]*db.Implant_task, error) {
+	log.Printf("[INFO] API: Attemping to fetch tasks for all implants")
+	tasks, err := db.GetAllTasks(completed)
 	if err != nil {
 		return nil, err
 	}

@@ -125,7 +125,7 @@ func handleCheckin(sess *transport.Session, data interface{}) {
 	//necessary arguments {PathToFile: "/etc/passwd"} and {PathToFile: "/etc/passwd"} and its corresponding MessageType (11, 11).
 	//The ImplantCheckinResp object will look as follows: {[11, 11], [0][json.Marshal(FileInfoReq1)]}
 	//														.....	 [1][json.Marhsal(FileInfoReq2)]
-	pendingTasks, err := db.GetTasks(implantCheckin.ImplantId, false)
+	pendingTasks, err := db.GetTasksForImplant(implantCheckin.ImplantId, false)
 	if err != nil {
 		if err == db.ErrNoResults {
 			log.Printf("[INFO] handlers: No pending tasks for implant with id: %s", implantCheckin.ImplantId)

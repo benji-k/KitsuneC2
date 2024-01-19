@@ -155,7 +155,7 @@ func GetImplantStatus(implantId string) (bool, error) {
 
 // Given an implant ID, returns tasks belonging to that implant. The completed paramter dictates whether the tasks returned are
 // completed or pending
-func GetTasks(implantId string, completed bool) ([]*Implant_task, error) {
+func GetTasksForImplant(implantId string, completed bool) ([]*Implant_task, error) {
 	log.Printf("[INFO] db: executing statement: SELECT * FROM implant_tasks WHERE implant_id=%s AND completed=%t", implantId, completed)
 	var stmt *sql.Stmt
 	var err error
@@ -169,6 +169,43 @@ func GetTasks(implantId string, completed bool) ([]*Implant_task, error) {
 	}
 	defer stmt.Close()
 	rows, err := stmt.Query(implantId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var tasks []*Implant_task = make([]*Implant_task, MAX_PENDING_TASKS)
+	var i int = 0
+	for rows.Next() {
+		tasks[i] = new(Implant_task)
+		rows.Scan(&tasks[i].Task_id, &tasks[i].Implant_id, &tasks[i].Task_type, &tasks[i].Task_data, &tasks[i].Completed, &tasks[i].Task_result)
+		i++
+	}
+	if i == 0 {
+		return nil, ErrNoResults
+	}
+
+	tasks = tasks[:i]
+
+	return tasks, nil
+}
+
+// Fetches all tasks for every implant from the database. The completed parameter dictates whether the tasks that are fetched are
+// completed or not.
+func GetAllTasks(completed bool) ([]*Implant_task, error) {
+	log.Printf("[INFO] db: executing statement: SELECT * FROM implant_tasks WHERE completed=%t", completed)
+	var stmt *sql.Stmt
+	var err error
+	if completed {
+		stmt, err = dbConn.Prepare("SELECT * FROM implant_tasks WHERE completed=TRUE")
+	} else {
+		stmt, err = dbConn.Prepare("SELECT * FROM implant_tasks WHERE completed=FALSE")
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+	rows, err := stmt.Query()
 	if err != nil {
 		return nil, err
 	}

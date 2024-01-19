@@ -37,7 +37,7 @@ var MessageTypeToStruct = map[int]func() interface{}{
 
 // Used in CLI to map taskType to readable name
 var MessageTypeToModuleName = map[int]string{
-	6:  "implant kill",
+	5:  "implant kill",
 	7:  "change config",
 	11: "file info",
 	13: "ls",
