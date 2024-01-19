@@ -1,3 +1,4 @@
+KITSUNEC2_WEBURL="http://localhost:7331/" //location of the web-app
 NEXTAUTH_URL="http://localhost:3000/api/auth"
 NEXTAUTH_SECRET="" //generate with openssl rand -base64 32
 USERNAME="USER" //username to login the web-app

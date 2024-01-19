@@ -1,10 +1,52 @@
+"use client"
 
-export default function ImplantTable({ implantsData }) {
+import useSWR from 'swr'
+import ReactLoading from 'react-loading';
 
-    return (
+export default function ImplantTable({refreshRate}) {
+    const fetcher = async url => {
+        const res = await fetch(url)
+       
+        if (!res.ok) {
+          const error = new Error('An error occurred while fetching the data.')
+          const errReason = await res.json()
+          error.info = errReason.error
+          error.status = res.status
+          throw error
+        }
+       
+        return res.json()
+    }
+
+    const { data, error, isLoading } = useSWR('/api/kitsune/implants', fetcher, { refreshInterval: refreshRate })
+ 
+    if (error) return (
+        <div className="m-5 mt-3">
+            <div className="mx-auto h-64 bg-kc2-light-gray overflow-scroll flex justify-center items-center text-lg">
+                <p className='text-red-300'>Error fetching data from server: {error.info}</p>
+            </div>
+        </div>
+    )
+
+    if (isLoading) return (
+        <div className="m-5 mt-3">
+            <div className="mx-auto h-64 bg-kc2-light-gray overflow-scroll flex justify-center items-center">
+                <ReactLoading type="spinningBubbles" color="#cccccc" height={75} width={75} />
+            </div>
+        </div>
+    )
+
+    if(data.length === 0) return (
+        <div className="m-5 mt-3">
+            <div className="mx-auto h-64 bg-kc2-light-gray overflow-scroll flex justify-center items-center text-lg">
+                <p className='text-slate-300'>No active implants</p>
+            </div>
+        </div>
+    )
+
+    if(data) return (
         <div className="m-5 mt-3">
         <div className="mx-auto h-64 bg-kc2-light-gray overflow-scroll">
-
             <table className="table-auto w-full">
                 <thead>
                     <tr className="bg-kc2-dark-gray h-10">
@@ -21,17 +63,17 @@ export default function ImplantTable({ implantsData }) {
                 </thead>
                 <tbody>
                     {
-                        implantsData && implantsData.map((implant) => (
-                            <tr key={implant.id} className="odd:bg-kc2-light-gray even:bg-[#434254] h-10 hover:bg-slate-500 cursor-pointer">
-                                <td className="text-xs text-white px-3 whitespace-nowrap">{implant.id}</td>
-                                <td className="text-xs text-white px-3 whitespace-nowrap">{implant.externalAddress}</td>
-                                <td className="text-xs text-white px-3 whitespace-nowrap">{implant.hostname}</td>
-                                <td className="text-xs text-white px-3 whitespace-nowrap">{implant.username}</td>
-                                <td className="text-xs text-white px-3 whitespace-nowrap">{implant.uid}</td>
-                                <td className="text-xs text-white px-3 whitespace-nowrap">{implant.gid}</td>
-                                <td className="text-xs text-white px-3 whitespace-nowrap">{implant.os}</td>
-                                <td className="text-xs text-white px-3 whitespace-nowrap">{implant.arch}</td>
-                                <td className="text-xs text-white px-3 whitespace-nowrap">{implant.lastSeen} seconds ago</td>
+                        data && data.map((implant) => (
+                            <tr key={implant.Id} className="odd:bg-kc2-light-gray even:bg-[#434254] h-10 hover:bg-slate-500 cursor-pointer">
+                                <td className="text-xs text-white px-3 whitespace-nowrap">{implant.Id}</td>
+                                <td className="text-xs text-white px-3 whitespace-nowrap">{implant.Public_ip}</td>
+                                <td className="text-xs text-white px-3 whitespace-nowrap">{implant.Hostname}</td>
+                                <td className="text-xs text-white px-3 whitespace-nowrap">{implant.Username}</td>
+                                <td className="text-xs text-white px-3 whitespace-nowrap">{implant.Uid}</td>
+                                <td className="text-xs text-white px-3 whitespace-nowrap">{implant.Gid}</td>
+                                <td className="text-xs text-white px-3 whitespace-nowrap">{implant.Os}</td>
+                                <td className="text-xs text-white px-3 whitespace-nowrap">{implant.Arch}</td>
+                                <td className="text-xs text-white px-3 whitespace-nowrap">{implant.Last_checkin} seconds ago</td>
                             </tr>
                         ))
                     }

@@ -1,16 +1,14 @@
 'use client'
+import { useDashboardState } from "@/app/kitsune/state/dashboard"
 
-import { IoMdArrowDropdown } from "react-icons/io";
+export default function TaskSelectBtn() {
+    const showCompletedTasks = useDashboardState((state) => state.setShowCompletedTasks)
 
-export default function TaskSelectBtn(){
-
-    return(
-        <button className="bg-kc2-light-gray text-white px-3 ml-4
-        rounded-md">
-            <div className="flex items-center gap-3">
-                <p>Pending</p>
-                <IoMdArrowDropdown />
-            </div>
-        </button>
+    return (
+        <select className="bg-kc2-light-gray text-white px-3 ml-4 py-1 rounded-md" onChange={(e) => 
+        e.target.value === "completed" ? showCompletedTasks(true) : showCompletedTasks(false)}>
+            <option value="pending">Pending</option>
+            <option value="completed">Completed</option>
+        </select>
     )
 }
