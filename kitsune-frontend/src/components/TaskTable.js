@@ -3,7 +3,7 @@
 import useSWR from 'swr'
 import ReactLoading from 'react-loading';
 import { Tasks } from '@/constants/tasks';
-import { useDashboardState } from '@/app/kitsune/state/dashboard';
+import { useDashboardState } from '@/state/dashboard';
 
 export default function TaskTable({refreshRate}){
     const fetcher = async url => {
@@ -22,8 +22,9 @@ export default function TaskTable({refreshRate}){
 
     const showCompletedTasks = useDashboardState((state) => (state.showCompletedTasks))
     const tasksDataUrl = showCompletedTasks ? "/api/kitsune/tasks?completed=true" : "/api/kitsune/tasks?completed=false"
+    const selectedImplants = useDashboardState((state) => (state.selectedImplants))
     const { data, error, isLoading } = useSWR(tasksDataUrl, fetcher, { refreshInterval: refreshRate })
- 
+
     if (error) return (
         <div className="m-5 mt-3">
             <div className="mx-auto h-64 bg-kc2-light-gray overflow-scroll flex justify-center items-center text-lg">
@@ -40,18 +41,30 @@ export default function TaskTable({refreshRate}){
         </div>
     )
 
-    if (data.length === 0) return(
+    if (data.filter((t) => selectedImplants.includes(t.Implant_id)).length === 0) return(
         <div className="m-5 mt-3">
             <div className="mx-auto h-64 bg-kc2-light-gray overflow-scroll flex justify-center items-center text-lg">
-                <p className='text-slate-300'>No tasks for implant</p>
+                <p className='text-slate-300'>No tasks for selected implant(s)</p>
             </div>
         </div>
     )
+
+
 
     const getTaskName = (task) => {
         const filteredTasks = Tasks.filter((t) => t.taskType === task.Task_type);
         return filteredTasks[0] ? filteredTasks[0].taskName : "?";
     };
+
+    const b64ToArguments = (base64Arg) => {
+        try{
+            const jsonObj = JSON.parse(atob(base64Arg))
+            delete jsonObj.TaskId
+            return JSON.stringify(jsonObj)
+        } catch {
+            return "{}"
+        }
+    }
 
     if (data) return(
         <div className="m-5 mt-3">
@@ -67,11 +80,11 @@ export default function TaskTable({refreshRate}){
                 </thead>
                 <tbody>
                     {
-                        data && data.map((task) => (
+                        data && data.filter((task) => selectedImplants.includes(task.Implant_id)).map((task) => (
                             <tr key={task.Task_id} className="odd:bg-kc2-dark-gray even:bg-black h-10">
                                 <td className="text-xs text-white px-3 whitespace-nowrap">{task.Task_id}</td>
                                 <td className="text-xs text-white px-3 whitespace-nowrap">{getTaskName(task)}</td>
-                                <td className="text-xs text-white px-3 whitespace-nowrap">{task.Task_result}</td>
+                                <td className="text-xs text-white px-3 whitespace-nowrap">{b64ToArguments(task.Task_data)}</td>
                             </tr>
                         ))
                     }

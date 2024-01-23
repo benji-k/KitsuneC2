@@ -1,5 +1,5 @@
 'use client'
-import { useDashboardState } from "@/app/kitsune/state/dashboard"
+import { useDashboardState } from "@/state/dashboard"
 
 export default function TaskSelectBtn() {
     const showCompletedTasks = useDashboardState((state) => state.setShowCompletedTasks)
