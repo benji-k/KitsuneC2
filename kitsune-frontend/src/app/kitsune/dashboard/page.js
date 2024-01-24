@@ -5,14 +5,16 @@ import NewTaskBtn from "@/components/newTaskBtn"
 import TaskSelectBtn from "@/components/taskSelectBtn"
 import TaskTable from "@/components/TaskTable"
 import NewTaskWindow from "@/components/newTaskWindow"
+import ResultWindow from "@/components/resultWindow"
 import { useDashboardState } from "@/state/dashboard"
 
 export default function Dashboard() {
-    const newTaskWindowOpen = useDashboardState((state) => state.newTaskWindowOpen
-    )
+    const newTaskWindowOpen = useDashboardState((state) => state.newTaskWindowOpen)
+    const resultWindowOpen = useDashboardState((state) => state.resultWindowOpen)
     return (
         <>
-            {newTaskWindowOpen ? <NewTaskWindow /> : <></>}
+            {newTaskWindowOpen && <NewTaskWindow />}
+            {resultWindowOpen && <ResultWindow />}
             <h2 className="text-white text-3xl pl-5 pt-5">Implants</h2>
             <div className="m-5 mt-3">
                 <ImplantTable 

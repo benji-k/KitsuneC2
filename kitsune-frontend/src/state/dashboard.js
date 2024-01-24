@@ -3,6 +3,8 @@ import { create } from 'zustand'
 export const useDashboardState = create((set, get) => ({
     selectedImplants: [],
     newTaskWindowOpen: false,
+    resultWindowOpen: false,
+    taskResult: {},
     showCompletedTasks: false,
     selectImplant: (implantId) => {
       if(get().selectedImplants.includes(implantId)){
@@ -12,5 +14,7 @@ export const useDashboardState = create((set, get) => ({
       }
     },
     setNewTaskWindowOpen: (val) => set({newTaskWindowOpen: val}),
+    setResultWindowOpen: (val) => set({resultWindowOpen: val}),
+    setTaskResult: (val) => set({taskResult: val}),
     setShowCompletedTasks: (val) => set({showCompletedTasks: val}),
   }))

@@ -23,6 +23,9 @@ export default function TaskTable({refreshRate}){
     const showCompletedTasks = useDashboardState((state) => (state.showCompletedTasks))
     const tasksDataUrl = showCompletedTasks ? "/api/kitsune/tasks?completed=true" : "/api/kitsune/tasks?completed=false"
     const selectedImplants = useDashboardState((state) => (state.selectedImplants))
+    const setResultWindowOpen = useDashboardState((state) => (state.setResultWindowOpen))
+    const setTaskResult = useDashboardState((state) => state.setTaskResult)
+
     const { data, error, isLoading } = useSWR(tasksDataUrl, fetcher, { refreshInterval: refreshRate })
 
     if (error) return (
@@ -76,6 +79,7 @@ export default function TaskTable({refreshRate}){
                         <th className="text-left text-xs text-white px-3">ID</th>
                         <th className="text-left text-xs text-white px-3">Module</th>
                         <th className="text-left text-xs text-white px-3">Arguments</th>
+                        {showCompletedTasks && <th className="text-left text-xs text-white px-3">Result</th>}
                     </tr>
                 </thead>
                 <tbody>
@@ -85,6 +89,11 @@ export default function TaskTable({refreshRate}){
                                 <td className="text-xs text-white px-3 whitespace-nowrap">{task.Task_id}</td>
                                 <td className="text-xs text-white px-3 whitespace-nowrap">{getTaskName(task)}</td>
                                 <td className="text-xs text-white px-3 whitespace-nowrap">{b64ToArguments(task.Task_data)}</td>
+                                <td className="text-xs text-kc2-soap-pink px-3 whitespace-nowrap cursor-pointer hover:underline"
+                                 onClick={()=>{
+                                    setTaskResult(task)
+                                    setResultWindowOpen(true)
+                                    }}>Show result</td>
                             </tr>
                         ))
                     }
