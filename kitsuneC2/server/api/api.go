@@ -24,6 +24,10 @@ var runningsListeners []listener.Listener
 // to see the types of requests a server can make to the implant.
 func AddTaskForImplant(implantId string, taskType int, taskArguments *communication.Task) (string, error) {
 	log.Printf("[INFO] API: attempting to create task with type %d for implant with ID %s.", taskType, implantId)
+	if !ImplantExists(implantId) {
+		return "", errors.New("cannot add task for non-existant implant")
+	}
+
 	//use reflection to check that taskType and taskArguments correspond
 	expectedType := reflect.TypeOf(communication.MessageTypeToStruct[taskType]())
 	actualType := reflect.TypeOf(*taskArguments).Elem()
