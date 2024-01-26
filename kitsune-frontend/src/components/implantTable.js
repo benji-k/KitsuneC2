@@ -72,7 +72,7 @@ export default function ImplantTable({ refreshRate }) {
                                 <td className="text-xs text-white px-3 whitespace-nowrap">{implant.Gid}</td>
                                 <td className="text-xs text-white px-3 whitespace-nowrap">{implant.Os}</td>
                                 <td className="text-xs text-white px-3 whitespace-nowrap">{implant.Arch}</td>
-                                <td className="text-xs text-white px-3 whitespace-nowrap">{implant.Last_checkin} seconds ago</td>
+                                <td className="text-xs text-white px-3 whitespace-nowrap">{Math.floor(Date.now() / 1000) - parseInt(implant.Last_checkin)} seconds ago</td>
                             </tr>
                         ))
                     }
