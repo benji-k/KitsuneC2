@@ -328,7 +328,7 @@ func interactRemove(cCtx *cli.Context) error {
 
 func interactKill(cCtx *cli.Context) error {
 	var task communication.Task = &communication.ImplantKillReq{}
-	taskId, err := api.AddTaskForImplant(cliCtx.implantId, 5, &task)
+	taskId, err := api.AddTaskForImplant(cliCtx.implantId, communication.IMPLANT_KILL_REQ, &task)
 	if err != nil {
 		NotifyUser(err.Error(), "FAIL")
 		return nil
@@ -367,7 +367,7 @@ func interactConfig(cCtx *cli.Context) error {
 	}
 
 	var task communication.Task = config
-	taskId, err := api.AddTaskForImplant(cliCtx.implantId, 7, &task)
+	taskId, err := api.AddTaskForImplant(cliCtx.implantId, communication.IMPLANT_CONFIG_REQ, &task)
 	if err != nil {
 		NotifyUser(err.Error(), "FAIL")
 		return nil
@@ -392,7 +392,7 @@ func interactFileInfo(cCtx *cli.Context) error {
 	path := cCtx.Args().First()
 
 	var task communication.Task = &communication.FileInfoReq{PathToFile: path}
-	taskId, err := api.AddTaskForImplant(cliCtx.implantId, 11, &task)
+	taskId, err := api.AddTaskForImplant(cliCtx.implantId, communication.FILE_INFO_REQ, &task)
 	if err != nil {
 		NotifyUser(err.Error(), "FAIL")
 		return nil
@@ -416,7 +416,7 @@ func interactUpload(cCtx *cli.Context) error {
 	}
 
 	var task communication.Task = &communication.UploadReq{File: fileContents, Destination: destination}
-	taskId, err := api.AddTaskForImplant(cliCtx.implantId, 21, &task)
+	taskId, err := api.AddTaskForImplant(cliCtx.implantId, communication.UPLOAD_REQ, &task)
 	if err != nil {
 		NotifyUser(err.Error(), "FAIL")
 		return nil
@@ -434,7 +434,7 @@ func interactDownload(cCtx *cli.Context) error {
 	}
 
 	var task communication.Task = &communication.DownloadReq{Origin: origin, Destination: destination}
-	taskId, err := api.AddTaskForImplant(cliCtx.implantId, 19, &task)
+	taskId, err := api.AddTaskForImplant(cliCtx.implantId, communication.DOWNLOAD_REQ, &task)
 	if err != nil {
 		NotifyUser(err.Error(), "FAIL")
 		return nil
@@ -451,7 +451,7 @@ func interactLs(cCtx *cli.Context) error {
 	path := cCtx.Args().First()
 
 	var task communication.Task = &communication.LsReq{Path: path}
-	taskId, err := api.AddTaskForImplant(cliCtx.implantId, 13, &task)
+	taskId, err := api.AddTaskForImplant(cliCtx.implantId, communication.LS_REQ, &task)
 	if err != nil {
 		NotifyUser(err.Error(), "FAIL")
 		return nil
@@ -468,7 +468,7 @@ func interactCd(cCtx *cli.Context) error {
 	path := cCtx.Args().First()
 
 	var task communication.Task = &communication.CdReq{Path: path}
-	taskId, err := api.AddTaskForImplant(cliCtx.implantId, 17, &task)
+	taskId, err := api.AddTaskForImplant(cliCtx.implantId, communication.CD_REQ, &task)
 	if err != nil {
 		NotifyUser(err.Error(), "FAIL")
 		return nil
@@ -487,7 +487,7 @@ func interactExec(cCtx *cli.Context) error {
 	args := strings.Split(argsStr, " ")
 
 	var task communication.Task = &communication.ExecReq{Cmd: cmd, Args: args}
-	taskId, err := api.AddTaskForImplant(cliCtx.implantId, 15, &task)
+	taskId, err := api.AddTaskForImplant(cliCtx.implantId, communication.EXEC_REQ, &task)
 	if err != nil {
 		NotifyUser(err.Error(), "FAIL")
 		return nil
@@ -510,7 +510,7 @@ func interactShellcodeExec(cCtx *cli.Context) error {
 	}
 
 	var task communication.Task = &communication.ShellcodeExecReq{Shellcode: sc}
-	taskId, err := api.AddTaskForImplant(cliCtx.implantId, 23, &task)
+	taskId, err := api.AddTaskForImplant(cliCtx.implantId, communication.SHELLCODE_EXEC_REQ, &task)
 	if err != nil {
 		NotifyUser(err.Error(), "FAIL")
 		return nil

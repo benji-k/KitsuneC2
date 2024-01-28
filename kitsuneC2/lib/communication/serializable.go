@@ -3,49 +3,73 @@
 
 package communication
 
+const IMPLANT_REGISTER_REQ int = 0
+const IMPLANT_REGISTER_RESP int = 1
+const IMPLANT_CHECKIN_REQ int = 2
+const IMPLANT_CHECKIN_RESP int = 3
+const IMPLANT_ERROR_RESP int = 4
+const IMPLANT_KILL_REQ int = 5
+const IMPLANT_KILL_RESP int = 6
+const IMPLANT_CONFIG_REQ int = 7
+const IMPLANT_CONFIG_RESP int = 8
+const FILE_INFO_REQ int = 11
+const FILE_INFO_RESP int = 12
+const LS_REQ int = 13
+const LS_RESP int = 14
+const EXEC_REQ int = 15
+const EXEC_RESP int = 16
+const CD_REQ int = 17
+const CD_RESP int = 18
+const DOWNLOAD_REQ int = 19
+const DOWNLOAD_RESP int = 20
+const UPLOAD_REQ int = 21
+const UPLOAD_RESP int = 22
+const SHELLCODE_EXEC_REQ int = 23
+const SHELLCODE_EXEC_RESP int = 24
+
 // This map correlates all MessageType's to a specific data stucture for a message. This can be used for reflection so that no big switch
 // statements have to be created. Note that MessageTypes and TaskTypes are the same.
 var MessageTypeToStruct = map[int]func() interface{}{
-	0: func() interface{} { return &ImplantRegisterReq{} },
-	1: func() interface{} { return &ImplantRegisterResp{} },
-	2: func() interface{} { return &ImplantCheckinReq{} },
-	3: func() interface{} { return &ImplantCheckinResp{} },
-	4: func() interface{} { return &ImplantErrorResp{} },
-	5: func() interface{} { return &ImplantKillReq{} },
-	6: func() interface{} { return &ImplantKillResp{} },
-	7: func() interface{} { return &ImplantConfigReq{} },
-	8: func() interface{} { return &ImplantConfigResp{} },
+	IMPLANT_REGISTER_REQ:  func() interface{} { return &ImplantRegisterReq{} },
+	IMPLANT_REGISTER_RESP: func() interface{} { return &ImplantRegisterResp{} },
+	IMPLANT_CHECKIN_REQ:   func() interface{} { return &ImplantCheckinReq{} },
+	IMPLANT_CHECKIN_RESP:  func() interface{} { return &ImplantCheckinResp{} },
+	IMPLANT_ERROR_RESP:    func() interface{} { return &ImplantErrorResp{} },
+	IMPLANT_KILL_REQ:      func() interface{} { return &ImplantKillReq{} },
+	IMPLANT_KILL_RESP:     func() interface{} { return &ImplantKillResp{} },
+	IMPLANT_CONFIG_REQ:    func() interface{} { return &ImplantConfigReq{} },
+	IMPLANT_CONFIG_RESP:   func() interface{} { return &ImplantConfigResp{} },
 	//...
 	//reserved for implant functionality
 
 	//modules start
-	11: func() interface{} { return &FileInfoReq{} },
-	12: func() interface{} { return &FileInfoResp{} },
-	13: func() interface{} { return &LsReq{} },
-	14: func() interface{} { return &LsResp{} },
-	15: func() interface{} { return &ExecReq{} },
-	16: func() interface{} { return &ExecResp{} },
-	17: func() interface{} { return &CdReq{} },
-	18: func() interface{} { return &CdResp{} },
-	19: func() interface{} { return &DownloadReq{} },
-	20: func() interface{} { return &DownloadResp{} },
-	21: func() interface{} { return &UploadReq{} },
-	22: func() interface{} { return &UploadResp{} },
-	23: func() interface{} { return &ShellcodeExecReq{} },
-	24: func() interface{} { return &ShellcodeExecResp{} },
+	FILE_INFO_REQ:       func() interface{} { return &FileInfoReq{} },
+	FILE_INFO_RESP:      func() interface{} { return &FileInfoResp{} },
+	LS_REQ:              func() interface{} { return &LsReq{} },
+	LS_RESP:             func() interface{} { return &LsResp{} },
+	EXEC_REQ:            func() interface{} { return &ExecReq{} },
+	EXEC_RESP:           func() interface{} { return &ExecResp{} },
+	CD_REQ:              func() interface{} { return &CdReq{} },
+	CD_RESP:             func() interface{} { return &CdResp{} },
+	DOWNLOAD_REQ:        func() interface{} { return &DownloadReq{} },
+	DOWNLOAD_RESP:       func() interface{} { return &DownloadResp{} },
+	UPLOAD_REQ:          func() interface{} { return &UploadReq{} },
+	UPLOAD_RESP:         func() interface{} { return &UploadResp{} },
+	SHELLCODE_EXEC_REQ:  func() interface{} { return &ShellcodeExecReq{} },
+	SHELLCODE_EXEC_RESP: func() interface{} { return &ShellcodeExecResp{} },
 }
 
 // Used in CLI to map taskType to readable name
 var MessageTypeToModuleName = map[int]string{
-	5:  "implant kill",
-	7:  "change config",
-	11: "file info",
-	13: "ls",
-	15: "exec",
-	17: "cd",
-	19: "download",
-	21: "upload",
-	23: "shellcode exec",
+	IMPLANT_KILL_REQ:   "implant kill",
+	IMPLANT_CONFIG_REQ: "change config",
+	FILE_INFO_REQ:      "file info",
+	LS_REQ:             "ls",
+	EXEC_REQ:           "exec",
+	CD_REQ:             "cd",
+	DOWNLOAD_REQ:       "download",
+	UPLOAD_REQ:         "upload",
+	SHELLCODE_EXEC_REQ: "shellcode exec",
 }
 
 // A task is a type of message that gets sent after checkin. Every task needs to have an ID so that we know to what task certain
@@ -102,10 +126,10 @@ func (t *ImplantKillResp) SetTaskId(id string) {
 
 type ImplantConfigReq struct {
 	TaskId           string
-	ServerIp         string
-	ServerPort       int
-	CallbackInterval int
-	CallbackJitter   int
+	ServerIp         string `json:"ServerIp"`
+	ServerPort       int    `json:"ServerPort"`
+	CallbackInterval int    `json:"CallbackInterval"`
+	CallbackJitter   int    `json:"CallbackJitter"`
 }
 
 func (t *ImplantConfigReq) SetTaskId(id string) {
@@ -123,7 +147,7 @@ func (t *ImplantConfigResp) SetTaskId(id string) {
 
 type FileInfoReq struct {
 	TaskId     string
-	PathToFile string
+	PathToFile string `json:"PathToFile" binding:"required"`
 }
 
 func (t *FileInfoReq) SetTaskId(id string) {
@@ -145,7 +169,7 @@ func (t *FileInfoResp) SetTaskId(id string) {
 
 type LsReq struct {
 	TaskId string
-	Path   string
+	Path   string `json:"Path" binding:"required"`
 }
 
 func (t *LsReq) SetTaskId(id string) {
@@ -163,8 +187,8 @@ func (t *LsResp) SetTaskId(id string) {
 
 type ExecReq struct {
 	TaskId string
-	Cmd    string
-	Args   []string
+	Cmd    string   `json:"Cmd" binding:"required"`
+	Args   []string `json:"Args"`
 }
 
 func (t *ExecReq) SetTaskId(id string) {
@@ -182,7 +206,7 @@ func (t *ExecResp) SetTaskId(id string) {
 
 type CdReq struct {
 	TaskId string
-	Path   string
+	Path   string `json:"Path" binding:"required"`
 }
 
 func (t *CdReq) SetTaskId(id string) {
@@ -200,8 +224,8 @@ func (t *CdResp) SetTaskId(id string) {
 
 type DownloadReq struct {
 	TaskId      string
-	Origin      string
-	Destination string
+	Origin      string `json:"Origin" binding:"required"`
+	Destination string `json:"Destination"`
 }
 
 func (t *DownloadReq) SetTaskId(id string) {
@@ -219,8 +243,8 @@ func (t *DownloadResp) SetTaskId(id string) {
 
 type UploadReq struct {
 	TaskId      string
-	File        []byte
-	Destination string
+	File        []byte `json:"File" binding:"required"`
+	Destination string `json:"Destination"`
 }
 
 func (t *UploadReq) SetTaskId(id string) {
@@ -238,7 +262,7 @@ func (t *UploadResp) SetTaskId(id string) {
 
 type ShellcodeExecReq struct {
 	TaskId    string
-	Shellcode []byte
+	Shellcode []byte `json:"Shellcode" binding:"required"`
 }
 
 func (t *ShellcodeExecReq) SetTaskId(id string) {

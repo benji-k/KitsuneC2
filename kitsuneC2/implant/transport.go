@@ -97,5 +97,5 @@ func ReceiveEnvelopeFromServer(connection net.Conn) (int, interface{}, error) {
 // be made clear an error was encountered.
 func SendErrorToServer(connection net.Conn, taskId string, err error) error {
 	resp := communication.ImplantErrorResp{TaskId: taskId, Error: err.Error()}
-	return SendEnvelopeToServer(connection, 4, resp)
+	return SendEnvelopeToServer(connection, communication.IMPLANT_ERROR_RESP, resp)
 }
