@@ -7,7 +7,6 @@ import (
 	"KitsuneC2/lib/communication"
 	"KitsuneC2/lib/utils"
 	"KitsuneC2/server/api"
-	"KitsuneC2/server/builder"
 	"bytes"
 	"encoding/hex"
 	"encoding/json"
@@ -164,7 +163,7 @@ func homeGenerate(cCtx *cli.Context) error {
 		return nil
 	}
 
-	outFile, err := api.BuildImplant(&builder.BuilderConfig{ImplantOs: os, ImplantArch: arch, OutputFile: output, ServerIp: rhost, ServerPort: rport, ImplantName: name, CallbackInterval: cbInterval, CallbackJitter: cbJitter, MaxRegisterRetryCount: rCount})
+	outFile, err := api.BuildImplant(os, arch, output, rhost, name, rport, cbInterval, cbJitter, rCount)
 	if err != nil {
 		NotifyUser(err.Error(), "FAIL")
 		return nil

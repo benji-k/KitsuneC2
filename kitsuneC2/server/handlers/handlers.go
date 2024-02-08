@@ -21,14 +21,13 @@ var messageTypeToFunc = map[int]func(*transport.Session, interface{}){
 	communication.IMPLANT_ERROR_RESP:   handleImplantErrorResp,
 	communication.IMPLANT_KILL_RESP:    handleImplantKillResp,
 	communication.IMPLANT_CONFIG_RESP:  handleImplantConfigResp,
-	//reserved for implant functionality
-	communication.FILE_INFO_RESP:      handleFileInfoResp,
-	communication.LS_RESP:             handleLsResp,
-	communication.EXEC_RESP:           handleExecResp,
-	communication.CD_RESP:             handleCdResp,
-	communication.DOWNLOAD_RESP:       handleDownloadResp,
-	communication.UPLOAD_RESP:         handleUploadResp,
-	communication.SHELLCODE_EXEC_RESP: handleShellcodeExecResp,
+	communication.FILE_INFO_RESP:       handleFileInfoResp,
+	communication.LS_RESP:              handleLsResp,
+	communication.EXEC_RESP:            handleExecResp,
+	communication.CD_RESP:              handleCdResp,
+	communication.DOWNLOAD_RESP:        handleDownloadResp,
+	communication.UPLOAD_RESP:          handleUploadResp,
+	communication.SHELLCODE_EXEC_RESP:  handleShellcodeExecResp,
 }
 
 // This function can be passed to a listener to handle incoming connections. This function guarantees that the connection will be closed after it's
@@ -97,7 +96,6 @@ func handleImplantRegister(sess *transport.Session, data interface{}) {
 		log.Printf("[ERROR] handlers: Could not send register confirmation to implant with ID: %s (%s). Reason: %s", dbEntry.Id, dbEntry.Public_ip, err)
 		return
 	}
-
 	log.Printf("[INFO] handlers: Letting implant with ID: %s know that register was successful.", implantRegister.ImplantId)
 }
 

@@ -111,7 +111,7 @@ func postAddTask(c *gin.Context) {
 	}
 }
 
-// given a string array as string e.g. ['string1', 'string2', ...]
+// given a string array as string e.g. ["string1", "string2", ...]
 // parses the string and returns array
 // This function assumes string are written using single quotes
 func parseStringArray(arr string) []string {
@@ -119,7 +119,7 @@ func parseStringArray(arr string) []string {
 
 	var stringsSlice []string
 	for _, part := range parts {
-		trimmedPart := strings.TrimSpace(strings.ReplaceAll(part, "'", ""))
+		trimmedPart := strings.TrimSpace(strings.ReplaceAll(part, "\"", ""))
 		stringsSlice = append(stringsSlice, trimmedPart)
 	}
 	return stringsSlice

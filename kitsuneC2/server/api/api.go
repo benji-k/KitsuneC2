@@ -27,7 +27,6 @@ func AddTaskForImplant(implantId string, taskType int, taskArguments *communicat
 	if !ImplantExists(implantId) {
 		return "", errors.New("cannot add task for non-existant implant")
 	}
-
 	//use reflection to check that taskType and taskArguments correspond
 	expectedType := reflect.TypeOf(communication.MessageTypeToStruct[taskType]())
 	actualType := reflect.TypeOf(*taskArguments).Elem()
@@ -156,7 +155,10 @@ func KillListener(listenerId int) error {
 }
 
 // Given an implant configuration, invokes go build and generates an implant binary
-func BuildImplant(config *builder.BuilderConfig) (string, error) {
+func BuildImplant(os, arch, outFile, serverIp, name string, serverPort, cbInterval, cbJitter, maxRetryCount int) (string, error) {
+
+	config := builder.BuilderConfig{ImplantOs: os, ImplantArch: arch, OutputFile: outFile, ServerIp: serverIp, ServerPort: serverPort, ImplantName: name, CallbackInterval: cbInterval, CallbackJitter: cbJitter, MaxRegisterRetryCount: maxRetryCount}
+
 	log.Printf("[INFO] API: Build implant started.")
 	if config.ImplantName == "" {
 		config.ImplantName = utils.GenerateRandomName()
@@ -172,5 +174,5 @@ func BuildImplant(config *builder.BuilderConfig) (string, error) {
 	}
 	config.PublicKey = pub
 
-	return builder.BuildImplant(config)
+	return builder.BuildImplant(&config)
 }
