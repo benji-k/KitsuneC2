@@ -89,11 +89,12 @@ export default function TaskTable({refreshRate}){
                                 <td className="text-xs text-white px-3 whitespace-nowrap">{task.Task_id}</td>
                                 <td className="text-xs text-white px-3 whitespace-nowrap">{getTaskName(task)}</td>
                                 <td className="text-xs text-white px-3 whitespace-nowrap">{b64ToArguments(task.Task_data)}</td>
+                                {showCompletedTasks &&
                                 <td className="text-xs text-kc2-soap-pink px-3 whitespace-nowrap cursor-pointer hover:underline"
                                  onClick={()=>{
                                     setTaskResult(task)
                                     setResultWindowOpen(true)
-                                    }}>Show result</td>
+                                    }}>Show result</td> }
                             </tr>
                         ))
                     }

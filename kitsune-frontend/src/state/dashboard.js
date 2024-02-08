@@ -6,6 +6,16 @@ export const useDashboardState = create((set, get) => ({
     resultWindowOpen: false,
     taskResult: {},
     showCompletedTasks: false,
+    notificationQueue: [],
+    pushNotification: (val) => {
+      set({notificationQueue: [...get().notificationQueue, val]})
+    },
+    popNotification: () => {
+      const queue = get().notificationQueue
+      const poppedItem = queue[queue.length - 1]
+      set({notificationQueue: queue.slice(0, -1)})
+      return poppedItem
+    },
     selectImplant: (implantId) => {
       if(get().selectedImplants.includes(implantId)){
         set({selectedImplants: get().selectedImplants.filter((i) => (i != implantId))})

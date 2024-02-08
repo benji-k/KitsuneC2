@@ -17,12 +17,19 @@ export default function ResultWindow() {
 
     const b64ToResults = (b64Str) => {
         try {
-            const result = JSON.parse(atob(taskResult.Task_result)).Result 
-            console.log(result)
-            if (result === null || result == undefined){
-                return "No output"
+            const obj = JSON.parse(atob(b64Str))
+            const result = obj.Result 
+            const error = obj.Error
+
+            if (error){
+                return "Error: " + error
             }
-            return result
+
+            if (result){
+                return result
+            }
+
+            return "No output"
         } catch{
             return "No output"
         }
@@ -60,7 +67,7 @@ export default function ResultWindow() {
             <h2 className="text-white self-start mt-5 mb-4 pb-2 text-xl w-full border-b-2 border-b-slate-200 border-opacity-30">Task result:</h2>
             <div className="bg-black w-full rounded-lg min-h-[100px] mb-4 overflow-scroll text-white text-sm p-4 whitespace-pre-wrap">
                 {
-                    b64ToResults(taskResult.Result)
+                    b64ToResults(taskResult.Task_result)
                 }
             </div>
             

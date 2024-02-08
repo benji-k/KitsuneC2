@@ -6,6 +6,7 @@ export const Tasks = [
         args: [
             {
                 name: "path",
+                apiName: "Path",
                 optional: true,
                 type: String,
                 tooltip: "If not specified, lists current working directory."
@@ -25,24 +26,28 @@ export const Tasks = [
         args: [
             {
                 name: "server-ip",
+                apiName: "ServerIp",
                 optional: true,
                 type: String,
                 tooltip: "New server IP that implant will connect to."
             },
             {
                 name: "server-port",
+                apiName: "ServerPort",
                 optional: true,
                 type: Number,
                 tooltip: "New server port that implant will connect to."
             },
             {
                 name: "callback-interval",
+                apiName: "CallbackInterval",
                 optional: true,
                 type: Number,
                 tooltip: "Time between implant check-ins."
             },
             {
                 name: "callback-jitter",
+                apiName: "CallbackJitter",
                 optional: true,
                 type: Number,
                 tooltip: "Randomness of implant checkins in seconds."
@@ -57,6 +62,7 @@ export const Tasks = [
         args: [
             {
                 name: "path",
+                apiName: "PathToFile",
                 optional: false,
                 type: String,
                 tooltip: "Path to file you want more info of."
@@ -70,12 +76,14 @@ export const Tasks = [
         args: [
             {
                 name: "cmd",
+                apiName: "Cmd",
                 optional: false,
                 type: String,
                 tooltip: "Program to be executed, e.g. bash. (See Go's 'exec' documentation for details)"
             },
             {
                 name: "args",
+                apiName: "Args",
                 optional: true,
                 type: String,
                 tooltip: "Arguments to be passed to executing program."
@@ -89,6 +97,7 @@ export const Tasks = [
         args: [
             {
                 name: "path",
+                apiName: "Path",
                 optional: false,
                 type: String,
                 tooltip: "Path to new working directory."
@@ -102,6 +111,7 @@ export const Tasks = [
         args: [
             {
                 name: "path",
+                apiName: "Origin",
                 optional: false,
                 type: String,
                 tooltip: "Path to file that should be downloaded."
@@ -115,12 +125,14 @@ export const Tasks = [
         args: [
             {
                 name: "file",
+                apiName: "File",
                 optional: false,
                 type: "file",
                 tooltip: "File that should be uploaded"
             },
             {
                 name: "destination",
+                apiName: "Destination",
                 optional: false,
                 type: String,
                 tooltip: "Directory file should be uploaded to."
@@ -134,6 +146,7 @@ export const Tasks = [
         args: [
             {
                 name: "shellcode",
+                apiName: "Shellcode",
                 optional: false,
                 type: String,
                 tooltip: "Base64 encoded shellcode"

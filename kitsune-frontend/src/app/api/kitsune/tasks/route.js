@@ -19,7 +19,7 @@ export async function GET(req){
             return Response.json(responseJson, {status:500})
         }
         
-    } catch(error){
+    } catch{
         return Response.json({"error":"Kitsune server unreachable"}, {status:500})
     }   
 }

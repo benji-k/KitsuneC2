@@ -9,7 +9,7 @@ export default function NewTaskBtn(){
     const [showToolTip, setShowToolTip] = useState(false) 
 
     return(
-        <div className="relative text-white text-sm" onMouseLeave={()=>{setShowToolTip(false)}} onMouseEnter={() =>{selectedImplants.length === 0 && setShowToolTip(true)}}>
+        <div className="relative text-white text-sm z-10" onMouseLeave={()=>{setShowToolTip(false)}} onMouseEnter={() =>{selectedImplants.length === 0 && setShowToolTip(true)}}>
             {showToolTip ?
                 <div className="absolute bg-slate-900 p-2 text-sm rounded-lg bottom-6 right-8 w-52">
                 Please select at least 1 implant
