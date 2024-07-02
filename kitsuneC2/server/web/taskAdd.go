@@ -8,6 +8,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+var taskTypeToHandlerFunc = map[int]func(c *gin.Context, implant string) error{
+	5:  addImplantKill,
+	7:  addChangeConfig,
+	11: addFileInfo,
+	13: addLs,
+	15: addExec,
+	17: addCd,
+	19: addDownload,
+	21: addUpload,
+	23: addShellcodeExec,
+}
+
 var errMissingArgs error = errors.New("missing/invalid arguments")
 
 func addImplantKill(c *gin.Context, implantId string) error {
