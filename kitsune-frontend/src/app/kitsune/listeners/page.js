@@ -1,6 +1,19 @@
+import ListenerTable from "@/components/listenerTable"
+import NewListenerForm from "@/components/newListenerForm"
 
 export default function Listeners(){
     return (
-        <p>Listeners</p>
+    <>
+        <h2 className="text-white text-3xl pl-5 pt-5">Listeners</h2>
+        <div className="m-5 mt-3">
+            <ListenerTable 
+                refreshRate={3000}
+            />
+        </div>
+        <h2 className="text-white text-3xl pl-5 pt-5">Add Listener</h2>
+        <div className="m-5 mt-3">
+            <NewListenerForm />
+        </div>
+    </>
     )
 }
