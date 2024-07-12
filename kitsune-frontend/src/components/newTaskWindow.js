@@ -1,14 +1,15 @@
 "use client"
 
 import { useState } from "react"
-import { useDashboardState } from "@/state/dashboard"
+import { useDashboardState } from "@/state/application"
+import { useGlobalState } from "@/state/application"
 import { Tasks } from "@/constants/tasks"
 
 export default function NewTaskWindow() {
     const [selectedTask, setSelectedTask] = useState(Tasks.at(0).taskName)
     const setNewTaskWindowOpen = useDashboardState((state) => state.setNewTaskWindowOpen)
     const selectedImplants = useDashboardState((state) => state.selectedImplants)
-    const pushNotification = useDashboardState((state) => state.pushNotification)
+    const pushNotification = useGlobalState((state) => state.pushNotification)
 
     const [taskArguments, setTaskArguments] = useState({})
     const [addingTask, setAddingTask] = useState(false)

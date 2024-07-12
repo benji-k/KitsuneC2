@@ -2,7 +2,7 @@
 
 import useSWR from 'swr'
 import ReactLoading from 'react-loading';
-import { useDashboardState } from '@/state/dashboard';
+import { useDashboardState } from '@/state/application';
 
 export default function ImplantTable({ refreshRate }) {
     const fetcher = async url => {

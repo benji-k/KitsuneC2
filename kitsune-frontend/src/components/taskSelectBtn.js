@@ -1,5 +1,5 @@
 'use client'
-import { useDashboardState } from "@/state/dashboard"
+import { useDashboardState } from "@/state/application"
 
 export default function TaskSelectBtn() {
     const showCompletedTasks = useDashboardState((state) => state.setShowCompletedTasks)

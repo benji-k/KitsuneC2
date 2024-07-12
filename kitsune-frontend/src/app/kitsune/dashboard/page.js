@@ -7,7 +7,7 @@ import TaskTable from "@/components/TaskTable"
 import NewTaskWindow from "@/components/newTaskWindow"
 import ResultWindow from "@/components/resultWindow"
 import NotificationBar from "@/components/notificationBar"
-import { useDashboardState } from "@/state/dashboard"
+import { useDashboardState } from "@/state/application"
 
 export default function Dashboard() {
     const newTaskWindowOpen = useDashboardState((state) => state.newTaskWindowOpen)
@@ -16,7 +16,7 @@ export default function Dashboard() {
         <>
             {newTaskWindowOpen && <NewTaskWindow />}
             {resultWindowOpen && <ResultWindow />}
-            <NotificationBar popupTime={5000} />
+            <NotificationBar popupTime={4000} />
             <h2 className="text-white text-3xl pl-5 pt-5">Implants</h2>
             <div className="m-5 mt-3">
                 <ImplantTable 

@@ -1,6 +1,6 @@
 "use client"
 
-import { useDashboardState } from "@/state/dashboard"
+import { useDashboardState } from "@/state/application"
 import { useState } from "react"
 
 export default function NewTaskBtn(){

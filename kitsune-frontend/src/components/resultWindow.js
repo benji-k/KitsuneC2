@@ -1,4 +1,4 @@
-import { useDashboardState } from "@/state/dashboard"
+import { useDashboardState } from "@/state/application"
 import { Tasks } from "@/constants/tasks"
 
 export default function ResultWindow() {

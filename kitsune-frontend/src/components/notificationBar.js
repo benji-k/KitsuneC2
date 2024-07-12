@@ -1,11 +1,11 @@
 "use client"
 
-import { useDashboardState } from "@/state/dashboard"
+import { useGlobalState } from "@/state/application"
 import { useEffect, useState } from "react"
 
 export default function NotificationBar({ popupTime }) {
-    const notificationQueue = useDashboardState((state) => state.notificationQueue)
-    const popNotification = useDashboardState((state) => state.popNotification)
+    const notificationQueue = useGlobalState((state) => state.notificationQueue)
+    const popNotification = useGlobalState((state) => state.popNotification)
     const [notificationQueueState, setNotificationQueueState] = useState([])
 
     useEffect(() => {

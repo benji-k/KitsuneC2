@@ -1,11 +1,13 @@
 "use client"
 
 import { useState } from "react"
+import { useGlobalState } from "@/state/application"
 
 export default function NewListenerForm() {
     const [newListenerNetwork, setNewListenerNetwork] = useState("0.0.0.0")
     const [newListenerPort, setNewListenerPort] = useState("4444")
     const [newListenerType, setNewListenerType] = useState("TCP")
+    const pushNotification = useGlobalState((state) => state.pushNotification)
 
     const AddListener = async function(e){
         e.preventDefault()
@@ -27,17 +29,13 @@ export default function NewListenerForm() {
             if (response.status === 500){
                 const err = await response.json()
                 const errText = Object.values(err.error)[0]
-                alert(errText)
-                //pushNotification({text: errText, type: "ERROR"})
+                pushNotification({text: errText, type:"ERROR"})
             } else if (response.status === 200){
-                alert("success")
+                pushNotification({text: "Successfully added listener", type:"SUCCESS"})
             }
         } catch(e){
-            alert(e)
-            //pushNotification({text: e, type:"ERROR"})
-        } finally{
-            
-        }
+            pushNotification({text: e, type:"ERROR"})
+        } 
     }
 
     return (

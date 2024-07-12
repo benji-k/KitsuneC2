@@ -3,7 +3,7 @@
 import useSWR from 'swr'
 import ReactLoading from 'react-loading';
 import { Tasks } from '@/constants/tasks';
-import { useDashboardState } from '@/state/dashboard';
+import { useDashboardState } from '@/state/application';
 
 export default function TaskTable({refreshRate}){
     const fetcher = async url => {

@@ -91,11 +91,9 @@ async function DeleteListener(id){
         if (response.status === 500){
             const err = await response.json()
             const errText = Object.values(err.error)[0]
-            alert(errText)
-        } else if (response.status === 200){
-            alert("success")
+            pushNotification({text: errText, type:"ERROR"})
         }
     } catch(e){
-        alert(e)
+        pushNotification({text: e, type:"ERROR"})
     }
 }
