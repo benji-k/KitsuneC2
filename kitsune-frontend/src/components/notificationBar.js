@@ -15,7 +15,7 @@ export default function NotificationBar({ popupTime }) {
             const notification = popNotification()
             setNotificationQueueState([notification])
         }
-    }, [notificationQueue, notificationQueueState])
+    }, [notificationQueue, notificationQueueState, popNotification])
 
     useEffect(() => {
         if (notificationQueueState.length > 0){
@@ -27,7 +27,7 @@ export default function NotificationBar({ popupTime }) {
 
             return () => clearTimeout(timer)
         }
-    }, [notificationQueueState])
+    }, [notificationQueueState, popupTime])
 
 
     const currentNotification = notificationQueueState[0]

@@ -8,7 +8,8 @@ import { signOut } from 'next-auth/react'
 import {NavLinks} from '../constants/navbar'
 
 export default function Navbar(){
-    
+    const pathName = usePathname()
+
     return (
         <>
             <div className="bg-kc2-light-gray px-10 py-3">
@@ -31,7 +32,7 @@ export default function Navbar(){
                 <nav className='flex gap-8 justify-center md:justify-end'>
                 {NavLinks.map((link) => (
                     <li key={link.label} className='list-none'>
-                        <Link href={link.href} className={usePathname() === link.href ? "text-kc2-soap-pink" : "text-white"}>{link.label}</Link>
+                        <Link href={link.href} className={pathName === link.href ? "text-kc2-soap-pink" : "text-white"}>{link.label}</Link>
                     </li>
                 ))}
                 </nav>
