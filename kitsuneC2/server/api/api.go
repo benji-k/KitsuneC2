@@ -155,6 +155,15 @@ func KillListener(listenerId int) error {
 }
 
 // Given an implant configuration, invokes go build and generates an implant binary
+// os:				Target operating system ("linux", "windows" ....) (see GOOS docs)
+// arch:			Target architecture ("amd64", "arm" ....) (see GOARCH docs)
+// outFile:			Destination path where binary will be written to
+// serverIp:		IP address that implant will callback to
+// name:			Name of the implant
+// serverPort:		Port that the implant will callback to
+// cbInterval:		Interval between callbacks (in seconds)
+// cbJitter:		Jitter between intervals (in seconds)
+// maxRetryCount:	Number of times an implant will try to reconnect if it can't contact C2 server
 func BuildImplant(os, arch, outFile, serverIp, name string, serverPort, cbInterval, cbJitter, maxRetryCount int) (string, error) {
 
 	config := builder.BuilderConfig{ImplantOs: os, ImplantArch: arch, OutputFile: outFile, ServerIp: serverIp, ServerPort: serverPort, ImplantName: name, CallbackInterval: cbInterval, CallbackJitter: cbJitter, MaxRegisterRetryCount: maxRetryCount}
@@ -163,8 +172,11 @@ func BuildImplant(os, arch, outFile, serverIp, name string, serverPort, cbInterv
 	if config.ImplantName == "" {
 		config.ImplantName = utils.GenerateRandomName()
 	}
-	if config.ServerPort < 0 || config.ServerPort > 65535 {
+	if config.ServerPort <= 0 || config.ServerPort >= 65535 {
 		return "", errors.New("not a valid port number")
+	}
+	if !(config.CallbackInterval > 0) {
+		return "", errors.New("callback interval must be a positive integer")
 	}
 
 	pub, err := db.GetPublicKey()

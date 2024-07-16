@@ -4,6 +4,7 @@ import (
 	"KitsuneC2/server/api"
 	"KitsuneC2/server/db"
 	"log"
+	"os"
 	"strconv"
 	"strings"
 
@@ -16,6 +17,7 @@ func Init() {
 	gin.LoggerWithWriter(log.Writer())
 
 	router.GET("/implants", getImplants)
+	router.POST("/implants/generate", postGenImplant)
 	router.GET("/listeners", getRunningListeners)
 	router.POST("listeners/add", postAddListener)
 	router.POST("listeners/remove", postRemoveListener)
@@ -168,6 +170,39 @@ func postAddTask(c *gin.Context) {
 	} else {
 		c.JSON(400, statuses)
 	}
+}
+
+type ImplantGenReq struct {
+	Os            string
+	Arch          string
+	ServerIp      string
+	Name          string
+	ServerPort    int
+	CbInterval    int
+	CbJitter      int
+	MaxRetryCount int
+}
+
+func postGenImplant(c *gin.Context) {
+	var config ImplantGenReq
+	c.ShouldBind(&config)
+
+	outFile, err := os.CreateTemp("", "implant")
+	if err != nil {
+		c.AbortWithStatusJSON(500, gin.H{"error": "Cannot create temporary files, aborted build"})
+		return
+	}
+	outFile.Close()
+
+	//we dont care about return value of Buildimplant, since it should be the same as outFile.Name()
+	_, err = api.BuildImplant(config.Os, config.Arch, outFile.Name(), config.ServerIp, config.Name, config.ServerPort, config.CbInterval, config.CbJitter, config.MaxRetryCount)
+	if err != nil {
+		c.AbortWithStatusJSON(400, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.File(outFile.Name())
+	defer os.Remove(outFile.Name())
 }
 
 // given a string array as string e.g. ["string1", "string2", ...]

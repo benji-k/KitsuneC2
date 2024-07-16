@@ -123,8 +123,8 @@ func invokeGoBuild(config *BuilderConfig, SourceDir string) error {
 
 	cmd := exec.Command("go", "build", "-o", config.OutputFile, "-ldflags=-s -w", ".")
 	cmd.Env = append(os.Environ(), "GOOS="+config.ImplantOs, "GOARCH="+config.ImplantArch)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	cmd.Stdout = log.Writer()
+	cmd.Stderr = log.Writer()
 
 	log.Printf("[INFO] builder: Executing command: %s %s", cmd.Path, cmd.Args)
 	return cmd.Run()
