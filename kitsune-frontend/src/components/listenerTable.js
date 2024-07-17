@@ -22,25 +22,25 @@ export default function ListenerTable({ refreshRate }) {
     const { data, error, isLoading } = useSWR("/api/kitsune/listeners", fetcher, { refreshInterval: refreshRate })
 
     if (error) return (
-        <div className="mx-auto h-64 bg-kc2-light-gray overflow-scroll flex justify-center items-center text-lg">
+        <div className="mx-auto h-64 bg-kc2-light-gray overflow-scroll scrollbar-hide flex justify-center items-center text-lg">
             <p className='text-red-300'>Error fetching data from server: {error.info}</p>
         </div>
     )
 
     if (isLoading) return (
-        <div className="mx-auto h-64 bg-kc2-light-gray overflow-scroll flex justify-center items-center">
+        <div className="mx-auto h-64 bg-kc2-light-gray overflow-scroll scrollbar-hide flex justify-center items-center">
             <ReactLoading type="spinningBubbles" color="#cccccc" height={75} width={75} />
         </div>
     )
 
     if (data.length === 0) return (
-        <div className="mx-auto h-64 bg-kc2-light-gray overflow-scroll flex justify-center items-center text-lg">
+        <div className="mx-auto h-64 bg-kc2-light-gray overflow-scroll scrollbar-hide flex justify-center items-center text-lg">
             <p className='text-slate-300'>No active listeners</p>
         </div>
     )
 
     if (data) return(
-        <div className="mx-auto h-64 bg-kc2-light-gray overflow-scroll">
+        <div className="mx-auto h-64 bg-kc2-light-gray overflow-scroll scrollbar-hide">
             <table className="table-auto w-full">
                 <thead>
                     <tr className="bg-kc2-dark-gray h-10">

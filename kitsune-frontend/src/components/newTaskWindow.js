@@ -57,7 +57,7 @@ export default function NewTaskWindow() {
 
     return (
         <div className="fixed flex justify-center items-center top-0 left-0 h-full w-full bg-[#9B9B9B]/[.54] z-20">
-            <form onSubmit={submitTask} className="bg-kc2-dark-gray flex flex-col items-center w-full px-3 mx-5 pt-4 rounded-2xl max-w-6xl max-h-[600px] overflow-scroll">
+            <form onSubmit={submitTask} className="bg-kc2-dark-gray flex flex-col items-center w-full px-3 mx-5 pt-4 rounded-2xl max-w-6xl max-h-[600px] scrollbar-hide overflow-scroll">
 
                 <select className="bg-kc2-light-gray text-white text-center rounded-md w-full max-w-2xl"
                     onChange={(e) => {
@@ -154,7 +154,7 @@ function Argument({ name, type, tooltip, required, onChange }) {
 
             <div className="flex justify-between">
                 <p onMouseEnter={() => { setShowToolTip(true) }} onMouseLeave={() => { setShowToolTip(false) }} className="w-32">{name}</p>
-                <input onChange={handleChange} required={required} type={switchInputType(type)} className="bg-kc2-dark-gray cursor-pointer rounded-md outline-none grow overflow-scroll file:bg-slate-700 file:border-0 file:text-white"></input>
+                <input onChange={handleChange} required={required} type={switchInputType(type)} className="bg-kc2-dark-gray cursor-pointer rounded-md outline-none grow overflow-scroll scrollbar-hide file:bg-slate-700 file:border-0 file:text-white"></input>
             </div>
         </div>
     )

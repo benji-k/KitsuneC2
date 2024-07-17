@@ -42,7 +42,7 @@ export default function ResultWindow() {
 
     return (
         <div className="fixed flex justify-center items-center top-0 left-0 h-full w-full bg-[#9B9B9B]/[.54] z-50">
-            <div className="bg-kc2-dark-gray flex flex-col items-center w-full px-3 mx-5 pt-4 rounded-2xl max-w-6xl max-h-[600px] overflow-scroll">
+            <div className="bg-kc2-dark-gray flex flex-col items-center w-full px-3 mx-5 pt-4 rounded-2xl max-w-6xl max-h-[600px] scrollbar-hide overflow-scroll">
             <h2 className="text-white mb-2 self-start mt-3 pb-2 text-xl w-full border-b-2 border-b-slate-200 border-opacity-30">Task info:</h2>
             <div className="text-white text-sm flex flex-col self-start">
 
@@ -65,7 +65,7 @@ export default function ResultWindow() {
             </div>
 
             <h2 className="text-white self-start mt-5 mb-4 pb-2 text-xl w-full border-b-2 border-b-slate-200 border-opacity-30">Task result:</h2>
-            <div className="bg-black w-full rounded-lg min-h-[100px] mb-4 overflow-scroll text-white text-sm p-4 whitespace-pre-wrap">
+            <div className="bg-black w-full rounded-lg min-h-[100px] mb-4 overflow-scroll scrollbar-hide text-white text-sm p-4 whitespace-pre-wrap">
                 {
                     b64ToResults(taskResult.Task_result)
                 }

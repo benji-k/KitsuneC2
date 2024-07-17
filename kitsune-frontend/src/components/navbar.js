@@ -28,7 +28,7 @@ export default function Navbar(){
                     </div>
                 </div>
             </div>
-            <div className="bg-kc2-dark-gray py-3 px-10  overflow-scroll border-b-2 border-black">
+            <div className="bg-kc2-dark-gray py-3 px-10  overflow-scroll scrollbar-hide border-b-2 border-black">
                 <nav className='flex gap-8 justify-center md:justify-end'>
                 {NavLinks.map((link) => (
                     <li key={link.label} className='list-none'>

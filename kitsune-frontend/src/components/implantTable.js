@@ -24,25 +24,25 @@ export default function ImplantTable({ refreshRate }) {
     const { data, error, isLoading } = useSWR('/api/kitsune/implants', fetcher, { refreshInterval: refreshRate })
 
     if (error) return (
-        <div className="mx-auto h-64 bg-kc2-light-gray overflow-scroll flex justify-center items-center text-lg">
+        <div className="mx-auto h-64 bg-kc2-light-gray overflow-scroll flex justify-center items-center text-lg scrollbar-hide">
             <p className='text-red-300'>Error fetching data from server: {error.info}</p>
         </div>
     )
 
     if (isLoading) return (
-        <div className="mx-auto h-64 bg-kc2-light-gray overflow-scroll flex justify-center items-center">
+        <div className="mx-auto h-64 bg-kc2-light-gray overflow-scroll flex justify-center items-center scrollbar-hide">
             <ReactLoading type="spinningBubbles" color="#cccccc" height={75} width={75} />
         </div>
     )
 
     if (data.length === 0) return (
-        <div className="mx-auto h-64 bg-kc2-light-gray overflow-scroll flex justify-center items-center text-lg">
+        <div className="mx-auto h-64 bg-kc2-light-gray overflow-scroll flex justify-center items-center text-lg scrollbar-hide">
             <p className='text-slate-300'>No active implants</p>
         </div>
     )
 
     if (data) return (
-        <div className="mx-auto h-64 bg-kc2-light-gray overflow-scroll">
+        <div className="mx-auto h-64 bg-kc2-light-gray overflow-scroll scrollbar-hide">
             <table className="table-auto w-full">
                 <thead>
                     <tr className="bg-kc2-dark-gray h-10">
