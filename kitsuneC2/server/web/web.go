@@ -173,14 +173,14 @@ func postAddTask(c *gin.Context) {
 }
 
 type ImplantGenReq struct {
-	Os            string
-	Arch          string
-	ServerIp      string
-	Name          string
-	ServerPort    int
-	CbInterval    int
-	CbJitter      int
-	MaxRetryCount int
+	Os            string `json:"os" binding:"required"`
+	Arch          string `json:"arch" binding:"required"`
+	ServerIp      string `json:"serverIp" binding:"required"`
+	Name          string `json:"name"`
+	ServerPort    int    `json:"serverPort,string" binding:"required"`
+	CbInterval    int    `json:"cbInterval,string" binding:"required"`
+	CbJitter      int    `json:"cbJitter,string" binding:"required"`
+	MaxRetryCount int    `json:"maxRetryCount,string" binding:"required"`
 }
 
 func postGenImplant(c *gin.Context) {
@@ -193,6 +193,7 @@ func postGenImplant(c *gin.Context) {
 		return
 	}
 	outFile.Close()
+	defer os.Remove(outFile.Name())
 
 	//we dont care about return value of Buildimplant, since it should be the same as outFile.Name()
 	_, err = api.BuildImplant(config.Os, config.Arch, outFile.Name(), config.ServerIp, config.Name, config.ServerPort, config.CbInterval, config.CbJitter, config.MaxRetryCount)
@@ -202,7 +203,6 @@ func postGenImplant(c *gin.Context) {
 	}
 
 	c.File(outFile.Name())
-	defer os.Remove(outFile.Name())
 }
 
 // given a string array as string e.g. ["string1", "string2", ...]

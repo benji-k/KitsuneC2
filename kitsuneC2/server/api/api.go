@@ -178,6 +178,12 @@ func BuildImplant(os, arch, outFile, serverIp, name string, serverPort, cbInterv
 	if !(config.CallbackInterval > 0) {
 		return "", errors.New("callback interval must be a positive integer")
 	}
+	if !(config.CallbackJitter >= 0) {
+		return "", errors.New("callback jitter must be a positive integer or 0")
+	}
+	if !(config.MaxRegisterRetryCount >= 0) {
+		return "", errors.New("max retry count must be a positive integer or 0")
+	}
 
 	pub, err := db.GetPublicKey()
 	if err != nil {
