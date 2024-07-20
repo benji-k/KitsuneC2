@@ -16,7 +16,7 @@ export default function Dashboard() {
         <>
             {newTaskWindowOpen && <NewTaskWindow />}
             {resultWindowOpen && <ResultWindow />}
-            <NotificationBar popupTime={4000} />
+            <NotificationBar popupTime={3000} refreshRate={5000} />
             <h2 className="text-white text-3xl pl-5 pt-5">Implants</h2>
             <div className="m-5 mt-3">
                 <ImplantTable 

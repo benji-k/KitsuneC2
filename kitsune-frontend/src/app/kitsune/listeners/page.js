@@ -5,7 +5,7 @@ import NotificationBar from "@/components/notificationBar"
 export default function Listeners(){
     return (
     <>
-        <NotificationBar popupTime={4000} />
+        <NotificationBar popupTime={3000} refreshRate={5000} />
         <h2 className="text-white text-3xl pl-5 pt-5">Listeners</h2>
         <div className="m-5 mt-3">
             <ListenerTable 

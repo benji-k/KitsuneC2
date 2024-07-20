@@ -2,10 +2,12 @@
 
 import { useGlobalState } from "@/state/application"
 import { useEffect, useState } from "react"
+import useSWR from 'swr'
 
-export default function NotificationBar({ popupTime }) {
+export default function NotificationBar({ popupTime, refreshRate }) {
     const notificationQueue = useGlobalState((state) => state.notificationQueue)
     const popNotification = useGlobalState((state) => state.popNotification)
+    const pushNotification = useGlobalState((state) => state.pushNotification)
     const [notificationQueueState, setNotificationQueueState] = useState([])
 
     useEffect(() => {
@@ -20,7 +22,7 @@ export default function NotificationBar({ popupTime }) {
     useEffect(() => {
         if (notificationQueueState.length > 0){
             // If there are notifications in the component state queue,
-            // remove the first notification after 5 seconds
+            // remove the first notification after popupTime seconds
             const timer = setTimeout(() => {
                 setNotificationQueueState((prevQueue) => prevQueue.slice(1))
             }, popupTime)
@@ -28,6 +30,30 @@ export default function NotificationBar({ popupTime }) {
             return () => clearTimeout(timer)
         }
     }, [notificationQueueState, popupTime])
+
+    const fetcher = async url => {
+        const res = await fetch(url)
+
+        if (!res.ok) {
+            const error = new Error('An error occurred while fetching the data.')
+            const errReason = await res.json()
+            error.info = errReason.error
+            error.status = res.status
+            throw error
+        }
+
+        return res.json()
+    }
+
+    const { data, error, isLoading} = useSWR('/api/kitsune/notifications', fetcher, { refreshInterval: refreshRate })
+    useEffect(() =>{
+        if (data){
+            data.forEach(notification => {
+                pushNotification({text: notification.Message, type: notification.NType})
+            });
+        }
+    }, [data])
+    
 
 
     const currentNotification = notificationQueueState[0]

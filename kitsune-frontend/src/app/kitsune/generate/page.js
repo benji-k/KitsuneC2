@@ -5,7 +5,7 @@ export default function Generate(){
 
     return(
         <>
-        <NotificationBar popupTime={4000} />
+        <NotificationBar popupTime={3000} refreshRate={5000}/>
         <h2 className="text-white text-3xl pl-5 pt-5">Generate New Implant Binary</h2>
         <div className="m-5 mt-10">
             <GenImplantForm />
