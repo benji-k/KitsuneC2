@@ -7,6 +7,7 @@ import (
 	"KitsuneC2/lib/communication"
 	"KitsuneC2/lib/utils"
 	"KitsuneC2/server/api"
+	"KitsuneC2/server/notifications"
 	"bytes"
 	"encoding/hex"
 	"encoding/json"
@@ -38,6 +39,7 @@ func InitCli() {
 	fmt.Println("Type 'help' for a list of available commands.")
 	fmt.Println()
 	rl = liner.NewLiner()
+	notifications.ImplantRegisterNotification.Subscribe(handleImplantRegisterNotification)
 }
 
 func CliLoop() {
@@ -101,6 +103,17 @@ func NotifyUser(msg string, msgType string) {
 		c := color.New(color.FgBlue)
 		c.Fprint(os.Stdout, "[*] ")
 		fmt.Fprint(os.Stdout, msg+"\n")
+	}
+}
+
+func handleImplantRegisterNotification(n notifications.Notification) {
+	switch n.NType {
+	case notifications.FAIL:
+		NotifyUser(n.Message, "FAIL")
+	case notifications.SUCCESS:
+		NotifyUser(n.Message, "SUCCESS")
+	default:
+		NotifyUser(n.Message, "INFO")
 	}
 }
 

@@ -6,6 +6,7 @@ import (
 	"KitsuneC2/lib/communication"
 	"KitsuneC2/lib/utils"
 	"KitsuneC2/server/db"
+	"KitsuneC2/server/notifications"
 	"KitsuneC2/server/transport"
 	"encoding/json"
 	"log"
@@ -88,6 +89,9 @@ func handleImplantRegister(sess *transport.Session, data interface{}) {
 		log.Printf("[ERROR] handlers: Could not register implant with ID: %s (%s). Reason: %s", dbEntry.Id, dbEntry.Public_ip, err)
 		return
 	}
+
+	//send notification to all observers that a new implant has checked in
+	notifications.ImplantRegisterNotification.Dispatch(notifications.Notification{Message: "Connect from [" + dbEntry.Public_ip + "] (" + dbEntry.Id + ")", NType: notifications.SUCCESS})
 
 	//let the implant know we successfully registered it.
 	req := communication.ImplantRegisterResp{Success: true}

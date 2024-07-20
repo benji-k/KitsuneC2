@@ -3,6 +3,7 @@ package web
 import (
 	"KitsuneC2/server/api"
 	"KitsuneC2/server/db"
+	"KitsuneC2/server/notifications"
 	"log"
 	"os"
 	"strconv"
@@ -23,7 +24,11 @@ func Init() {
 	router.POST("listeners/remove", postRemoveListener)
 	router.GET("/tasks", getTasks)
 	router.POST("/tasks/add", postAddTask)
+	router.GET("/notifications", getNotifications)
+
 	go router.Run("0.0.0.0:7331")
+
+	notifications.ImplantRegisterNotification.Subscribe(handleImplantRegisterNotification)
 }
 
 func getImplants(c *gin.Context) {
@@ -203,6 +208,18 @@ func postGenImplant(c *gin.Context) {
 	}
 
 	c.File(outFile.Name())
+}
+
+var pendingNotifications []notifications.Notification
+
+func getNotifications(c *gin.Context) {
+	response := append([]notifications.Notification{}, pendingNotifications...)
+	pendingNotifications = nil
+	c.JSON(200, response)
+}
+
+func handleImplantRegisterNotification(n notifications.Notification) {
+	pendingNotifications = append(pendingNotifications, n)
 }
 
 // given a string array as string e.g. ["string1", "string2", ...]
