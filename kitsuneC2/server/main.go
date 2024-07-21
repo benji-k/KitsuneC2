@@ -7,9 +7,18 @@ import (
 	"KitsuneC2/server/logging"
 	"KitsuneC2/server/transport"
 	"KitsuneC2/server/web"
+	"os"
+
+	"log"
+
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	err := godotenv.Load() //loads variables in .env file
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
 	initialize()
 	cli.CliLoop()
 	db.Shutdown()
@@ -21,5 +30,8 @@ func initialize() {
 	cli.InitCli()
 	transport.Initialize()
 	logging.InitLogger()
-	web.Init()
+
+	if os.Getenv("ENABLE_WEB_API") == "true" {
+		web.Init()
+	}
 }

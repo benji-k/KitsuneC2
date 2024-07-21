@@ -1,0 +1,3 @@
+ENABLE_WEB_API = "true"         //Should web API be enabled to control C2 server?
+WEB_API_INTERFACE = "127.0.0.1" //Interface that web API will be listening on
+WEB_API_PORT = 7331             //Port that web API will be listening for requests on

@@ -26,7 +26,10 @@ func Init() {
 	router.POST("/tasks/add", postAddTask)
 	router.GET("/notifications", getNotifications)
 
-	go router.Run("0.0.0.0:7331")
+	apiNetwork := os.Getenv("WEB_API_INTERFACE")
+	apiPort := os.Getenv("WEB_API_PORT")
+
+	go router.Run(apiNetwork + ":" + apiPort)
 
 	notifications.ImplantRegisterNotification.Subscribe(handleImplantRegisterNotification)
 }
