@@ -27,7 +27,7 @@ Instructions on how to install **KitsuneC2**
 ```bash
 git clone https://github.com/benji-k/KitsuneC2.git
 cd KitsuneC2/kitsuneC2
-sudo docker build --network=host . -t kitsunec2
+sudo python3 install.py
 ```
 
 ## Usage

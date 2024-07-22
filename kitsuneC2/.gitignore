@@ -1,2 +1,3 @@
 server/db/kitsune.sqlite
 server/.env
+server/server
