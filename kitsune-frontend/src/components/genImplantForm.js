@@ -159,7 +159,7 @@ export default function GenImplantForm() {
                         <b>Callback Jitter:</b> Variance between the different callback intervals in seconds.
                     </div>
                     <div>
-                        <b>Reconnect Try Count:</b> Amount of times an implant will try to reconnect if it cannot connect to the C2 server. If it cannot contact the server within "Reconnect Try Count" times, the implants terminates.
+                        <b>Reconnect Try Count:</b> Amount of times an implant will try to reconnect if it cannot connect to the C2 server. If it cannot contact the server within &quot;Reconnect Try Count&quot; times, the implants terminates.
                     </div>
                 </div>
             </div>

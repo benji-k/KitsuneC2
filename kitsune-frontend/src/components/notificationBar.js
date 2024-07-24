@@ -52,7 +52,7 @@ export default function NotificationBar({ popupTime, refreshRate }) {
                 pushNotification({text: notification.Message, type: notification.NType})
             });
         }
-    }, [data])
+    }, [data, pushNotification])
     
 
 
