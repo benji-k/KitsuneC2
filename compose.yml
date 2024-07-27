@@ -1,0 +1,17 @@
+services:
+
+  frontend:
+    build:
+      context: ./kitsune-frontend
+      network: "host"
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    network_mode: "host"
+
+  backend:
+    build: ./kitsuneC2
+    expose:
+      - "7331"
+    network_mode: "host"

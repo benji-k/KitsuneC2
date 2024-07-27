@@ -9,6 +9,7 @@ import (
 	"KitsuneC2/server/web"
 	"os"
 
+	"fmt"
 	"log"
 
 	"github.com/joho/godotenv"
@@ -20,18 +21,24 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 	initialize()
-	cli.CliLoop()
+
+	if os.Getenv("ENABLE_WEB_API") == "false" {
+		cli.CliLoop()
+	} else {
+		fmt.Scanln()
+	}
+
 	db.Shutdown()
 }
 
 func initialize() {
 	utils.PrintBanner()
 	db.Initialize()
-	cli.InitCli()
-	transport.Initialize()
-	logging.InitLogger()
-
 	if os.Getenv("ENABLE_WEB_API") == "true" {
 		web.Init()
+	} else {
+		cli.InitCli()
 	}
+	transport.Initialize()
+	logging.InitLogger()
 }

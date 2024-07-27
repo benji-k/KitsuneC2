@@ -1,3 +1,4 @@
-ENABLE_WEB_API = "true"
-WEB_API_INTERFACE = "127.0.0.1"
-WEB_API_PORT = "7331"
+ENABLE_WEB_API = "true"         //setting to true will run server in daemon mode. Setting to false will run servers with interactive CLI
+WEB_API_INTERFACE = "127.0.0.1" //interface web server will be listening on.
+WEB_API_PORT = "7331"           //port web server will be listening on.
+GIN_MODE = "debug"              //set to "release" for production builds
