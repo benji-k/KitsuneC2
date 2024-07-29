@@ -3,6 +3,7 @@ package web
 import (
 	"KitsuneC2/server/api"
 	"KitsuneC2/server/db"
+	"KitsuneC2/server/logging"
 	"KitsuneC2/server/notifications"
 	"log"
 	"os"
@@ -13,7 +14,6 @@ import (
 )
 
 func Init() {
-	gin.SetMode(gin.DebugMode)
 	router := gin.New()
 	gin.LoggerWithWriter(log.Writer())
 
@@ -25,6 +25,7 @@ func Init() {
 	router.GET("/tasks", getTasks)
 	router.POST("/tasks/add", postAddTask)
 	router.GET("/notifications", getNotifications)
+	router.GET("/logs", getLogs)
 
 	apiNetwork := os.Getenv("WEB_API_INTERFACE")
 	apiPort := os.Getenv("WEB_API_PORT")
@@ -223,6 +224,24 @@ func getNotifications(c *gin.Context) {
 
 func handleImplantRegisterNotification(n notifications.Notification) {
 	pendingNotifications = append(pendingNotifications, n)
+}
+
+func getLogs(c *gin.Context) {
+	logFile := logging.GetLogFilepath()
+	_, err := os.Stat(logFile)
+	if err != nil {
+		c.AbortWithStatusJSON(500, gin.H{"error": "log file not available"})
+		return
+	}
+
+	contentAsBytes, err := os.ReadFile(logFile)
+	if err != nil {
+		c.AbortWithStatusJSON(500, gin.H{"error": "log file not available"})
+		return
+	}
+	contentAsStr := string(contentAsBytes)
+	c.JSON(200, contentAsStr)
+
 }
 
 // given a string array as string e.g. ["string1", "string2", ...]

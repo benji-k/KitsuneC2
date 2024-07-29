@@ -21,18 +21,22 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 	initialize()
-
 	if os.Getenv("ENABLE_WEB_API") == "false" {
 		cli.CliLoop()
 	} else {
-		fmt.Scanln()
+		fmt.Println("Starting in daemon mode. Type \"exit\" to shutdown daemon.")
+		cmd := ""
+		for cmd != "exit" {
+			fmt.Scanln(&cmd)
+		}
 	}
 
-	db.Shutdown()
+	shutdown()
 }
 
 func initialize() {
 	utils.PrintBanner()
+	logging.InitLogger()
 	db.Initialize()
 	if os.Getenv("ENABLE_WEB_API") == "true" {
 		web.Init()
@@ -40,5 +44,9 @@ func initialize() {
 		cli.InitCli()
 	}
 	transport.Initialize()
-	logging.InitLogger()
+}
+
+func shutdown() {
+	db.Shutdown()
+	logging.ShutdownLogger()
 }

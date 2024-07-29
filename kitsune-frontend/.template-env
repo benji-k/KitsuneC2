@@ -1,4 +1,4 @@
-KITSUNEC2_WEBURL="http://localhost:7331/"
+KITSUNEC2_WEBURL="http://localhost:7331"
 NEXTAUTH_URL="{_nextAuthUrl}"
 NEXTAUTH_SECRET="{_nextAuthSecret}"
 USERNAME="{_username}" 
