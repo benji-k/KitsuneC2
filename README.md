@@ -23,14 +23,11 @@ To name a few. Feel free to improve this project by submitting a pull-request.
 
 
 ## Installation
-Instructions on how to install **KitsuneC2**
+Instructions on how to install **KitsuneC2** (Linux and Windows)
 ```bash
 git clone https://github.com/benji-k/KitsuneC2.git
 cd KitsuneC2/kitsuneC2
-sudo python3 install.py
-```
+python3 install.py
 
-## Usage
-```bash
-sudo docker run -it --network=host kitsunec2
+Follow the instructions given by the Python script
 ```

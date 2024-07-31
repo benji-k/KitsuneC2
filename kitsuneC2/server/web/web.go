@@ -36,19 +36,29 @@ func Init() {
 }
 
 func getImplants(c *gin.Context) {
+	if !isAuthorized(c) {
+		c.AbortWithStatusJSON(401, "Unauthorized")
+		return
+	}
+
 	implants, err := api.GetAllImplants()
 	if err == db.ErrNoResults {
 		emptyResp := make([]string, 0)
 		c.JSON(200, emptyResp)
 		return
 	} else if err != nil {
-		c.AbortWithStatusJSON(400, gin.H{"error": err.Error()})
+		c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
 		return
 	}
 	c.JSON(200, implants)
 }
 
 func getRunningListeners(c *gin.Context) {
+	if !isAuthorized(c) {
+		c.AbortWithStatusJSON(401, "Unauthorized")
+		return
+	}
+
 	listeners, err := api.GetRunningListeners()
 	if err != nil { //only error that can be thrown is no listeners are running
 		emptyResp := make([]string, 0)
@@ -76,6 +86,11 @@ func getRunningListeners(c *gin.Context) {
 }
 
 func postAddListener(c *gin.Context) {
+	if !isAuthorized(c) {
+		c.AbortWithStatusJSON(401, "Unauthorized")
+		return
+	}
+
 	network := c.PostForm("network")
 	portStr := c.PostForm("port")
 
@@ -99,6 +114,11 @@ func postAddListener(c *gin.Context) {
 }
 
 func postRemoveListener(c *gin.Context) {
+	if !isAuthorized(c) {
+		c.AbortWithStatusJSON(401, "Unauthorized")
+		return
+	}
+
 	idStr := c.PostForm("id")
 
 	id, err := strconv.Atoi(idStr)
@@ -117,6 +137,11 @@ func postRemoveListener(c *gin.Context) {
 }
 
 func getTasks(c *gin.Context) {
+	if !isAuthorized(c) {
+		c.AbortWithStatusJSON(401, "Unauthorized")
+		return
+	}
+
 	completed := false
 	paramAsStr := c.Request.URL.Query().Get("completed")
 	if paramAsStr != "" {
@@ -138,6 +163,11 @@ func getTasks(c *gin.Context) {
 }
 
 func postAddTask(c *gin.Context) {
+	if !isAuthorized(c) {
+		c.AbortWithStatusJSON(401, "Unauthorized")
+		return
+	}
+
 	taskTypeStr := c.PostForm("taskType")
 	if taskTypeStr == "" {
 		c.AbortWithStatusJSON(400, gin.H{"error": "taskType parameter should be a valid integer"})
@@ -193,6 +223,11 @@ type ImplantGenReq struct {
 }
 
 func postGenImplant(c *gin.Context) {
+	if !isAuthorized(c) {
+		c.AbortWithStatusJSON(401, "Unauthorized")
+		return
+	}
+
 	var config ImplantGenReq
 	c.ShouldBind(&config)
 
@@ -217,6 +252,11 @@ func postGenImplant(c *gin.Context) {
 var pendingNotifications []notifications.Notification
 
 func getNotifications(c *gin.Context) {
+	if !isAuthorized(c) {
+		c.AbortWithStatusJSON(401, "Unauthorized")
+		return
+	}
+
 	response := append([]notifications.Notification{}, pendingNotifications...)
 	pendingNotifications = nil
 	c.JSON(200, response)
@@ -227,6 +267,11 @@ func handleImplantRegisterNotification(n notifications.Notification) {
 }
 
 func getLogs(c *gin.Context) {
+	if !isAuthorized(c) {
+		c.AbortWithStatusJSON(401, "Unauthorized")
+		return
+	}
+
 	logFile := logging.GetLogFilepath()
 	_, err := os.Stat(logFile)
 	if err != nil {
@@ -242,6 +287,11 @@ func getLogs(c *gin.Context) {
 	contentAsStr := string(contentAsBytes)
 	c.JSON(200, contentAsStr)
 
+}
+
+func isAuthorized(c *gin.Context) bool {
+	authHeader := c.GetHeader("Authorization")
+	return authHeader == os.Getenv("API_AUTH_TOKEN")
 }
 
 // given a string array as string e.g. ["string1", "string2", ...]

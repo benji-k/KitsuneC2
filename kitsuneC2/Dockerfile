@@ -12,4 +12,6 @@ WORKDIR /opt/kitsuneC2/server
 
 RUN go build .
 
+RUN apt update && apt install sqlite3
+
 ENTRYPOINT [ "./server" ]

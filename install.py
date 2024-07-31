@@ -37,7 +37,8 @@ def main():
     
 
 def windowsWebInstall():
-    pass
+    print("Windows web install is currently not supported. Install on Linux or wait for a bit ;)")
+    exit(0)
 
 def windowsCliInstall():
     pass

@@ -11,7 +11,12 @@ export async function GET(req){
 
 
     try{
-        const response = await fetch(API_URL + "/notifications", {cache: "no-store"})
+        const response = await fetch(API_URL + "/notifications", {
+            cache: "no-store",
+            headers: {
+                "Authorization" : process.env.KITSUNEC2_API_AUTH_TOKEN
+            }
+        })
         const responseJson = await response.json()
         
         //we add timestamps to the notifications because of issues with SWR not re-rendering components if the data stays the same

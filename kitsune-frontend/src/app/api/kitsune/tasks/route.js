@@ -11,7 +11,12 @@ export async function GET(req){
 
     let completed = req.nextUrl.searchParams.get("completed")
     try{
-        const response = await fetch(API_URL + (completed == "true" ? "/tasks?completed=true" : "/tasks?completed=false"), {cache: "no-store"})
+        const response = await fetch(API_URL + (completed == "true" ? "/tasks?completed=true" : "/tasks?completed=false"), {
+            cache: "no-store",
+            headers: {
+                "Authorization" : process.env.KITSUNEC2_API_AUTH_TOKEN
+            }
+        })
         const responseJson = await response.json()
         if (response.status == 200){
             return Response.json(responseJson)

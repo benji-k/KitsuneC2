@@ -12,7 +12,7 @@ export default async function KitsuneLayout({ children }) {
         return (
             <>
                 <Navbar />
-                <div className="bg-kc2-dashboard-bg min-h-screen">
+                <div className="bg-kc2-dashboard-bg min-h-screen overflow-hidden">
                     <NotificationBar popupTime={3000} refreshRate={5000} />
                     {children}
                 </div>

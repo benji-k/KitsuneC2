@@ -16,6 +16,7 @@ export async function POST(req){
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
+                "Authorization" : process.env.KITSUNEC2_API_AUTH_TOKEN
             },
             body: JSON.stringify(body)
         })

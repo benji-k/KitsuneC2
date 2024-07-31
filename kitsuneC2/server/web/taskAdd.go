@@ -4,6 +4,9 @@ import (
 	"KitsuneC2/lib/communication"
 	"KitsuneC2/server/api"
 	"errors"
+	"log"
+	"os"
+	"path/filepath"
 
 	"github.com/gin-gonic/gin"
 )
@@ -89,9 +92,15 @@ func addDownload(c *gin.Context, implantId string) error {
 	if err := c.ShouldBind(&download); err != nil {
 		return errMissingArgs
 	}
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		log.Printf("[ERROR] web: Cannot download remote files to user home directory (are the correct permissions set?)")
+		return errors.New("cannot download remote file to user home directory (are the correct permissions set?)")
+	}
+	download.Destination = filepath.Join(homeDir, ".kitsuneC2", "remote", implantId)
 
 	var task communication.Task = &download
-	_, err := api.AddTaskForImplant(implantId, communication.DOWNLOAD_REQ, &task)
+	_, err = api.AddTaskForImplant(implantId, communication.DOWNLOAD_REQ, &task)
 	return err
 }
 

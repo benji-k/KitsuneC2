@@ -28,7 +28,7 @@ export default function NewListenerForm() {
             })
             if (response.status === 500){
                 const err = await response.json()
-                const errText = Object.values(err.error)[0]
+                const errText = Object.values(err.error)
                 pushNotification({text: errText, type:"ERROR"})
             } else if (response.status === 200){
                 pushNotification({text: "Successfully added listener", type:"SUCCESS"})

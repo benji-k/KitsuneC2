@@ -10,7 +10,13 @@ export async function GET(req){
     } 
 
     try{
-        const response = await fetch(API_URL + "/implants", {cache: "no-store"})
+        const response = await fetch(API_URL + "/implants", {
+            cache: "no-store",
+            headers: {
+                "Authorization" : process.env.KITSUNEC2_API_AUTH_TOKEN
+            }
+        
+        })
         const responseJson = await response.json()
         if (response.status == 200){
             return Response.json(responseJson)

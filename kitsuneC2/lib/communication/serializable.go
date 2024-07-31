@@ -222,7 +222,7 @@ func (t *CdResp) SetTaskId(id string) {
 type DownloadReq struct {
 	TaskId      string
 	Origin      string `form:"Origin" binding:"required"`
-	Destination string `form:"Destination" binding:"required"`
+	Destination string `form:"Destination"`
 }
 
 func (t *DownloadReq) SetTaskId(id string) {

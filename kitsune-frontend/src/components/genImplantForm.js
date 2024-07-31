@@ -7,7 +7,7 @@ export default function GenImplantForm() {
     const [implantOs, setImplantOs] = useState("linux")
     const [implantArch, setImplantArch] = useState("amd64")
     const [serverIp, setServerIp] = useState("127.0.0.1")
-    const [serverPort, setServerPort] = useState(4444)
+    const [serverPort, setServerPort] = useState("4444")
     const [implantName, setImplantName] = useState("")
     const [cbInterval, setCbInterval] = useState("10")
     const [cbJitter, setCbJitter] = useState("2")
@@ -52,7 +52,7 @@ export default function GenImplantForm() {
                 document.body.removeChild(link)
             } else{
                 const err = await response.json()
-                const errText = Object.values(err.error)[0]
+                const errText = Object.values(err.error)
                 pushNotification({text: errText, type:"ERROR"})
             }
         } catch(e){

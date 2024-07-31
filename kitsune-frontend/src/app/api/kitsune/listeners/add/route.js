@@ -22,6 +22,9 @@ export async function POST(req) {
 
         const result = await fetch(API_URL + "/listeners/add", {
             method: "POST",
+            headers: {
+                "Authorization" : process.env.KITSUNEC2_API_AUTH_TOKEN
+            },
             body: params
         })
 

@@ -72,6 +72,14 @@ func ReceiveEnvelopeFromImplant(connection net.Conn) (int, interface{}, *Session
 	// We read the first 4 bytes of the message to determine the length of the encrypted aesKey. Knowing this information, we can
 	// split the message in an encrypted AES key and the encrypted envelope. Using our private key we can decrypt the aes key, and with
 	// that key we can decrypt the message.
+
+	//This function catches all panics and lets the program resume gracefully in case of unexpected errors
+	defer func() {
+		if err := recover(); err != nil {
+			log.Printf("[ERROR] transport: panic while decrypting implant message")
+		}
+	}()
+
 	log.Printf("[INFO] transport: attempting to read incoming message from implant...")
 	messageLengthAsBytes, err := communication.ReadFromSocket(connection, 4) //read 4 bytes from connection to determine messageLen
 	if err != nil {

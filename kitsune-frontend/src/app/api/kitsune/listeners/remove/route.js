@@ -18,7 +18,10 @@ export async function POST(req) {
 
         const result = await fetch(API_URL + "/listeners/remove", {
             method: "POST",
-            body: params
+            body: params,
+            headers: {
+                "Authorization" : process.env.KITSUNEC2_API_AUTH_TOKEN
+            }
         })
 
         if (result.status === 200) {
