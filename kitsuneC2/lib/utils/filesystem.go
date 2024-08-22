@@ -12,6 +12,10 @@ func WriteFile(file []byte, location string) error {
 	if err != nil {
 		return err
 	}
+	err = os.MkdirAll(filepath.Dir(path), 0700)
+	if err != nil {
+		return err
+	}
 	fp, err := os.Create(path)
 	if err != nil {
 		return err

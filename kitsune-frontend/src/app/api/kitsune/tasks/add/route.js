@@ -10,32 +10,27 @@ export async function POST(req){
         return Response.json({"error":"Unauthorized"}, {status: 401})
     } 
 
-    const body = await req.json()
+    const form = await req.formData()
     
-    const implants = body.implants
-    const taskType = body.taskType
-    const taskArguments = body.arguments
+    const implants = form.get("implants")
+    const taskType = form.get("taskType")
+
+
+
+    form.set("implants", "["+implants+"]") //the backend expects an array [] 
 
     if(implants.length === 0){
         return Response.json({"error" : "At least one implant should be selected"}, {status:500})
     }
 
-    if (!Tasks.find((t) => (t.taskType === taskType))){
+    if (!Tasks.find((t) => (t.taskType == taskType))){
         return Response.json({"error" : "invalid task type"}, {status:500})
     }
 
     try{
-        const params = new URLSearchParams();
-
-        params.append("implants", "[" + implants + "]")
-        params.append("taskType", taskType)
-        Object.keys(taskArguments).forEach(key => {
-            params.append(key, taskArguments[key]);
-        });
-
         const result = await fetch(API_URL + "/tasks/add", {
             method: "POST",
-            body: params,
+            body: form,
             headers: {
                 "Authorization" : process.env.KITSUNEC2_API_AUTH_TOKEN
             }

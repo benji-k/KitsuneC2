@@ -4,9 +4,10 @@ import (
 	"KitsuneC2/lib/communication"
 	"KitsuneC2/server/api"
 	"errors"
-	"log"
+	"io"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -94,10 +95,9 @@ func addDownload(c *gin.Context, implantId string) error {
 	}
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
-		log.Printf("[ERROR] web: Cannot download remote files to user home directory (are the correct permissions set?)")
 		return errors.New("cannot download remote file to user home directory (are the correct permissions set?)")
 	}
-	download.Destination = filepath.Join(homeDir, ".kitsuneC2", "remote", implantId)
+	download.Destination = filepath.Join(homeDir, ".kitsuneC2", "remote", implantId, filepath.Base(strings.ReplaceAll(download.Origin, "\\", "/")))
 
 	var task communication.Task = &download
 	_, err = api.AddTaskForImplant(implantId, communication.DOWNLOAD_REQ, &task)
@@ -106,12 +106,30 @@ func addDownload(c *gin.Context, implantId string) error {
 
 func addUpload(c *gin.Context, implantId string) error {
 	var upload communication.UploadReq
-	if err := c.ShouldBind(&upload); err != nil {
+	dest := c.PostForm("Destination")
+	if dest == "" {
 		return errMissingArgs
 	}
 
+	file, err := c.FormFile("File")
+	if err != nil {
+		return errMissingArgs
+	}
+
+	fileFp, err := file.Open()
+	if err != nil {
+		return errors.New("could not read file to be uploaded")
+	}
+	fileData, err := io.ReadAll(fileFp)
+	if err != nil {
+		return errors.New("could not read file to be uploaded")
+	}
+
+	upload.Destination = dest
+	upload.File = fileData
+
 	var task communication.Task = &upload
-	_, err := api.AddTaskForImplant(implantId, communication.UPLOAD_REQ, &task)
+	_, err = api.AddTaskForImplant(implantId, communication.UPLOAD_REQ, &task)
 	return err
 }
 

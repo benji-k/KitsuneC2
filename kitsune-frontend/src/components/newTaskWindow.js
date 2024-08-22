@@ -26,19 +26,17 @@ export default function NewTaskWindow() {
         setAddingTask(true)
         const taskType = Tasks.find((t)=>(t.taskName === selectedTask)).taskType
 
-        const postData = {
-            "implants" : selectedImplants,
-            "taskType" : taskType,
-            "arguments" : taskArguments
+        const formData = new FormData()
+        formData.append("implants", selectedImplants)
+        formData.append("taskType", taskType)
+        for (const key in taskArguments){
+            formData.append(key, taskArguments[key])
         }
 
         try{
             const success = await fetch("/api/kitsune/tasks/add", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(postData),
+                body: formData,
             })
             if (success.status === 500){
                 const err = await success.json()
@@ -81,14 +79,22 @@ export default function NewTaskWindow() {
                     <div className="px-4 flex flex-col gap-2">
                         {Tasks.find((t) => (t.taskName === selectedTask)).args.map((arg) => (
                             !arg.optional &&
-                                <Argument name={arg.name} tooltip={arg.tooltip} type={arg.type} key={arg.name} required={true} onChange={(val)=>{handleArgumentChange(arg.apiName, val)}} />
+                                <Argument name={arg.name} tooltip={arg.tooltip} type={arg.type} key={arg.name} required={true} onChange={
+                                    (val)=>{
+                                        handleArgumentChange(arg.apiName, val)
+                                    }
+                                } />
                         ))}
                     </div>
                     <p className="mb-3 mt-4 text-lg border-b-[1px] border-slate-400 pb-1">Optional</p>
                     <div className="px-4 flex flex-col gap-2">
                         {Tasks.find((t) => (t.taskName === selectedTask)).args.map((arg) => (
                             arg.optional &&
-                                <Argument name={arg.name} tooltip={arg.tooltip} type={arg.type} key={arg.name} required={false} onChange={(val)=>{handleArgumentChange(arg.apiName, val)}}/>
+                                <Argument name={arg.name} tooltip={arg.tooltip} type={arg.type} key={arg.name} required={false} onChange={
+                                    (val)=>{
+                                        handleArgumentChange(arg.apiName, val)
+                                    }
+                                }/>
                         ))}
                     </div>
                 </div>
@@ -122,7 +128,11 @@ export default function NewTaskWindow() {
 
 function Argument({ name, type, tooltip, required, onChange }) {
     const handleChange = function(e){
-        onChange(e.target.value)
+        if (type == "file"){ //file uploads work weird in browsers. e.target.value only returns the name of the uploaded file, not its contents
+            onChange(e.target.files[0])
+        } else {
+            onChange(e.target.value)
+        }
     }
 
     const switchInputType = function (t) {

@@ -290,7 +290,7 @@ func handleCdResp(sess *transport.Session, data interface{}) {
 func handleDownloadResp(sess *transport.Session, data interface{}) {
 	downloadResp, ok := data.(*communication.DownloadResp)
 	if !ok {
-		log.Printf("[ERROR] handlers: Received envelope with messageType=14 (LsResp), but could not convert envelope data to LsResp datastructure")
+		log.Printf("[ERROR] handlers: Received envelope with messageType=20 (downloadResp), but could not convert envelope data to downloadResp datastructure")
 		return
 	}
 	log.Printf("[INFO] handlers: Attempting to handle a download response message.")

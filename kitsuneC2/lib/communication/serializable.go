@@ -240,7 +240,7 @@ func (t *DownloadResp) SetTaskId(id string) {
 
 type UploadReq struct {
 	TaskId      string
-	File        []byte `form:"File" binding:"required"`
+	File        []byte `form:"File"`
 	Destination string `form:"Destination" binding:"required"`
 }
 

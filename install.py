@@ -112,7 +112,7 @@ def linuxWebInstall():
     
 
 def cliDependenciesInstalled():
-    return which("go") is not None 
+    return which("go") is not None and which("sqlite3") is not None
 
 def webDependenciesInstalled():
     return which("docker") is not None
