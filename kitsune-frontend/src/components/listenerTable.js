@@ -3,20 +3,46 @@
 import useSWR from 'swr'
 import ReactLoading from 'react-loading';
 import { FaTrash } from "react-icons/fa6";
+import { useGlobalState } from "@/state/application"
 
 export default function ListenerTable({ refreshRate }) {
     const fetcher = async url => {
         const res = await fetch(url)
-       
+
         if (!res.ok) {
-          const error = new Error('An error occurred while fetching the data.')
-          const errReason = await res.json()
-          error.info = errReason.error
-          error.status = res.status
-          throw error
+            const error = new Error('An error occurred while fetching the data.')
+            const errReason = await res.json()
+            error.info = errReason.error
+            error.status = res.status
+            throw error
         }
-       
+
         return res.json()
+    }
+
+    const pushNotification = useGlobalState((state) => state.pushNotification)
+    const deleteListener = async function (id) {
+        const postData = {
+            "id": id,
+        }
+
+        try {
+            const response = await fetch("/api/kitsune/listeners/remove", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(postData),
+            })
+
+            if (response.status === 500) {
+                const err = await response.json()
+                const errText = Object.values(err.error)
+                pushNotification({ text: errText, type: "ERROR" })
+            }
+        } catch (e) {
+            pushNotification({ text: e, type: "ERROR" })
+        }
     }
 
     const { data, error, isLoading } = useSWR("/api/kitsune/listeners", fetcher, { refreshInterval: refreshRate })
@@ -39,7 +65,7 @@ export default function ListenerTable({ refreshRate }) {
         </div>
     )
 
-    if (data) return(
+    if (data) return (
         <div className="mx-auto h-64 bg-kc2-light-gray overflow-scroll scrollbar-hide">
             <table className="table-auto w-full">
                 <thead>
@@ -61,7 +87,7 @@ export default function ListenerTable({ refreshRate }) {
                                 <td className="text-xs text-white px-3 whitespace-nowrap">{listener.Type}</td>
                                 <td className='px-3'>
                                     <div>
-                                        <FaTrash size={15} color='#F96B6B'className='cursor-pointer' onClick={()=>(DeleteListener(index))}/>
+                                        <FaTrash size={15} color='#F96B6B' className='cursor-pointer' onClick={() => (deleteListener(index))} />
                                     </div>
                                 </td>
                             </tr>
@@ -72,28 +98,4 @@ export default function ListenerTable({ refreshRate }) {
         </div>
     )
 
-}
-
-async function DeleteListener(id){
-    const postData = {
-        "id" : id,
-    }
-
-    try{
-        const response = await fetch("/api/kitsune/listeners/remove", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(postData),
-        })
-
-        if (response.status === 500){
-            const err = await response.json()
-            const errText = Object.values(err.error)[0]
-            pushNotification({text: errText, type:"ERROR"})
-        }
-    } catch(e){
-        pushNotification({text: e, type:"ERROR"})
-    }
 }

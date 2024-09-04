@@ -40,7 +40,7 @@ export default function NewTaskWindow() {
             })
             if (success.status === 500){
                 const err = await success.json()
-                const errText = Object.values(err.error)[0]
+                const errText = Object.values(err.error)
                 pushNotification({text: errText, type: "ERROR"})
             } else if (success.status === 200){
                 setNewTaskWindowOpen(false)

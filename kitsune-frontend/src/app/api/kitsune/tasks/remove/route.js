@@ -4,21 +4,18 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 const API_URL = process.env.KITSUNEC2_WEBURL
 
 export async function POST(req) {
-    const session = await getServerSession(authOptions)
-    if (!session) {
-        return Response.json({ "error": "Unauthorized" }, { status: 401 })
-    }
+    //const session = await getServerSession(authOptions)
+    //if (!session) {
+    //    return Response.json({ "error": "Unauthorized" }, { status: 401 })
+    //}
 
 
     try {
-        const body = await req.json()
-        const id = body.id
-        const params = new URLSearchParams();
-        params.append("id", id)
+        const form = await req.formData()
 
-        const result = await fetch(API_URL + "/listeners/remove", {
+        const result = await fetch(API_URL + "/tasks/remove", {
             method: "POST",
-            body: params,
+            body: form,
             headers: {
                 "Authorization" : process.env.KITSUNEC2_API_AUTH_TOKEN
             }
@@ -28,7 +25,7 @@ export async function POST(req) {
             return Response.json({ "success": true })
         } else {
             const error = await result.json()
-            return Response.json(error, { status: 500 })
+            return Response.json(error , { status: 500 })
         }
     } catch (e) {
         return Response.json({ "error": e.message }, { status: 500 })

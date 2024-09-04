@@ -24,6 +24,7 @@ func Init() {
 	router.POST("listeners/remove", postRemoveListener)
 	router.GET("/tasks", getTasks)
 	router.POST("/tasks/add", postAddTask)
+	router.POST("/tasks/remove", postRemoveTask)
 	router.GET("/notifications", getNotifications)
 	router.GET("/logs", getLogs)
 
@@ -209,6 +210,33 @@ func postAddTask(c *gin.Context) {
 	} else {
 		c.JSON(400, statuses)
 	}
+}
+
+func postRemoveTask(c *gin.Context) {
+	/*if !isAuthorized(c) {
+		c.AbortWithStatusJSON(401, "Unauthorized")
+		return
+	}*/
+
+	taskId := c.PostForm("taskId")
+	if taskId == "" {
+		c.AbortWithStatusJSON(400, gin.H{"error": "taskId should be a valid string"})
+		return
+	}
+
+	implantId := c.PostForm("implantId")
+	if implantId == "" {
+		c.AbortWithStatusJSON(400, gin.H{"error": "implantId should be a valid string"})
+		return
+	}
+
+	err := api.RemovePendingTaskForImplant(implantId, taskId)
+	if err != nil {
+		c.AbortWithStatusJSON(400, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(200, gin.H{"success": true})
 }
 
 type ImplantGenReq struct {

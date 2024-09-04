@@ -40,7 +40,7 @@ export async function POST(req){
             return Response.json({"success" : true})
         } else {
             const error = await result.json()
-            return Response.json({"error":error}, {status:500})
+            return Response.json(error, {status:500})
         }
     } catch(e){
         return Response.json({"error":e.message}, {status:500})
