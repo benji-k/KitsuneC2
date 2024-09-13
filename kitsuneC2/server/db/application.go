@@ -11,7 +11,7 @@ const (
 )
 
 var (
-	ErrNoResults error = errors.New("no results for query") //Used in all Get* functions
+	ErrNoResults error = errors.New("no results for query") //Error that indicates no results where found for a given database query.
 )
 
 // Returns information about all active implants
@@ -88,7 +88,7 @@ func AddImplant(info *Implant_info) error {
 // Given an implant ID, removes all information related to said implant from ALL tables.
 func RemoveImplant(implantId string) error {
 	log.Printf("[INFO] db: executing statement: DELETE FROM implant_info WHERE id=%s", implantId)
-	log.Printf("[INFO] db: executing statement: DELETE FROM implant_info WHERE id=%s", implantId)
+	log.Printf("[INFO] db: executing statement: DELETE FROM implant_tasks WHERE implant_id=%s", implantId)
 	stmt1, _ := dbConn.Prepare("DELETE FROM implant_info WHERE id=?")
 	stmt2, _ := dbConn.Prepare("DELETE FROM implant_tasks WHERE implant_id=?")
 	defer stmt1.Close()

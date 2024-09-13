@@ -56,7 +56,7 @@ export default function GenImplantForm() {
                 pushNotification({text: errText, type:"ERROR"})
             }
         } catch(e){
-            pushNotification({text: e, type:"ERROR"})
+            pushNotification({text: e.message, type:"ERROR"})
         } finally{
             setGenerating(false)
         }

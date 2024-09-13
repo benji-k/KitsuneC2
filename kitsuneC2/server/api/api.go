@@ -194,3 +194,14 @@ func BuildImplant(os, arch, outFile, serverIp, name string, serverPort, cbInterv
 
 	return builder.BuildImplant(&config)
 }
+
+// Given an implant ID, removes the implant + all associated tasks from the DB.
+func DeleteImplant(implantId string) error {
+	log.Printf("[INFO] API: Attemping to remove implant and all associated tasks with ID: %s.", implantId)
+
+	if !ImplantExists(implantId) {
+		return errors.New("no such implant")
+	}
+
+	return db.RemoveImplant(implantId)
+}

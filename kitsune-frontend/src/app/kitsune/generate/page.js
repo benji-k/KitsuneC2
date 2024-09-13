@@ -1,4 +1,4 @@
-import GenImplantForm from "@/components/genImplantForm"
+import GenImplantForm from "@/components/forms/genImplantForm"
 
 export default function Generate(){
 

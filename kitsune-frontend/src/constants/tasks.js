@@ -7,7 +7,7 @@ export const Tasks = [
             {
                 name: "path",
                 apiName: "Path",
-                optional: true,
+                optional: false,
                 type: String,
                 tooltip: "If not specified, lists current working directory."
             }

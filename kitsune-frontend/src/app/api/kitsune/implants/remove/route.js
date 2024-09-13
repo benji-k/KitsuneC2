@@ -9,11 +9,13 @@ export async function POST(req) {
         return Response.json({ "error": "Unauthorized" }, { status: 401 })
     }
 
-
     try {
         const form = await req.formData()
 
-        const result = await fetch(API_URL + "/tasks/remove", {
+        const implants = form.get("implants")
+        form.set("implants", "[" + implants + "]")
+
+        const result = await fetch(API_URL + "/implants/remove", {
             method: "POST",
             body: form,
             headers: {
@@ -25,10 +27,11 @@ export async function POST(req) {
             return Response.json({ "success": true })
         } else {
             const error = await result.json()
+            console.log(error)
             return Response.json(error , { status: 500 })
         }
     } catch (e) {
+        console.log("EXCEPTION")
         return Response.json({ "error": e.message }, { status: 500 })
     }
-
 }

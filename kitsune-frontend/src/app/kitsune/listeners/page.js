@@ -1,5 +1,5 @@
-import ListenerTable from "@/components/listenerTable"
-import NewListenerForm from "@/components/newListenerForm"
+import ListenerTable from "@/components/tables/listenerTable"
+import NewListenerForm from "@/components/forms/newListenerForm"
 
 export default function Listeners(){
     return (

@@ -34,19 +34,19 @@ export default function NewTaskWindow() {
         }
 
         try{
-            const success = await fetch("/api/kitsune/tasks/add", {
+            const request = await fetch("/api/kitsune/tasks/add", {
                 method: "POST",
                 body: formData,
             })
-            if (success.status === 500){
-                const err = await success.json()
-                const errText = Object.values(err.error)
+            if (request.status === 500){
+                const err = await request.json()
+                const errText = JSON.stringify(err)
                 pushNotification({text: errText, type: "ERROR"})
-            } else if (success.status === 200){
+            } else if (request.status === 200){
                 setNewTaskWindowOpen(false)
             }
         } catch(e){
-            pushNotification({text: e, type:"ERROR"})
+            pushNotification({text: e.message, type:"ERROR"})
         } finally{
             setAddingTask(false)
         }

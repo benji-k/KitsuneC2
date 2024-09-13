@@ -34,7 +34,7 @@ export default function NewListenerForm() {
                 pushNotification({text: "Successfully added listener", type:"SUCCESS"})
             }
         } catch(e){
-            pushNotification({text: e, type:"ERROR"})
+            pushNotification({text: e.message, type:"ERROR"})
         } 
     }
 

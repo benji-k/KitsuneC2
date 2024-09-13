@@ -19,6 +19,7 @@ func Init() {
 
 	router.GET("/implants", getImplants)
 	router.POST("/implants/generate", postGenImplant)
+	router.POST("/implants/remove", postRemoveImplants)
 	router.GET("/listeners", getRunningListeners)
 	router.POST("listeners/add", postAddListener)
 	router.POST("listeners/remove", postRemoveListener)
@@ -52,6 +53,38 @@ func getImplants(c *gin.Context) {
 		return
 	}
 	c.JSON(200, implants)
+}
+
+func postRemoveImplants(c *gin.Context) {
+	if !isAuthorized(c) {
+		c.AbortWithStatusJSON(401, "Unauthorized")
+		return
+	}
+
+	implantsAsStr := c.PostForm("implants")
+	implants := parseStringArray(implantsAsStr)
+	if len(implants) == 0 {
+		c.AbortWithStatusJSON(400, gin.H{"error": "at least 1 implant should be specified"})
+		return
+	}
+
+	var statuses = make(map[string]string)
+	errEncountered := false
+	for _, implantId := range implants {
+		err := api.DeleteImplant(implantId)
+		if err != nil {
+			statuses[implantId] = err.Error()
+			errEncountered = true
+		} else {
+			statuses[implantId] = "success"
+		}
+	}
+
+	if !errEncountered {
+		c.JSON(200, gin.H{"success": true})
+	} else {
+		c.JSON(400, statuses)
+	}
 }
 
 func getRunningListeners(c *gin.Context) {
@@ -213,10 +246,10 @@ func postAddTask(c *gin.Context) {
 }
 
 func postRemoveTask(c *gin.Context) {
-	/*if !isAuthorized(c) {
+	if !isAuthorized(c) {
 		c.AbortWithStatusJSON(401, "Unauthorized")
 		return
-	}*/
+	}
 
 	taskId := c.PostForm("taskId")
 	if taskId == "" {
@@ -322,9 +355,7 @@ func isAuthorized(c *gin.Context) bool {
 	return authHeader == os.Getenv("API_AUTH_TOKEN")
 }
 
-// given a string array as string e.g. ["string1", "string2", ...]
-// parses the string and returns array
-// This function assumes string are written using single quotes
+// given an array [value1, value2] provided as string, returns a string slice corresponding to the different values inside the array
 func parseStringArray(arr string) []string {
 	parts := strings.Split(arr[1:len(arr)-1], ",")
 
