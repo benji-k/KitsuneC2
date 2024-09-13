@@ -1,5 +1,7 @@
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
+import { Validation } from "@/constants/validation"
+import validate from "validate.js"
 
 const API_URL = process.env.KITSUNEC2_WEBURL
 
@@ -9,23 +11,29 @@ export async function POST(req) {
         return Response.json({ "error": "Unauthorized" }, { status: 401 })
     }
 
+    const validateParams = function (form){
+        const data = {};
+        form.forEach((value, key) => {
+            data[key] = value;
+        });
+
+        return validate(data, Validation.api_kitsune_listeners_add)
+    }
 
     try {
-        const body = await req.json()
-        const network = body.network
-        const port = body.port
-        const params = new URLSearchParams();
-        if(network != null){
-            params.append("network", network)
+        const form = await req.formData()
+
+        const validationFailed = validateParams(form)
+        if (validationFailed){
+            return Response.json({"error" : validationFailed}, { status: 400 })
         }
-        params.append("port", port)
 
         const result = await fetch(API_URL + "/listeners/add", {
             method: "POST",
             headers: {
                 "Authorization" : process.env.KITSUNEC2_API_AUTH_TOKEN
             },
-            body: params
+            body: form
         })
 
         if (result.status === 200) {

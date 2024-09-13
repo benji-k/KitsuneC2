@@ -12,19 +12,15 @@ export default function NewListenerForm() {
     const AddListener = async function(e){
         e.preventDefault()
         
-        const postData = {
-            "network" : newListenerNetwork,
-            "port" : newListenerPort,
-            "type" : newListenerType
-        }
+        const formData = new FormData()
+        formData.append("network", newListenerNetwork)
+        formData.append("port", newListenerPort)
+        formData.append("type", newListenerType)
 
         try{
             const response = await fetch("/api/kitsune/listeners/add", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(postData),
+                body: formData,
             })
             if (response.status === 500){
                 const err = await response.json()

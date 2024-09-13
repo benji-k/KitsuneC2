@@ -18,26 +18,22 @@ export default function GenImplantForm() {
     const handleFormSubmit = async function (e) {
         e.preventDefault()
 
-        const postData = {
-            "os": implantOs,
-            "arch": implantArch,
-            "serverIp": serverIp,
-            "serverPort": serverPort,
-            "name": implantName,
-            "cbInterval": cbInterval,
-            "cbJitter": cbJitter,
-            "maxRetryCount": maxRetryCount
-        }
+        const formData = new FormData()
+        formData.append("os", implantOs)
+        formData.append("arch", implantArch)
+        formData.append("serverIp", serverIp)
+        formData.append("serverPort", serverPort)
+        formData.append("name", implantName)
+        formData.append("cbInterval", cbInterval)
+        formData.append("cbJitter", cbJitter)
+        formData.append("maxRetryCount", maxRetryCount)
 
         setGenerating(true)
 
         try{
             const response = await fetch("/api/kitsune/implants/generate", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(postData),
+                body: formData,
             })
     
             if (response.status === 200){

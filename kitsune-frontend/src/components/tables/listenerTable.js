@@ -22,17 +22,13 @@ export default function ListenerTable({ refreshRate }) {
 
     const pushNotification = useGlobalState((state) => state.pushNotification)
     const deleteListener = async function (id) {
-        const postData = {
-            "id": id,
-        }
+        const formData = new FormData()
+        formData.append("id", id)
 
         try {
             const response = await fetch("/api/kitsune/listeners/remove", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(postData),
+                body: formData,
             })
 
             if (response.status === 500) {

@@ -273,14 +273,14 @@ func postRemoveTask(c *gin.Context) {
 }
 
 type ImplantGenReq struct {
-	Os            string `json:"os" binding:"required"`
-	Arch          string `json:"arch" binding:"required"`
-	ServerIp      string `json:"serverIp" binding:"required"`
-	Name          string `json:"name"`
-	ServerPort    int    `json:"serverPort,string" binding:"required"`
-	CbInterval    int    `json:"cbInterval,string" binding:"required"`
-	CbJitter      int    `json:"cbJitter,string" binding:"required"`
-	MaxRetryCount int    `json:"maxRetryCount,string" binding:"required"`
+	Os            string `form:"os" binding:"required"`
+	Arch          string `form:"arch" binding:"required"`
+	ServerIp      string `form:"serverIp" binding:"required"`
+	Name          string `form:"name"`
+	ServerPort    int    `form:"serverPort" binding:"required,number"`
+	CbInterval    int    `form:"cbInterval" binding:"required,number"`
+	CbJitter      int    `form:"cbJitter" binding:"required,number"`
+	MaxRetryCount int    `form:"maxRetryCount" binding:"required,number"`
 }
 
 func postGenImplant(c *gin.Context) {
