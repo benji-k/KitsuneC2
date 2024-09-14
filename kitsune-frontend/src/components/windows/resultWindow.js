@@ -1,9 +1,15 @@
+"use client"
+
+import { useState } from "react"
 import { useDashboardState } from "@/state/application"
+import { useGlobalState } from "@/state/application"
 import { Tasks } from "@/constants/tasks"
 
 export default function ResultWindow() {
     const setResultWindowOpen = useDashboardState((state) => state.setResultWindowOpen)
     const taskResult = useDashboardState((state) => state.taskResult)
+    const pushNotification = useGlobalState((state) => state.pushNotification)
+    const [downloading, setDownloading] = useState(false)
 
     const b64ToArguments = (b64Str) => {
         try{
@@ -40,6 +46,43 @@ export default function ResultWindow() {
         return filteredTasks[0] ? filteredTasks[0].taskName : "?";
     };
 
+    const getDownloadedFileName = function (task){
+        try{
+            const filePath = JSON.parse(b64ToArguments(task.Task_data)).Destination
+            return filePath.replace(/^.*[\\/]/, '')
+        } catch{
+            return "test"
+        }        
+    }
+
+    //For results that downloaded a file , we download it using this function. So the flow of the file is as follows:
+    // implant -> K2C-server -> K2C-frontend -> client
+    const downloadRemoteFile = async function(){
+        setDownloading(true)
+        try{
+            const response = await fetch("/api/kitsune/file/download?taskId="+taskResult.Task_id)
+            if (response.status === 200){
+                const blob = await response.blob()
+                const url = window.URL.createObjectURL(blob)
+                const link = document.createElement("a")
+                const fileName = getDownloadedFileName(taskResult)
+                link.href = url
+                link.setAttribute("download", fileName)
+                document.body.appendChild(link)
+                link.click()
+                document.body.removeChild(link)
+            } else{
+                const err = await response.json()
+                const errText = Object.values(err.error)
+                pushNotification({text: errText, type:"ERROR"})
+            }
+        } catch (e){
+            pushNotification({text: e.message, type:"ERROR"})
+        } finally{
+            setDownloading(false)
+        }
+    }
+
     return (
         <div className="fixed flex justify-center items-center top-0 left-0 h-full w-full bg-[#9B9B9B]/[.54] z-50">
             <div className="bg-kc2-dark-gray flex flex-col items-center w-full px-3 mx-5 pt-4 rounded-2xl max-w-6xl max-h-[600px] scrollbar-hide overflow-scroll">
@@ -71,8 +114,15 @@ export default function ResultWindow() {
                 }
             </div>
             
-            <button className="bg-[#F96B6B] text-white rounded-md px-8 py-1 mb-3 md:self-end"
-                onClick={() => { setResultWindowOpen(false) }}>Exit</button>
+            <div className="flex">
+                {taskResult.Task_type === 19 && b64ToResults(taskResult.Task_result) === "No output" && <button className="bg-green-500 mr-4 text-white rounded-md px-8 py-1 mb-3 md:self-end"
+                onClick={() => {downloadRemoteFile()}}>Download File
+                </button>} 
+                <button className="bg-[#F96B6B] text-white rounded-md px-8 py-1 mb-3 md:self-end"
+                    onClick={() => { setResultWindowOpen(false) }}>Exit
+                </button>
+            </div>
+            
             </div>
         </div>
     )

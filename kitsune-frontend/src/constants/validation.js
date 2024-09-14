@@ -114,5 +114,15 @@ export const Validation = {
                 message: "can only contain letters and numbers",
             },
         }
+    },
+
+    api_kitsune_file_download:{
+        taskId:{
+            presence: {allowEmpty: false},
+            format: {
+                pattern: "^[a-zA-Z0-9]*$",  // Alphanumeric (letters and numbers) or empty
+                message: "can only contain letters and numbers",
+            },
+        }
     }
 }

@@ -20,6 +20,7 @@ func Init() {
 	router.GET("/implants", getImplants)
 	router.POST("/implants/generate", postGenImplant)
 	router.POST("/implants/remove", postRemoveImplants)
+	router.GET("/file/download", getRemoteFile)
 	router.GET("/listeners", getRunningListeners)
 	router.POST("listeners/add", postAddListener)
 	router.POST("listeners/remove", postRemoveListener)
@@ -85,6 +86,33 @@ func postRemoveImplants(c *gin.Context) {
 	} else {
 		c.JSON(400, statuses)
 	}
+}
+
+func getRemoteFile(c *gin.Context) {
+	if !isAuthorized(c) {
+		c.AbortWithStatusJSON(401, "Unauthorized")
+		return
+	}
+
+	taskId := c.Request.URL.Query().Get("taskId")
+	if taskId == "" {
+		c.AbortWithStatusJSON(400, gin.H{"error": "taskId should be a valid string"})
+		return
+	}
+
+	fileLoc, err := api.GetDownloadedFilePathFromTask(taskId)
+	if err != nil {
+		c.AbortWithStatusJSON(400, gin.H{"error": err.Error()})
+		return
+	}
+
+	_, err = os.Stat(fileLoc)
+	if err != nil {
+		c.AbortWithStatusJSON(400, gin.H{"error": "downloaded file is not on Kitsune-server anymore (did you move/delete it?)"})
+		return
+	}
+
+	c.File(fileLoc)
 }
 
 func getRunningListeners(c *gin.Context) {

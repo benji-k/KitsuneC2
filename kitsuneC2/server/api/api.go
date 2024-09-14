@@ -205,3 +205,34 @@ func DeleteImplant(implantId string) error {
 
 	return db.RemoveImplant(implantId)
 }
+
+// If an implant completes a "download" task, this function will return the path of the downloaded file.
+func GetDownloadedFilePathFromTask(taskId string) (string, error) {
+	log.Printf("[INFO] API: Fetching downloaded file for task with ID: %s", taskId)
+
+	task, err := GetTask(taskId)
+	if err != nil {
+		return "", err
+	}
+
+	if !task.Completed {
+		return "", errors.New("implant hasn't executed task yet")
+	}
+
+	if task.Task_type != communication.DOWNLOAD_REQ {
+		return "", errors.New("task is not a download task")
+	}
+
+	//if (task.Task_result != ""){
+	//TODO
+	//}
+
+	downloadReq := new(communication.DownloadReq)
+	err = json.Unmarshal(task.Task_data, downloadReq)
+	if err != nil {
+		log.Printf("[ERROR] API: Could not unmarshal task with ID: %s back into its original structure", taskId)
+		return "", err
+	}
+
+	return downloadReq.Destination, nil
+}
