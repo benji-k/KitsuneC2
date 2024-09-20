@@ -6,6 +6,7 @@ import { useState } from "react"
 
 export default function DeleteImplantBtn() {
     const selectedImplants = useDashboardState((state) => state.selectedImplants)
+    const setSelectedImplants = useDashboardState((state) => state.setSelectedImplants)
     const setConfirmationWindowOpen = useDashboardState((state) => state.setConfirmationWindowOpen)
     const setConfirmationWindowText = useDashboardState((state) => state.setConfirmationWindowText)
     const setConfirmationWindowCallbackFn = useDashboardState((state) => state.setConfirmationWindowCallbackFn)
@@ -28,6 +29,8 @@ export default function DeleteImplantBtn() {
                 const err = await request.json()
                 const errText = JSON.stringify(err)
                 pushNotification({ text: errText, type: "ERROR" })
+            } else if (request.status === 200){
+                setSelectedImplants([])
             }
         } catch (e) {
             pushNotification({ text: e.message, type: "ERROR" })

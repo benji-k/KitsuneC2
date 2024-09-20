@@ -7,11 +7,24 @@ import (
 	"KitsuneC2/server/notifications"
 	"log"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 )
+
+// searches for kc2SSL.pem and kc2SSL.key files in dir
+func checkCertificates(dir string) bool {
+	_, err1 := os.Stat(filepath.Join(dir, "kc2SSL.pem"))
+	_, err2 := os.Stat(filepath.Join(dir, "kc2SSL.key"))
+
+	if err1 != nil || err2 != nil {
+		return false
+	}
+
+	return true
+}
 
 func Init() {
 	router := gin.New()
@@ -33,7 +46,17 @@ func Init() {
 	apiNetwork := os.Getenv("WEB_API_INTERFACE")
 	apiPort := os.Getenv("WEB_API_PORT")
 
-	go router.Run(apiNetwork + ":" + apiPort)
+	sslDir, err := filepath.Abs("../certificates") //relative path
+	if err != nil {
+		log.Fatalf("[FATAL] web: Could not get SSL certificate directory, reason: %s", err.Error())
+	}
+	if !checkCertificates(sslDir) {
+		log.Fatalf("[FATAL] web: SSL Certificates not found in %s", sslDir)
+	}
+	SSLKey := filepath.Join(sslDir, "kc2SSL.key")
+	SSLPem := filepath.Join(sslDir, "kc2SSL.pem")
+
+	go router.RunTLS(apiNetwork+":"+apiPort, SSLPem, SSLKey)
 
 	notifications.ImplantRegisterNotification.Subscribe(handleImplantRegisterNotification)
 }

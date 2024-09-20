@@ -5,7 +5,7 @@ services:
       context: ./kitsune-frontend
       network: "host"
     ports:
-      - "3000:3000"
+      - "8080:8080"
     depends_on:
       - backend
     network_mode: "host"

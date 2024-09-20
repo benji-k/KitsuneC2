@@ -16,6 +16,7 @@ export const useDashboardState = create((set, get) => ({
       set({ selectedImplants: [...get().selectedImplants, implantId] })
     }
   },
+  setSelectedImplants: (val) => set({selectedImplants : val}),
   setNewTaskWindowOpen: (val) => set({ newTaskWindowOpen: val }),
   setResultWindowOpen: (val) => set({ resultWindowOpen: val }),
   setTaskResult: (val) => set({ taskResult: val }),

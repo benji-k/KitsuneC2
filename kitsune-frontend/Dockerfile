@@ -7,7 +7,7 @@ WORKDIR /app
 
 RUN npm install .
 
-EXPOSE 3000
+EXPOSE 8080
 
 RUN npm run build
 

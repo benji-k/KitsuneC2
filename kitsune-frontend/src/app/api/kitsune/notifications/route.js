@@ -32,7 +32,7 @@ export async function GET(req){
         }
         
     } catch(error){
-        return Response.json({"error":"Kitsune server unreachable"}, {status:500})
+        return Response.json({"error":error.message}, {status:500})
     }   
 
 }

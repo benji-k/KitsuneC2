@@ -14,8 +14,7 @@ export async function GET(req){
             cache: "no-store",
             headers: {
                 "Authorization" : process.env.KITSUNEC2_API_AUTH_TOKEN
-            }
-        
+            },
         })
         const responseJson = await response.json()
         if (response.status == 200){
@@ -25,6 +24,7 @@ export async function GET(req){
         }
         
     } catch(error){
-        return Response.json({"error":"Kitsune server unreachable"}, {status:500})
+        console.log(error)
+        return Response.json({"error":error.message}, {status:500})
     }   
 }

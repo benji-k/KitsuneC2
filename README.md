@@ -27,6 +27,7 @@ Instructions on how to install **KitsuneC2** (Linux and Windows)
 ```bash
 git clone https://github.com/benji-k/KitsuneC2.git
 cd KitsuneC2/kitsuneC2
+pip install -r requirements.txt
 python3 install.py
 
 Follow the instructions given by the Python script

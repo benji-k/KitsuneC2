@@ -1,5 +1,5 @@
-ENABLE_WEB_API = "{webEnabled}"
-API_AUTH_TOKEN = "{apiToken}"
+ENABLE_WEB_API = "{_webEnabled}"
+API_AUTH_TOKEN = "{_apiAuthToken}"
 WEB_API_INTERFACE = "127.0.0.1"
 WEB_API_PORT = "7331"
 GIN_MODE="debug"
