@@ -1,5 +1,4 @@
-FROM node:latest
-
+FROM node:18.17.1-alpine
 
 COPY . ./app
 
@@ -7,8 +6,10 @@ WORKDIR /app
 
 RUN npm install .
 
-EXPOSE 8080
-
 RUN npm run build
 
-CMD npm start
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
+USER appuser
+
+ENTRYPOINT [ "npm", "start" ]
