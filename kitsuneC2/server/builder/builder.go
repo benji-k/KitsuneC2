@@ -121,7 +121,7 @@ func invokeGoBuild(config *BuilderConfig, SourceDir string) error {
 	}
 	defer os.Chdir(cwd) //make sure we cd back to the original place we came from
 
-	cmd := exec.Command("go", "build", "-o", config.OutputFile, "-ldflags=-s -w", ".")
+	cmd := exec.Command("go", "build", "-o", config.OutputFile, "-ldflags=-s -w -extldflags \"-static\"", ".")
 	cmd.Env = append(os.Environ(), "GOOS="+config.ImplantOs, "GOARCH="+config.ImplantArch)
 	cmd.Stdout = log.Writer()
 	cmd.Stderr = log.Writer()

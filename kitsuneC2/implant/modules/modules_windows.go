@@ -1,3 +1,5 @@
+//go:build windows
+
 package modules
 
 import (
@@ -6,7 +8,7 @@ import (
 
 // TODO
 func ShellcodeExec(shellcode []byte) error {
-	return errors.New("Not yet implemented")
+	return errors.New("Not yet implemented for this platform")
 }
 
 /*

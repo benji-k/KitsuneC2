@@ -27,6 +27,11 @@ func checkCertificates(dir string) bool {
 }
 
 func Init() {
+
+	if os.Getenv("GIN_MODE") == "release" { //for some reason, gin doesn't recognize the env variable, so we set it manually
+		gin.SetMode(gin.ReleaseMode)
+	}
+
 	router := gin.New()
 	gin.LoggerWithWriter(log.Writer())
 
@@ -55,6 +60,8 @@ func Init() {
 	}
 	SSLKey := filepath.Join(sslDir, "kc2SSL.key")
 	SSLPem := filepath.Join(sslDir, "kc2SSL.pem")
+
+	router.SetTrustedProxies(nil)
 
 	go router.RunTLS(apiNetwork+":"+apiPort, SSLPem, SSLKey)
 
