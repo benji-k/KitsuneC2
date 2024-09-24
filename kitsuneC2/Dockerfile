@@ -12,8 +12,4 @@ RUN go build .
 
 RUN apt update && apt install sqlite3
 
-RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
-
-USER appuser
-
 ENTRYPOINT [ "./server" ]
