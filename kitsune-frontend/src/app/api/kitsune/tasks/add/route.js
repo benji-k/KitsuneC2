@@ -1,6 +1,5 @@
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
-import { Tasks } from "@/constants/tasks"
 import { Validation } from "@/constants/validation"
 import validate from "validate.js"
 

@@ -8,7 +8,7 @@ RUN npm install .
 
 RUN npm run build
 
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
 
 USER appuser
 
