@@ -40,8 +40,8 @@ func Init() {
 	router.POST("/implants/remove", postRemoveImplants)
 	router.GET("/file/download", getRemoteFile)
 	router.GET("/listeners", getRunningListeners)
-	router.POST("listeners/add", postAddListener)
-	router.POST("listeners/remove", postRemoveListener)
+	router.POST("/listeners/add", postAddListener)
+	router.POST("/listeners/remove", postRemoveListener)
 	router.GET("/tasks", getTasks)
 	router.POST("/tasks/add", postAddTask)
 	router.POST("/tasks/remove", postRemoveTask)
@@ -93,10 +93,21 @@ func postRemoveImplants(c *gin.Context) {
 	}
 
 	implantsAsStr := c.PostForm("implants")
+	if implantsAsStr == "" {
+		c.AbortWithStatusJSON(400, gin.H{"error": "at least 1 implant should be specified"})
+		return
+	}
 	implants := parseStringArray(implantsAsStr)
 	if len(implants) == 0 {
 		c.AbortWithStatusJSON(400, gin.H{"error": "at least 1 implant should be specified"})
 		return
+	}
+
+	for _, implant := range implants {
+		if !isAlphaNumeric(implant) {
+			c.AbortWithStatusJSON(400, gin.H{"error": "invalid implant: " + implant})
+			return
+		}
 	}
 
 	var statuses = make(map[string]string)
@@ -126,6 +137,10 @@ func getRemoteFile(c *gin.Context) {
 
 	taskId := c.Request.URL.Query().Get("taskId")
 	if taskId == "" {
+		c.AbortWithStatusJSON(400, gin.H{"error": "taskId should be a valid string"})
+		return
+	}
+	if !isAlphaNumeric(taskId) {
 		c.AbortWithStatusJSON(400, gin.H{"error": "taskId should be a valid string"})
 		return
 	}
@@ -193,6 +208,15 @@ func postAddListener(c *gin.Context) {
 	port, err := strconv.Atoi(portStr)
 	if err != nil {
 		c.AbortWithStatusJSON(400, gin.H{"error": "port parameter should be a valid integer"})
+		return
+	}
+
+	if !isValidIpAdress(network) && !isValidDomain(network) {
+		c.AbortWithStatusJSON(400, gin.H{"error": "network parameter should be valid (ip address or domain)"})
+		return
+	}
+	if !isValidPort(port) {
+		c.AbortWithStatusJSON(400, gin.H{"error": "invalid port number"})
 		return
 	}
 
@@ -278,6 +302,13 @@ func postAddTask(c *gin.Context) {
 		return
 	}
 
+	for _, implant := range implants {
+		if !isAlphaNumeric(implant) {
+			c.AbortWithStatusJSON(400, gin.H{"error": "invalid implant: " + implant})
+			return
+		}
+	}
+
 	handlerFunc, ok := taskTypeToHandlerFunc[taskType]
 	if !ok {
 		c.AbortWithStatusJSON(400, gin.H{"error": "invalid task type"})
@@ -314,9 +345,17 @@ func postRemoveTask(c *gin.Context) {
 		c.AbortWithStatusJSON(400, gin.H{"error": "taskId should be a valid string"})
 		return
 	}
+	if !isAlphaNumeric(taskId) {
+		c.AbortWithStatusJSON(400, gin.H{"error": "taskId should be a valid string"})
+		return
+	}
 
 	implantId := c.PostForm("implantId")
 	if implantId == "" {
+		c.AbortWithStatusJSON(400, gin.H{"error": "implantId should be a valid string"})
+		return
+	}
+	if !isAlphaNumeric(implantId) {
 		c.AbortWithStatusJSON(400, gin.H{"error": "implantId should be a valid string"})
 		return
 	}
@@ -348,7 +387,36 @@ func postGenImplant(c *gin.Context) {
 	}
 
 	var config ImplantGenReq
-	c.ShouldBind(&config)
+	err := c.ShouldBind(&config)
+	if err != nil {
+		c.AbortWithStatusJSON(400, gin.H{"error": err.Error()})
+		return
+	}
+
+	if !isValidOs(config.Os) {
+		c.AbortWithStatusJSON(400, gin.H{"error": "os should be valid"})
+		return
+	}
+	if !isValidArch(config.Arch) {
+		c.AbortWithStatusJSON(400, gin.H{"error": "arch should be valid"})
+		return
+	}
+	if !isValidIpAdress(config.ServerIp) && !isValidDomain(config.ServerIp) {
+		c.AbortWithStatusJSON(400, gin.H{"error": "server ip should be valid"})
+		return
+	}
+	if !isAlphaNumeric(config.Name) && config.Name != "" {
+		c.AbortWithStatusJSON(400, gin.H{"error": "name can only contain alphanumeric characters"})
+		return
+	}
+	if !isValidPort(config.ServerPort) {
+		c.AbortWithStatusJSON(400, gin.H{"error": "portnumber should be valid"})
+		return
+	}
+	if !(config.CbInterval > 0) || !(config.CbJitter > 0) || !(config.MaxRetryCount > 0) {
+		c.AbortWithStatusJSON(400, gin.H{"error": "interval, jitter and retrycount should be > 0"})
+		return
+	}
 
 	outFile, err := os.CreateTemp("", "implant")
 	if err != nil {
@@ -417,7 +485,7 @@ func isAuthorized(c *gin.Context) bool {
 func parseStringArray(arr string) []string {
 	parts := strings.Split(arr[1:len(arr)-1], ",")
 
-	var stringsSlice []string
+	var stringsSlice []string = make([]string, 0)
 	for _, part := range parts {
 		trimmedPart := strings.TrimSpace(strings.ReplaceAll(part, "\"", ""))
 		stringsSlice = append(stringsSlice, trimmedPart)

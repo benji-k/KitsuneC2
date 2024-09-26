@@ -13,8 +13,8 @@ export const Validation = {
         serverIp : {
             presence: {allowEmpty: false},
             format: {
-                pattern: /^(?:\d{1,3}\.){3}\d{1,3}$|^[a-fA-F0-9:]+$/,  // IPv4 or IPv6 pattern
-                message: "must be a valid IP address (either IPv4 or IPv6)",
+                pattern: /^((([a-zA-Z0-9]+(-[a-zA-Z0-9]+)*\.)+[a-zA-Z]{2,})|(\b(?:[A-Fa-f0-9]{1,4}:){7}[A-Fa-f0-9]{1,4}\b)|(\b(?:(?:2[0-5][0-5]|1?\d{1,2})\.){3}(?:2[0-5][0-5]|1?\d{1,2})\b))$/,  // IPv4 or IPv6 pattern
+                message: "must be a valid IP address or domain (either IPv4 or IPv6)",
             },
         },
         name : {    
