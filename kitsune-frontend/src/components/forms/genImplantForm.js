@@ -61,11 +61,11 @@ export default function GenImplantForm() {
 
     return (
         <div className="flex gap-x-48 gap-y-10 flex-wrap">
-            <div className="bg-kc2-dark-gray p-3 max-w-md min-w-96 rounded-lg">
+            <div className="bg-kc2-dark-gray p-3 max-w-md rounded-lg">
                 <form onSubmit={handleFormSubmit}>
                     <div className="flex justify-between py-2 max-w-96">
                         <p className="text-white">OS</p>
-                        <select className="bg-kc2-light-gray text-white text-center rounded-md p-1" onChange={(e) => { setImplantOs(e.target.value) }}>
+                        <select className="bg-kc2-light-gray text-white text-center rounded-md p-1 ml-2" onChange={(e) => { setImplantOs(e.target.value) }}>
                             <option>linux</option>
                             <option>windows</option>
                             <option>aix</option>
@@ -83,7 +83,7 @@ export default function GenImplantForm() {
                     </div>
                     <div className="flex justify-between py-2 max-w-96">
                         <p className="text-white">Architecture</p>
-                        <select className="bg-kc2-light-gray text-white text-center rounded-md p-1" onChange={(e) => { setImplantArch(e.target.value) }}>
+                        <select className="bg-kc2-light-gray text-white text-center rounded-md p-1 ml-2" onChange={(e) => { setImplantArch(e.target.value) }}>
                             <option>amd64</option>
                             <option>386</option>
                             <option>arm</option>
@@ -100,19 +100,19 @@ export default function GenImplantForm() {
                     </div>
                     <div className="flex justify-between py-2 max-w-96">
                         <p className="text-white">Callback IP</p>
-                        <input required title="Test tooltip" type="text" value={serverIp} className="bg-kc2-light-gray rounded-md outline-none text-white pl-1" onChange={(e) => { setServerIp(e.target.value) }}></input>
+                        <input required title="Test tooltip" type="text" value={serverIp} className="bg-kc2-light-gray rounded-md outline-none text-white pl-1 ml-2" onChange={(e) => { setServerIp(e.target.value) }}></input>
                     </div>
                     <div className="flex justify-between py-2 max-w-96">
                         <p className="text-white">Callback Port</p>
-                        <input required type="number" value={serverPort} className="bg-kc2-light-gray rounded-md outline-none text-white pl-1" onChange={(e) => { setServerPort(e.target.value) }}></input>
+                        <input required type="number" value={serverPort} className="bg-kc2-light-gray rounded-md outline-none text-white pl-1 ml-2" onChange={(e) => { setServerPort(e.target.value) }}></input>
                     </div>
                     <div className="flex justify-between py-2 max-w-96">
                         <p className="text-white">Implant Name</p>
-                        <input type="text" placeholder="EvilImplant" className="bg-kc2-light-gray rounded-md outline-none text-white pl-1" onChange={(e) => { setImplantName(e.target.value) }}></input>
+                        <input type="text" placeholder="EvilImplant" className="bg-kc2-light-gray rounded-md outline-none text-white pl-1 ml-2" onChange={(e) => { setImplantName(e.target.value) }}></input>
                     </div>
                     <div className="flex justify-between py-2 max-w-96">
                         <p className="text-white">Callback Interval</p>
-                        <input required type="number" value={cbInterval} className="bg-kc2-light-gray rounded-md outline-none text-white pl-1" onChange={(e) => { setCbInterval(e.target.value) }}></input>
+                        <input required type="number" value={cbInterval} className="bg-kc2-light-gray rounded-md outline-none text-white pl-1 ml-2" onChange={(e) => { setCbInterval(e.target.value) }}></input>
                     </div>
                     <div className="flex justify-between py-2 max-w-96">
                         <p className="text-white">Callback Jitter</p>
@@ -120,7 +120,7 @@ export default function GenImplantForm() {
                     </div>
                     <div className="flex justify-between py-2 max-w-96">
                         <p className="text-white">Reconnect Try Count</p>
-                        <input required type="number" value={maxRetryCount} className="bg-kc2-light-gray rounded-md outline-none text-white pl-1" onChange={(e) => { setMaxRetryCount(e.target.value) }}></input>
+                        <input required type="number" value={maxRetryCount} className="bg-kc2-light-gray rounded-md outline-none text-white pl-1 ml-2" onChange={(e) => { setMaxRetryCount(e.target.value) }}></input>
                     </div>
                     {
                         generating ? 

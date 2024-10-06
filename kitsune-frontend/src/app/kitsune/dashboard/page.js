@@ -30,7 +30,7 @@ export default function Dashboard() {
                     <h2 className="text-white text-3xl pl-5 ">Tasks</h2>
                     <TaskSelectBtn />
                 </div>
-                <div className="flex">
+                <div className="flex flex-col gap-2 md:flex-row">
                     <DeleteImplantBtn />
                     <NewTaskBtn />
                 </div>
