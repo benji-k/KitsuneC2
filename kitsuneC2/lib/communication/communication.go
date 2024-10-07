@@ -7,6 +7,7 @@ import (
 	"KitsuneC2/lib/cryptography"
 	"encoding/json"
 	"errors"
+	"io"
 	"net"
 	"reflect"
 )
@@ -55,7 +56,7 @@ func WriteToSocket(connection net.Conn, data []byte) error {
 // Reads n bytes from a socket.
 func ReadFromSocket(connection net.Conn, n int) ([]byte, error) {
 	var buffer []byte = make([]byte, n)
-	bytesRead, err := connection.Read(buffer) //connection.Read reads a maximum of len(buffer)
+	bytesRead, err := io.ReadFull(connection, buffer)
 	if err != nil {
 		return nil, err
 	}

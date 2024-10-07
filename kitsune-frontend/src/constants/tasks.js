@@ -72,7 +72,7 @@ export const Tasks = [
     {
         taskType: 15,
         taskName: "exec",
-        description: "Executes a program with specified arguments on the remote machine.",
+        description: "Executes a command in shell. (Linux: /bin/sh, Windows: Powershell, Other Platforms: Unimplemented)",
         args: [
             {
                 name: "cmd",
@@ -80,13 +80,6 @@ export const Tasks = [
                 optional: false,
                 type: String,
                 tooltip: "Program to be executed, e.g. bash. (See Go's 'exec' documentation for details)"
-            },
-            {
-                name: "args",
-                apiName: "Args",
-                optional: true,
-                type: String,
-                tooltip: "Arguments to be passed to executing program."
             }
         ]
     },
@@ -142,7 +135,7 @@ export const Tasks = [
     {
         taskType: 23,
         taskName: "shellcode exec",
-        description: "Executes shellcode in a new thread on the remote host.",
+        description: "Executes shellcode in a new thread on the remote host. Shellcode must be base64 encoded.",
         args: [
             {
                 name: "shellcode",

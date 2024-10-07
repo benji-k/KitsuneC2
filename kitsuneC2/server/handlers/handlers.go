@@ -288,6 +288,7 @@ func handleCdResp(sess *transport.Session, data interface{}) {
 
 // Handles envelopes with messageType==20. The implant sends this message when the server sends a download request.
 func handleDownloadResp(sess *transport.Session, data interface{}) {
+	//TODO: Fix implant download stuff
 	downloadResp, ok := data.(*communication.DownloadResp)
 	if !ok {
 		log.Printf("[ERROR] handlers: Received envelope with messageType=20 (downloadResp), but could not convert envelope data to downloadResp datastructure")

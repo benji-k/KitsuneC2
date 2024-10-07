@@ -1,4 +1,4 @@
-//go:build !linux && !windows
+//go:build !linux && !windows && !debug
 
 package modules
 
@@ -7,5 +7,9 @@ import (
 )
 
 func ShellcodeExec(shellcode []byte) error {
+	return errors.New("Not yet implemented for this platform")
+}
+
+func Exec(cmd string) ([]byte, error) {
 	return errors.New("Not yet implemented for this platform")
 }

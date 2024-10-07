@@ -24,18 +24,21 @@ export default function ResultWindow() {
     const b64ToResults = (b64Str) => {
         try {
             const obj = JSON.parse(atob(b64Str))
-            const result = obj.Result 
             const error = obj.Error
 
             if (error){
                 return "Error: " + error
             }
 
-            if (result){
-                return result
+            delete obj.TaskId
+            
+            if (Object.keys(obj).length === 1){
+                return obj[Object.keys(obj)[0]]
+            } else if (Object.keys(obj).length > 1){
+                return JSON.stringify(obj)
+            } else {
+                return "No output"
             }
-
-            return "No output"
         } catch{
             return "No output"
         }
@@ -115,7 +118,7 @@ export default function ResultWindow() {
             </div>
             
             <div className="flex">
-                {taskResult.Task_type === 19 && b64ToResults(taskResult.Task_result) === "No output" && <button className="bg-green-500 mr-4 text-white rounded-md px-8 py-1 mb-3 md:self-end"
+                {taskResult.Task_type === 19 && b64ToResults(taskResult.Task_result).includes("Wrote file to") && <button className="bg-green-500 mr-4 text-white rounded-md px-8 py-1 mb-3 md:self-end"
                 onClick={() => {downloadRemoteFile()}}>Download File
                 </button>} 
                 <button className="bg-[#F96B6B] text-white rounded-md px-8 py-1 mb-3 md:self-end"

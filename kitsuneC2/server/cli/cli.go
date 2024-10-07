@@ -491,14 +491,12 @@ func interactCd(cCtx *cli.Context) error {
 
 func interactExec(cCtx *cli.Context) error {
 	cmd := cCtx.String("cmd")
-	argsStr := cCtx.String("args")
 	if cmd == "" {
 		NotifyUser("[--cmd] is required", "FAIL")
 		return nil
 	}
-	args := strings.Split(argsStr, " ")
 
-	var task communication.Task = &communication.ExecReq{Cmd: cmd, Args: args}
+	var task communication.Task = &communication.ExecReq{Cmd: cmd}
 	taskId, err := api.AddTaskForImplant(cliCtx.implantId, communication.EXEC_REQ, &task)
 	if err != nil {
 		NotifyUser(err.Error(), "FAIL")

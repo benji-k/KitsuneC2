@@ -19,7 +19,7 @@ func WriteFile(file []byte, location string) error {
 	//to overwrite existing files on it's OS. A malicious operator could, in theory, write implant binaries to arbitrary locations on the system.
 	//we don't want a malicous operator to potentially corrupt the system.
 	_, err = os.Stat(path)
-	if err != nil {
+	if err == nil {
 		return errors.New("cannot write file because it already exists")
 	}
 

@@ -184,8 +184,7 @@ func (t *LsResp) SetTaskId(id string) {
 
 type ExecReq struct {
 	TaskId string
-	Cmd    string   `form:"Cmd" binding:"required"`
-	Args   []string `form:"Args"`
+	Cmd    string `form:"Cmd" binding:"required"`
 }
 
 func (t *ExecReq) SetTaskId(id string) {

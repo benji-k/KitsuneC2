@@ -1,24 +1,30 @@
-//go:build windows && !debug
+//go:build windows && debug
 
 package modules
 
 import (
 	"errors"
+	"log"
 	"os/exec"
 )
 
 // TODO
 func ShellcodeExec(shellcode []byte) error {
+	log.Printf("[START WINDOWS SHELLCODE EXEC] starting new thread with following shellcode: % X\n", shellcode)
+	log.Printf("[ERROR WINDOWS SHELLCODE EXEC] not yet implemented\n")
 	return errors.New("Not yet implemented for this platform")
 }
 
 // Executes a command in Powershell and returns stdout
 func Exec(cmd string) ([]byte, error) {
+	log.Printf("[START WINDOWS EXEC] Powershell command: %s\n", cmd)
 	command := exec.Command("C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", cmd)
 	byteOut, err := command.CombinedOutput()
 	if err != nil {
+		log.Printf("[ERROR WINDOWS EXEC] error: %s\n", err.Error())
 		return nil, err
 	}
+	log.Printf("[SUCCESS WINDOWS EXEC] result: %s\n", string(byteOut))
 	return byteOut, nil
 }
 
