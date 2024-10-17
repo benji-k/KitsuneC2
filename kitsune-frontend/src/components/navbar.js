@@ -22,7 +22,7 @@ export default function Navbar(){
                     <div className='flex gap-16 text-[#ABABAB]'>
                         <div className='hidden md:flex gap-3 items-center'>
                             <FaUser size={15} color='#ABABAB'/>
-                            <p>Welcome, USER</p>
+                            <p>Welcome, admin</p>
                         </div>
                         <button onClick={()=>{signOut({ callbackUrl: '/login' })}}>Logout</button>
                     </div>

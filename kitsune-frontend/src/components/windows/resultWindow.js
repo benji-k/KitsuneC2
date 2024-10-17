@@ -90,23 +90,22 @@ export default function ResultWindow() {
         <div className="fixed flex justify-center items-center top-0 left-0 h-full w-full bg-[#9B9B9B]/[.54] z-50">
             <div className="bg-kc2-dark-gray flex flex-col items-center w-full px-3 mx-5 pt-4 rounded-2xl max-w-6xl max-h-[600px] scrollbar-hide overflow-scroll">
             <h2 className="text-white mb-2 self-start mt-3 pb-2 text-xl w-full border-b-2 border-b-slate-200 border-opacity-30">Task info:</h2>
-            <div className="text-white text-sm flex flex-col self-start">
-
-                <div className="flex">
-                        <p className="w-32 text-kc2-soap-pink">Task ID:</p>
-                        <p>{taskResult.Task_id}</p>
+            <div className="text-white text-sm flex flex-col self-start max-w-full">
+                <div className="flex gap-16">
+                        <p className="text-kc2-soap-pink w-24 shrink-0">Task ID:</p>
+                        <p className="overflow-scroll">{taskResult.Task_id}</p>
                 </div>
-                <div className="flex">
-                        <p className="w-32 text-kc2-soap-pink">Implant ID:</p>
-                        <p>{taskResult.Implant_id}</p>
+                <div className="flex gap-16">
+                        <p className="text-kc2-soap-pink w-24 shrink-0">Implant ID:</p>
+                        <p className="overflow-scroll">{taskResult.Implant_id}</p>
                 </div>
-                <div className="flex">
-                    <p className="w-32 text-kc2-soap-pink">Task type:</p>
-                    <p>{getTaskName(taskResult)}</p>
+                <div className="flex gap-16">
+                    <p className="text-kc2-soap-pink w-24 shrink-0">Task type:</p>
+                    <p className="overflow-scroll">{getTaskName(taskResult)}</p>
                 </div>
-                <div className="flex">
-                    <p className="w-32 text-kc2-soap-pink">Task arguments:</p>
-                    <p>{b64ToArguments(taskResult.Task_data)}</p>
+                <div className="flex gap-16">
+                    <p className="text-kc2-soap-pink w-24 shrink-0">Task arguments:</p>
+                    <p className="overflow-scroll max-h-60">{b64ToArguments(taskResult.Task_data)}</p>
                 </div>    
             </div>
 
