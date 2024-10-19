@@ -26,6 +26,7 @@ type BuilderConfig struct {
 var implantSource string = "../implant"
 var libSource string = "../lib"
 var goMod string = "../go.mod"
+var goSum string = "../go.sum"
 
 // Given a build config, compiles an implant binary and returns the output path.
 func BuildImplant(config *BuilderConfig) (string, error) {
@@ -117,7 +118,7 @@ func invokeGoBuild(config *BuilderConfig, SourceDir string) error {
 	cwd, _ := os.Getwd()
 	err := os.Chdir(SourceDir)
 	if err != nil {
-		log.Printf("[ERROR] Could not access temporary source code at %s.", SourceDir)
+		log.Printf("[ERROR] builder: Could not access temporary source code at %s.", SourceDir)
 		return err
 	}
 	defer os.Chdir(cwd) //make sure we cd back to the original place we came from
@@ -158,9 +159,15 @@ func copyImplantSrcToTmpFolder() (string, error) {
 		log.Printf("[ERROR] builder: Could not copy %s to %s", libSource, filepath.Join(tmpFolder, "lib"))
 		return "", err
 	}
+
 	err = os.Link(goMod, filepath.Join(tmpFolder, "go.mod"))
 	if err != nil {
 		log.Printf("[ERROR] builder: Could to copy %s to %s", goMod, filepath.Join(tmpFolder, "go.mod"))
+		return "", err
+	}
+	err = os.Link(goSum, filepath.Join(tmpFolder, "go.sum"))
+	if err != nil {
+		log.Printf("[ERROR] builder: Could to copy %s to %s", goSum, filepath.Join(tmpFolder, "go.sum"))
 		return "", err
 	}
 	return tmpFolder, nil
