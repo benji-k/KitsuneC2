@@ -1,8 +1,9 @@
 package builder
 
 import (
-	"KitsuneC2/lib/utils"
+	implantSource "KitsuneC2"
 	"errors"
+	"io/fs"
 	"log"
 	"os"
 	"os/exec"
@@ -22,11 +23,6 @@ type BuilderConfig struct {
 	PublicKey             string
 	MaxRegisterRetryCount int
 }
-
-var implantSource string = "../implant"
-var libSource string = "../lib"
-var goMod string = "../go.mod"
-var goSum string = "../go.sum"
 
 // Given a build config, compiles an implant binary and returns the output path.
 func BuildImplant(config *BuilderConfig) (string, error) {
@@ -56,29 +52,6 @@ func BuildImplant(config *BuilderConfig) (string, error) {
 
 func initBuilder() error {
 	log.Printf("[INFO] builder: Initializing builder")
-	var err error
-	goMod, _ = filepath.Abs(goMod)
-	libSource, _ = filepath.Abs(libSource)
-	implantSource, err = filepath.Abs(implantSource)
-	if err != nil {
-		return err
-	}
-
-	_, err = os.Stat(goMod)
-	if err != nil {
-		log.Printf("[ERROR] Cannot find go.mod at location %s.", goMod)
-		return err
-	}
-	_, err = os.Stat(libSource)
-	if err != nil {
-		log.Printf("[ERROR] Cannot find lib/ at location %s.", libSource)
-		return err
-	}
-	_, err = os.Stat(implantSource)
-	if err != nil {
-		log.Printf("[ERROR] Cannot find implant/ at location %s.", implantSource)
-		return err
-	}
 
 	return nil
 }
@@ -144,31 +117,66 @@ func copyImplantSrcToTmpFolder() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	os.Mkdir(filepath.Join(tmpFolder, "lib"), 0700)
-	err = os.Mkdir(filepath.Join(tmpFolder, "implant"), 0700)
-	if err != nil {
-		return "", err
-	}
-	err = utils.CopyFolder(implantSource, filepath.Join(tmpFolder, "implant"))
-	if err != nil {
-		log.Printf("[ERROR] builder: Could not copy %s to %s", implantSource, filepath.Join(tmpFolder, "implant"))
-		return "", err
-	}
-	err = utils.CopyFolder(libSource, filepath.Join(tmpFolder, "lib"))
-	if err != nil {
-		log.Printf("[ERROR] builder: Could not copy %s to %s", libSource, filepath.Join(tmpFolder, "lib"))
-		return "", err
-	}
 
-	err = os.Link(goMod, filepath.Join(tmpFolder, "go.mod"))
-	if err != nil {
-		log.Printf("[ERROR] builder: Could to copy %s to %s", goMod, filepath.Join(tmpFolder, "go.mod"))
-		return "", err
-	}
-	err = os.Link(goSum, filepath.Join(tmpFolder, "go.sum"))
-	if err != nil {
-		log.Printf("[ERROR] builder: Could to copy %s to %s", goSum, filepath.Join(tmpFolder, "go.sum"))
-		return "", err
-	}
+	fs.WalkDir(implantSource.ImplantFs, ".", func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+
+		// Create the destination path in the temp directory
+		destPath := filepath.Join(tmpFolder, path)
+
+		if d.IsDir() {
+			// If it's a directory, create it
+			err := os.MkdirAll(destPath, os.ModePerm)
+			if err != nil {
+				return err
+			}
+		} else {
+			// If it's a file, copy its content
+			content, err := implantSource.ImplantFs.ReadFile(path)
+			if err != nil {
+				return err
+			}
+
+			err = os.WriteFile(destPath, content, os.ModePerm)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+
+	fs.WalkDir(implantSource.LibFs, ".", func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+
+		// Create the destination path in the temp directory
+		destPath := filepath.Join(tmpFolder, path)
+
+		if d.IsDir() {
+			// If it's a directory, create it
+			err := os.MkdirAll(destPath, os.ModePerm)
+			if err != nil {
+				return err
+			}
+		} else {
+			// If it's a file, copy its content
+			content, err := implantSource.LibFs.ReadFile(path)
+			if err != nil {
+				return err
+			}
+
+			err = os.WriteFile(destPath, content, os.ModePerm)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+	os.WriteFile(filepath.Join(tmpFolder, "go.mod"), []byte(implantSource.GoMod), os.ModePerm)
+	os.WriteFile(filepath.Join(tmpFolder, "go.sum"), []byte(implantSource.GoSum), os.ModePerm)
+
 	return tmpFolder, nil
 }
