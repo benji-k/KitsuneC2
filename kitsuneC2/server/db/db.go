@@ -9,35 +9,44 @@ package db
 
 import (
 	"database/sql"
-	"errors"
+	_ "embed"
 	"log"
 	"os"
-	"os/exec"
+	"path/filepath"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var (
-	dbConn *sql.DB
-)
+var dbConn *sql.DB
+var dbPath string
 
-// Initializes the database by looking for a kitsune.sqlite file in the /db/ folder. If it finds it, it opens a connection to it.
+// Embed the schema.sql file
+//
+//go:embed sql.schema
+var schema string
+
+// Initializes the database by looking for the kitsune.sqlite specified in dbPath variable. If it finds it, it opens a connection to it.
 // If it doesn't, it attempts to create a database file. This function must succeed for the program to function properly.
 func Initialize() {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		log.Fatal("[FATAL] db: user home directory not available to write files to!")
+	}
+	dbPath = filepath.Join(homeDir, ".kitsuneC2", "kitsune.sqlite")
+
 	//Check if db already exists. If not, create it.
-	if _, err := os.Stat("./db/kitsune.sqlite"); err != nil {
-		log.Println("[INFO] db: /db/kitsune.sqlite was not found, attempting to create...")
+	if _, err := os.Stat(dbPath); err != nil {
+		log.Printf("[INFO] db: %s was not found, attempting to create...", dbPath)
 		err := createDb()
 		if err != nil {
 			log.Fatal("[FATAL] db: could not create database file! Reason: " + err.Error())
 		}
-		log.Println("[INFO] db: succesfully created /db/kitsune.sqlite")
+		log.Printf("[INFO] db: succesfully created %s", dbPath)
 	}
 
-	log.Println("[INFO] db: /db/kitsune.sqlite found, opening connection...")
+	log.Printf("[INFO] db: %s found, opening connection...", dbPath)
 
-	var err error
-	dbConn, err = sql.Open("sqlite3", "./db/kitsune.sqlite")
+	dbConn, err = sql.Open("sqlite3", dbPath)
 	if err != nil {
 		log.Fatal("[FATAL] db: could not connect to db! Reason: " + err.Error())
 	}
@@ -51,19 +60,18 @@ func Shutdown() {
 
 // When no kitsune.sqlite file is found, this function attempts to create one based on the sql.schema file.
 func createDb() error {
-	schema, err := os.Open("./db/sql.schema")
+
+	// Open a connection to the SQLite database (this will create the file if it doesn't exist)
+	db, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
 		return err
 	}
-	defer schema.Close()
+	defer db.Close()
 
-	cmd := exec.Command("sqlite3", "./db/kitsune.sqlite")
-	cmd.Stdin = schema
-
-	cmdOutput, err := cmd.Output()
-	if string(cmdOutput) != "" || err != nil {
-		os.Remove("./db/kitsune.sqlite")
-		return errors.New("\"sqlite3 kitsude.sqlite < sql.schema\" gave an unexpected output! Output: " + string(cmdOutput) + ". Error: " + err.Error())
+	// Execute the schema
+	_, err = db.Exec(schema)
+	if err != nil {
+		return err
 	}
 	return nil
 }
