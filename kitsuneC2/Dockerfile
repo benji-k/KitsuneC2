@@ -10,4 +10,10 @@ WORKDIR /opt/kitsuneC2/server
 
 RUN go build .
 
+ENV ENABLE_WEB_API="true"
+
 ENTRYPOINT [ "./server" ]
+
+
+
+

@@ -76,7 +76,7 @@ func ReceiveEnvelopeFromImplant(connection net.Conn) (int, interface{}, *Session
 	//This function catches all panics and lets the program resume gracefully in case of unexpected errors
 	defer func() {
 		if err := recover(); err != nil {
-			log.Printf("[ERROR] transport: panic while decrypting implant message")
+			log.Printf("[ERROR] transport: panic while decrypting implant message. Reason: %s", err)
 		}
 	}()
 
