@@ -62,7 +62,7 @@ export default function DeleteImplantBtn() {
                 :
                     <button className={`${selectedImplants.length === 0 ? "bg-slate-300" : "bg-red-500"} rounded-md mr-5 p-2
                     px-6`} onClick={() => { confirmDeleteImplant() }} disabled={selectedImplants.length === 0}
-                    >Kill Implant
+                    >Delete
                     </button>
             }
 
