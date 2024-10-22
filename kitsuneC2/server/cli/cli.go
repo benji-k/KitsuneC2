@@ -120,7 +120,7 @@ func handleImplantRegisterNotification(n notifications.Notification) {
 //Template specific functions. These functions get called from templates.go
 //------------------homeCliApp functions-----------------------
 
-func homeImplants(cCtx *cli.Context) error {
+func homeImplantsList(cCtx *cli.Context) error {
 	implants, err := api.GetAllImplants()
 	if err != nil {
 		NotifyUser("could not fetch implants. Reason: "+err.Error(), "FAIL")
@@ -137,6 +137,22 @@ func homeImplants(cCtx *cli.Context) error {
 	}
 	tbl.Print()
 
+	return nil
+}
+
+func homeImplantsDelete(cCtx *cli.Context) error {
+	if cCtx.Args().Len() != 1 {
+		NotifyUser("remove: expected 1 argument", "FAIL")
+		return nil
+	}
+	implantId := cCtx.Args().First()
+
+	err := api.DeleteImplant(implantId)
+	if err != nil {
+		NotifyUser("remove: error: "+err.Error(), "FAIL")
+		return nil
+	}
+	NotifyUser("successfully deleted implant with ID: "+implantId+" from server", "SUCCESS")
 	return nil
 }
 

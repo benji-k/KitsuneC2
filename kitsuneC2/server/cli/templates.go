@@ -17,10 +17,23 @@ var homeCliApp cli.App = cli.App{
 	Commands: []*cli.Command{
 		{
 			Name:        "implants",
-			Usage:       "List active implants",
-			UsageText:   "implants",
-			Description: "Lists all active implants that have contacted the server.",
-			Action:      homeImplants,
+			Usage:       "List or remove implants",
+			UsageText:   "implants [command]",
+			Description: "List or delete implants",
+			Subcommands: []*cli.Command{
+				{
+					Name:      "list",
+					Usage:     "list all implants",
+					UsageText: "list",
+					Action:    homeImplantsList,
+				},
+				{
+					Name:      "delete",
+					Usage:     "delete implant with [implant_id]. IMPORTANT: This command deletes all records from the implant and does NOT kill the implant if you want the implant to terminate, first send it a kill command.",
+					UsageText: "delete [implant_id]",
+					Action:    homeImplantsDelete,
+				},
+			},
 		},
 		{
 			Name:        "gen-implant",

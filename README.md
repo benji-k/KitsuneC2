@@ -23,7 +23,14 @@ To name a few. Feel free to improve this project by submitting a pull-request.
 
 
 ## Installation
-Instructions on how to install **KitsuneC2** (Linux and Windows)
+KitsuneC2 has both a CLI-interface and a Web-interface. Instructions are different depending on what interface you want.
+
+### Install KitsuneC2 with CLI-interface
+Make sure you have Go installed and in **PATH**. Go to the [RELEASES] tab and download the server binary for your platform. No extra dependencies are needed, you can run the binary and start your engagement.
+
+
+### Install KitsuneC2 with Web-interface
+The web-interface will run using **docker-compose** and requires a bit more setting up. Currently, *Windows* is **not** supported yet for this mode.
 ```bash
 git clone https://github.com/benji-k/KitsuneC2.git
 cd KitsuneC2/kitsuneC2
