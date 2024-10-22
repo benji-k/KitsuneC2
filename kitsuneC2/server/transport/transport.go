@@ -27,13 +27,14 @@ func Initialize() {
 	priv, err := db.GetPrivateKey()
 	if err == db.ErrNoResults { //we don't have a keypair, try to create one.
 		log.Printf("[INFO] transport: no existing keypair in DB, attempting to create...")
-		priv, pub, err := cryptography.GenerateRSAKeyPair(2048)
+		newPriv, newPub, err := cryptography.GenerateRSAKeyPair(2048)
 		if err != nil {
 			log.Fatal("[FATAL] transport: Could not generate keypair. Reason: ", err.Error())
 		}
-		privStr := cryptography.RsaPrivateKeyToString(priv)
-		pubStr := cryptography.RSAPublicKeyToString(pub)
+		privStr := cryptography.RsaPrivateKeyToString(newPriv)
+		pubStr := cryptography.RSAPublicKeyToString(newPub)
 		db.InitKeypair(privStr, pubStr)
+		priv = privStr
 	} else if err != nil { //something went wrong during fetching of keypair
 		log.Fatal("[FATAL] transport: Could not fetch private key from db. Reason: " + err.Error())
 	}
