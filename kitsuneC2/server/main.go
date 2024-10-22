@@ -16,18 +16,19 @@ import (
 )
 
 func main() {
-	initialize()
 	if os.Getenv("ENABLE_WEB_API") == "true" {
 		fmt.Println("Starting in daemon mode. Type \"exit\" to shutdown daemon.")
 		err := godotenv.Load() //loads variables in .env file
 		if err != nil {
 			log.Fatal("Error loading .env file")
 		}
+		initialize()
 		cmd := ""
 		for cmd != "exit" {
 			fmt.Scanln(&cmd)
 		}
 	} else {
+		initialize()
 		cli.CliLoop()
 	}
 

@@ -101,7 +101,14 @@ func invokeGoBuild(config *BuilderConfig, SourceDir string) error {
 		return errors.New("not a valid output path")
 	}
 
-	cmd := exec.Command("go", "build", "-o", santizedPath, "-ldflags=-s -w -extldflags \"-static\"", ".")
+	ldFlags := "" //this piece of code checks if target is windows, and if so, adds a linker flag that hides the console window
+	if config.ImplantOs == "windows" {
+		ldFlags = "-ldflags=-s -w -H=windowsgui -extldflags \"-static\""
+	} else {
+		ldFlags = "-ldflags=-s -w -extldflags \"-static\""
+	}
+
+	cmd := exec.Command("go", "build", "-o", santizedPath, ldFlags, ".")
 	cmd.Env = append(os.Environ(), "GOOS="+config.ImplantOs, "GOARCH="+config.ImplantArch)
 	cmd.Stdout = log.Writer()
 	cmd.Stderr = log.Writer()

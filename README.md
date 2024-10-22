@@ -35,7 +35,7 @@ The web-interface will run using **docker-compose** and requires a bit more sett
 git clone https://github.com/benji-k/KitsuneC2.git
 cd KitsuneC2
 pip install -r requirements.txt
-python3 install.py
+python3 web-install.py
 
 Follow the instructions given by the Python script
 ```
