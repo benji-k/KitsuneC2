@@ -33,7 +33,7 @@ Make sure you have Go installed and in **PATH**. Go to the [RELEASES] tab and do
 The web-interface will run using **docker-compose** and requires a bit more setting up. Currently, *Windows* is **not** supported yet for this mode.
 ```bash
 git clone https://github.com/benji-k/KitsuneC2.git
-cd KitsuneC2/kitsuneC2
+cd KitsuneC2
 pip install -r requirements.txt
 python3 install.py
 
