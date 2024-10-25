@@ -15,10 +15,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/benji-k/KitsuneC2/KitsuneC2/lib/communication"
-	"github.com/benji-k/KitsuneC2/KitsuneC2/lib/utils"
-	"github.com/benji-k/KitsuneC2/KitsuneC2/server/api"
-	"github.com/benji-k/KitsuneC2/KitsuneC2/server/notifications"
+	"github.com/benji-k/KitsuneC2/kitsuneC2/lib/communication"
+	"github.com/benji-k/KitsuneC2/kitsuneC2/lib/utils"
+	"github.com/benji-k/KitsuneC2/kitsuneC2/server/api"
+	"github.com/benji-k/KitsuneC2/kitsuneC2/server/notifications"
 
 	"github.com/fatih/color"
 	"github.com/peterh/liner"

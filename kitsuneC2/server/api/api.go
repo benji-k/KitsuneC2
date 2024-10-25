@@ -10,13 +10,13 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/benji-k/KitsuneC2/KitsuneC2/lib/communication"
-	"github.com/benji-k/KitsuneC2/KitsuneC2/lib/cryptography"
-	"github.com/benji-k/KitsuneC2/KitsuneC2/lib/utils"
-	"github.com/benji-k/KitsuneC2/KitsuneC2/server/builder"
-	"github.com/benji-k/KitsuneC2/KitsuneC2/server/db"
-	"github.com/benji-k/KitsuneC2/KitsuneC2/server/handlers"
-	"github.com/benji-k/KitsuneC2/KitsuneC2/server/listener"
+	"github.com/benji-k/KitsuneC2/kitsuneC2/lib/communication"
+	"github.com/benji-k/KitsuneC2/kitsuneC2/lib/cryptography"
+	"github.com/benji-k/KitsuneC2/kitsuneC2/lib/utils"
+	"github.com/benji-k/KitsuneC2/kitsuneC2/server/builder"
+	"github.com/benji-k/KitsuneC2/kitsuneC2/server/db"
+	"github.com/benji-k/KitsuneC2/kitsuneC2/server/handlers"
+	"github.com/benji-k/KitsuneC2/kitsuneC2/server/listener"
 )
 
 var runningsListeners []listener.Listener

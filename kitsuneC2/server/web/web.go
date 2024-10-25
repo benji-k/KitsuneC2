@@ -7,10 +7,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/benji-k/KitsuneC2/KitsuneC2/server/api"
-	"github.com/benji-k/KitsuneC2/KitsuneC2/server/db"
-	"github.com/benji-k/KitsuneC2/KitsuneC2/server/logging"
-	"github.com/benji-k/KitsuneC2/KitsuneC2/server/notifications"
+	"github.com/benji-k/KitsuneC2/kitsuneC2/server/api"
+	"github.com/benji-k/KitsuneC2/kitsuneC2/server/db"
+	"github.com/benji-k/KitsuneC2/kitsuneC2/server/logging"
+	"github.com/benji-k/KitsuneC2/kitsuneC2/server/notifications"
 
 	"github.com/gin-gonic/gin"
 )

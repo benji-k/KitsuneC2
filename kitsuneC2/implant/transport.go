@@ -8,9 +8,9 @@ import (
 	"net"
 	"reflect"
 
-	"github.com/benji-k/KitsuneC2/KitsuneC2/implant/config"
-	"github.com/benji-k/KitsuneC2/KitsuneC2/lib/communication"
-	"github.com/benji-k/KitsuneC2/KitsuneC2/lib/cryptography"
+	"github.com/benji-k/KitsuneC2/kitsuneC2/implant/config"
+	"github.com/benji-k/KitsuneC2/kitsuneC2/lib/communication"
+	"github.com/benji-k/KitsuneC2/kitsuneC2/lib/cryptography"
 )
 
 var (

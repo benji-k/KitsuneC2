@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"text/template"
 
-	implantSource "github.com/benji-k/KitsuneC2"
+	implantSource "github.com/benji-k/KitsuneC2/kitsuneC2"
 )
 
 type BuilderConfig struct {

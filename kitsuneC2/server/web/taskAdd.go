@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/benji-k/KitsuneC2/KitsuneC2/lib/communication"
-	"github.com/benji-k/KitsuneC2/KitsuneC2/server/api"
+	"github.com/benji-k/KitsuneC2/kitsuneC2/lib/communication"
+	"github.com/benji-k/KitsuneC2/kitsuneC2/server/api"
 
 	"github.com/gin-gonic/gin"
 )

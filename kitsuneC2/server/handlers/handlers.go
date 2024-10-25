@@ -8,11 +8,11 @@ import (
 	"net"
 	"time"
 
-	"github.com/benji-k/KitsuneC2/KitsuneC2/lib/communication"
-	"github.com/benji-k/KitsuneC2/KitsuneC2/lib/utils"
-	"github.com/benji-k/KitsuneC2/KitsuneC2/server/db"
-	"github.com/benji-k/KitsuneC2/KitsuneC2/server/notifications"
-	"github.com/benji-k/KitsuneC2/KitsuneC2/server/transport"
+	"github.com/benji-k/KitsuneC2/kitsuneC2/lib/communication"
+	"github.com/benji-k/KitsuneC2/kitsuneC2/lib/utils"
+	"github.com/benji-k/KitsuneC2/kitsuneC2/server/db"
+	"github.com/benji-k/KitsuneC2/kitsuneC2/server/notifications"
+	"github.com/benji-k/KitsuneC2/kitsuneC2/server/transport"
 )
 
 // we use some clever reflection design so that we do not have to make a huge switch statement containing all possible messageTypes.

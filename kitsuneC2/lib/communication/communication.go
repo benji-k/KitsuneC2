@@ -10,7 +10,7 @@ import (
 	"net"
 	"reflect"
 
-	"github.com/benji-k/KitsuneC2/KitsuneC2/lib/cryptography"
+	"github.com/benji-k/KitsuneC2/kitsuneC2/lib/cryptography"
 )
 
 // All communication between the client and servers get wrapped in an Envelope. This Envelope contains the type of the message being sent, and

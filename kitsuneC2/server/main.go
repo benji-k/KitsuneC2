@@ -3,12 +3,12 @@ package main
 import (
 	"os"
 
-	"github.com/benji-k/KitsuneC2/KitsuneC2/lib/utils"
-	"github.com/benji-k/KitsuneC2/KitsuneC2/server/cli"
-	"github.com/benji-k/KitsuneC2/KitsuneC2/server/db"
-	"github.com/benji-k/KitsuneC2/KitsuneC2/server/logging"
-	"github.com/benji-k/KitsuneC2/KitsuneC2/server/transport"
-	"github.com/benji-k/KitsuneC2/KitsuneC2/server/web"
+	"github.com/benji-k/KitsuneC2/kitsuneC2/lib/utils"
+	"github.com/benji-k/KitsuneC2/kitsuneC2/server/cli"
+	"github.com/benji-k/KitsuneC2/kitsuneC2/server/db"
+	"github.com/benji-k/KitsuneC2/kitsuneC2/server/logging"
+	"github.com/benji-k/KitsuneC2/kitsuneC2/server/transport"
+	"github.com/benji-k/KitsuneC2/kitsuneC2/server/web"
 
 	"fmt"
 	"log"
