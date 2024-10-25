@@ -7,7 +7,7 @@ KitsuneC2 is a pure-go adversary emulation framework that can be used by organis
 
 ## Features
 - Dynamic implant generation
-- Web interface
+- Web interface *and* CLI interface
 - In-memory execution of shellcode
 - Malleable C2 traffic
 
@@ -21,12 +21,14 @@ framework to use for professional engagements. There are way more mature framewo
 
 To name a few. Feel free to improve this project by submitting a pull-request.
 
+> Known issues: 
+> <br> KitsuneC2 Windows server cannot generate linux implants because of lack of Cgo toolchain support
 
 ## Installation
 KitsuneC2 has both a CLI-interface and a Web-interface. Instructions are different depending on what interface you want.
 
 ### Install KitsuneC2 with CLI-interface
-Make sure you have Go installed and in **PATH**. Go to the [RELEASES] tab and download the server binary for your platform. No extra dependencies are needed, you can run the binary and start your engagement.
+Make sure you have **Go** and **GCC** installed and in **PATH**. Go to the [RELEASES] tab and download the server binary for your platform. No extra dependencies are needed, you can run the binary and start your engagement.
 
 
 ### Install KitsuneC2 with Web-interface
@@ -39,3 +41,13 @@ python3 web-install.py
 
 Follow the instructions given by the Python script
 ```
+
+
+
+## Screenshots
+<p align="center">
+  <img src="screenshots/Dashboard-screenshot.png" alt="KitsuneC2 Logo" width="800"/>
+</p>
+<p align="center">
+  <img src="screenshots/Terminal-screenshot.png" alt="KitsuneC2 Logo" width="800"/>
+</p>

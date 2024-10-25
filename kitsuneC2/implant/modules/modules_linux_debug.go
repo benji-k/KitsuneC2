@@ -30,6 +30,7 @@ import (
 	"unsafe"
 )
 
+// TODO: Find pure Go solution to executing shellcode, since Cgo doesn't work too well on Windows.
 func ShellcodeExec(sc []byte) {
 	log.Printf("[START LINUX SHELLCODE EXEC] starting new thread with following shellcode: % X\n", sc)
 	go C.call((*C.char)(unsafe.Pointer(&sc[0])), (C.size_t)(len(sc)))
