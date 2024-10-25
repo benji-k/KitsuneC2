@@ -1,9 +1,6 @@
 package transport
 
 import (
-	"KitsuneC2/lib/communication"
-	"KitsuneC2/lib/cryptography"
-	"KitsuneC2/server/db"
 	"bytes"
 	"encoding/binary"
 	"encoding/json"
@@ -11,6 +8,10 @@ import (
 	"log"
 	"net"
 	"reflect"
+
+	"github.com/benji-k/KitsuneC2/KitsuneC2/lib/communication"
+	"github.com/benji-k/KitsuneC2/KitsuneC2/lib/cryptography"
+	"github.com/benji-k/KitsuneC2/KitsuneC2/server/db"
 )
 
 // A Session consists of an open socket connection, and the aes-key used to encrypt/decrypt data going in/out

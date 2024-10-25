@@ -6,12 +6,13 @@
 package modules
 
 import (
-	"KitsuneC2/lib/utils"
 	"fmt"
 	"io/fs"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/benji-k/KitsuneC2/KitsuneC2/lib/utils"
 )
 
 // Given a filepath, returns info about a file such as name, size etc.

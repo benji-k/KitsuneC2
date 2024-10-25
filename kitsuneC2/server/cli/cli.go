@@ -4,10 +4,6 @@
 package cli
 
 import (
-	"KitsuneC2/lib/communication"
-	"KitsuneC2/lib/utils"
-	"KitsuneC2/server/api"
-	"KitsuneC2/server/notifications"
 	"bytes"
 	"encoding/hex"
 	"encoding/json"
@@ -18,6 +14,11 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/benji-k/KitsuneC2/KitsuneC2/lib/communication"
+	"github.com/benji-k/KitsuneC2/KitsuneC2/lib/utils"
+	"github.com/benji-k/KitsuneC2/KitsuneC2/server/api"
+	"github.com/benji-k/KitsuneC2/KitsuneC2/server/notifications"
 
 	"github.com/fatih/color"
 	"github.com/peterh/liner"

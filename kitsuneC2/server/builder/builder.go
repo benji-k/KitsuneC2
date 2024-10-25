@@ -1,7 +1,6 @@
 package builder
 
 import (
-	implantSource "KitsuneC2"
 	"errors"
 	"io/fs"
 	"log"
@@ -9,6 +8,8 @@ import (
 	"os/exec"
 	"path/filepath"
 	"text/template"
+
+	implantSource "github.com/benji-k/KitsuneC2"
 )
 
 type BuilderConfig struct {

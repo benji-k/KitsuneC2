@@ -1,9 +1,6 @@
 package main
 
 import (
-	"KitsuneC2/implant/config"
-	"KitsuneC2/lib/communication"
-	"KitsuneC2/lib/cryptography"
 	"encoding/json"
 	"errors"
 	"math"
@@ -14,6 +11,10 @@ import (
 	"runtime"
 	"strconv"
 	"time"
+
+	"github.com/benji-k/KitsuneC2/KitsuneC2/implant/config"
+	"github.com/benji-k/KitsuneC2/KitsuneC2/lib/communication"
+	"github.com/benji-k/KitsuneC2/KitsuneC2/lib/cryptography"
 )
 
 const (

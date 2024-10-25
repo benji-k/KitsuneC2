@@ -4,12 +4,13 @@
 package communication
 
 import (
-	"KitsuneC2/lib/cryptography"
 	"encoding/json"
 	"errors"
 	"io"
 	"net"
 	"reflect"
+
+	"github.com/benji-k/KitsuneC2/KitsuneC2/lib/cryptography"
 )
 
 // All communication between the client and servers get wrapped in an Envelope. This Envelope contains the type of the message being sent, and

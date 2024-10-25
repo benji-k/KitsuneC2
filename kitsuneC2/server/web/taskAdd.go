@@ -1,14 +1,15 @@
 package web
 
 import (
-	"KitsuneC2/lib/communication"
-	"KitsuneC2/server/api"
 	"encoding/base64"
 	"errors"
 	"io"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/benji-k/KitsuneC2/KitsuneC2/lib/communication"
+	"github.com/benji-k/KitsuneC2/KitsuneC2/server/api"
 
 	"github.com/gin-gonic/gin"
 )

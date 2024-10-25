@@ -1,15 +1,16 @@
 package main
 
 import (
-	"KitsuneC2/implant/config"
-	"KitsuneC2/lib/communication"
-	"KitsuneC2/lib/cryptography"
 	"bytes"
 	"encoding/binary"
 	"encoding/json"
 	"errors"
 	"net"
 	"reflect"
+
+	"github.com/benji-k/KitsuneC2/KitsuneC2/implant/config"
+	"github.com/benji-k/KitsuneC2/KitsuneC2/lib/communication"
+	"github.com/benji-k/KitsuneC2/KitsuneC2/lib/cryptography"
 )
 
 var (

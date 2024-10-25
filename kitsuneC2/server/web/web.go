@@ -1,15 +1,16 @@
 package web
 
 import (
-	"KitsuneC2/server/api"
-	"KitsuneC2/server/db"
-	"KitsuneC2/server/logging"
-	"KitsuneC2/server/notifications"
 	"log"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	"github.com/benji-k/KitsuneC2/KitsuneC2/server/api"
+	"github.com/benji-k/KitsuneC2/KitsuneC2/server/db"
+	"github.com/benji-k/KitsuneC2/KitsuneC2/server/logging"
+	"github.com/benji-k/KitsuneC2/KitsuneC2/server/notifications"
 
 	"github.com/gin-gonic/gin"
 )

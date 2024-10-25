@@ -1,4 +1,4 @@
-module KitsuneC2
+module github.com/benji-k/KitsuneC2/kitsuneC2
 
 go 1.21.3
 

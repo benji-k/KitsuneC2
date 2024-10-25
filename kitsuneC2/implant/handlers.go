@@ -1,10 +1,11 @@
 package main
 
 import (
-	"KitsuneC2/implant/config"
-	"KitsuneC2/implant/modules"
-	"KitsuneC2/lib/communication"
 	"net"
+
+	"github.com/benji-k/KitsuneC2/KitsuneC2/implant/config"
+	"github.com/benji-k/KitsuneC2/KitsuneC2/implant/modules"
+	"github.com/benji-k/KitsuneC2/KitsuneC2/lib/communication"
 )
 
 var MessageTypeToFunc = map[int]func(net.Conn, interface{}){

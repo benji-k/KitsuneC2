@@ -3,19 +3,20 @@
 package api
 
 import (
-	"KitsuneC2/lib/communication"
-	"KitsuneC2/lib/cryptography"
-	"KitsuneC2/lib/utils"
-	"KitsuneC2/server/builder"
-	"KitsuneC2/server/db"
-	"KitsuneC2/server/handlers"
-	"KitsuneC2/server/listener"
 	"encoding/json"
 	"errors"
 	"log"
 	"reflect"
 	"strconv"
 	"time"
+
+	"github.com/benji-k/KitsuneC2/KitsuneC2/lib/communication"
+	"github.com/benji-k/KitsuneC2/KitsuneC2/lib/cryptography"
+	"github.com/benji-k/KitsuneC2/KitsuneC2/lib/utils"
+	"github.com/benji-k/KitsuneC2/KitsuneC2/server/builder"
+	"github.com/benji-k/KitsuneC2/KitsuneC2/server/db"
+	"github.com/benji-k/KitsuneC2/KitsuneC2/server/handlers"
+	"github.com/benji-k/KitsuneC2/KitsuneC2/server/listener"
 )
 
 var runningsListeners []listener.Listener
