@@ -28,7 +28,7 @@ To name a few. Feel free to improve this project by submitting a pull-request.
 KitsuneC2 has both a CLI-interface and a Web-interface. Instructions are different depending on what interface you want.
 
 ### Install KitsuneC2 with CLI-interface
-Make sure you have **Go** and **GCC** installed and in **PATH**. Go to the [RELEASES] tab and download the server binary for your platform. No extra dependencies are needed, you can run the binary and start your engagement.
+Make sure you have **Go** and **GCC** installed and in **PATH**. Go to the [Releases](https://github.com/benji-k/KitsuneC2/releases) tab and download the server binary for your platform. No extra dependencies are needed, you can run the binary and start your engagement.
 
 
 ### Install KitsuneC2 with Web-interface
